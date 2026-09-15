@@ -1,8 +1,11 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Sparkles } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
 import Footer from "../components/layout/Footer.jsx";
+import DetailHero from "../components/detail/DetailHero.jsx";
+import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
+import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { SERVICES_META, UNIT_LABEL, findServiceBySlug } from "../data/services.js";
 
@@ -26,94 +29,82 @@ export default function ServiceDetail() {
     <div className="min-h-screen bg-cream">
       <NavBar />
 
-      <section className="relative h-[46vh] min-h-[360px] overflow-hidden pt-16">
-        <img
-          src={`https://loremflickr.com/1600/900/${encodeURIComponent(meta.image)}`}
-          alt={name}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-fixed via-ink-fixed/50 to-ink-fixed/20" />
-        <div className="relative h-full max-w-content mx-auto px-6 flex flex-col justify-end pb-12">
-          <Link to="/#services" className="inline-flex items-center gap-1.5 text-cream-fixed/70 text-sm hover:text-cream-fixed transition-colors mb-4 w-fit">
-            <ArrowLeft size={14} />
-            {t("services.heading")}
-          </Link>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <span className="inline-block text-xs font-medium uppercase tracking-wide bg-white/15 text-cream-fixed px-3 py-1 rounded-full mb-4">
-              {category}
-            </span>
-            <h1 className="font-display italic text-3xl sm:text-5xl text-cream-fixed max-w-2xl">{name}</h1>
-          </motion.div>
-        </div>
-      </section>
+      <DetailHero
+        image={`https://loremflickr.com/1600/1000/${encodeURIComponent(meta.image)}`}
+        overlay="linear-gradient(0deg, rgba(30,26,23,0.92) 5%, rgba(30,26,23,0.55) 55%, rgba(30,26,23,0.15) 100%)"
+        backTo="/#services"
+        backLabel={t("services.heading")}
+        icon={Sparkles}
+        badge={
+          <span className="text-xs font-medium uppercase tracking-widest text-[#C89A3D]">{category}</span>
+        }
+        title={name}
+      />
 
-      <section className="px-6 py-16 max-w-content mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-12">
+      <section className="px-6 py-20 max-w-content mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-14">
         <div>
-          <p className="text-lg text-stone leading-relaxed mb-10">{text}</p>
+          <p className="text-xl text-stone leading-relaxed mb-12 max-w-2xl">{text}</p>
 
           {featureList.length > 0 && (
             <>
-              <h2 className="font-display text-xl text-ink mb-5">
+              <p className="text-sm font-medium text-coffee uppercase tracking-widest mb-2">
+                {lang === "fr" ? "Détail de la prestation" : "Service breakdown"}
+              </p>
+              <h2 className="font-display italic text-2xl text-ink mb-7">
                 {lang === "fr" ? "Ce qui est inclus" : "What's included"}
               </h2>
-              <ul className="space-y-3 mb-10">
-                {featureList.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-stone">
-                    <span className="w-5 h-5 rounded-full bg-[#C89A3D]/15 flex items-center justify-center text-coffee-dark shrink-0 mt-0.5">
-                      <Check size={12} />
+              <div className="grid sm:grid-cols-2 gap-4">
+                {featureList.map((f, i) => (
+                  <motion.div
+                    key={f}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
+                    className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4"
+                  >
+                    <span className="w-7 h-7 rounded-full bg-[#C89A3D]/15 flex items-center justify-center text-coffee-dark shrink-0">
+                      <Check size={13} />
                     </span>
-                    {f}
-                  </li>
+                    <span className="text-stone text-sm leading-relaxed pt-0.5">{f}</span>
+                  </motion.div>
                 ))}
-              </ul>
+              </div>
             </>
           )}
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit">
-          <div className="rounded-2xl border border-line bg-surface p-7">
-            <span className="text-xs text-ink-faint uppercase tracking-wide">{t("services.priceFrom")}</span>
-            <p className="font-display text-3xl text-ink mb-6">
-              {meta.priceFrom} $<span className="text-sm text-ink-soft font-sans"> /{unit}</span>
+          <DetailSidebarCard>
+            <span className="text-xs text-ink-faint uppercase tracking-widest">{t("services.priceFrom")}</span>
+            <p className="font-display text-4xl text-ink mt-2 mb-1">
+              {meta.priceFrom} $<span className="text-base text-ink-soft font-sans"> /{unit}</span>
+            </p>
+            <p className="text-sm text-ink-soft mb-7">
+              {lang === "fr" ? "Devis ajusté à votre besoin exact." : "Quote adjusted to your exact needs."}
             </p>
             <a
               href="/#rejoindre"
-              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors"
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
             >
               {t("services.request")}
               <ArrowRight size={15} />
             </a>
-          </div>
+          </DetailSidebarCard>
         </div>
       </section>
 
-      <section className="px-6 py-16 border-t border-line max-w-content mx-auto">
-        <h2 className="font-display text-xl text-ink mb-8">
-          {lang === "fr" ? "Autres services" : "Other services"}
-        </h2>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {otherServices.map((s) => (
-            <Link
-              key={s.slug}
-              to={`/services/${s.slug}`}
-              className="group rounded-2xl border border-line overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              <div className="h-32 overflow-hidden">
-                <img
-                  src={`https://loremflickr.com/400/240/${encodeURIComponent(s.image)}`}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-4">
-                <p className="font-display text-ink group-hover:text-coffee-dark transition-colors">
-                  {t(`services.${s.key}n`)}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <RelatedGrid
+        eyebrow={lang === "fr" ? "À explorer aussi" : "Also worth exploring"}
+        heading={lang === "fr" ? "Autres services" : "Other services"}
+        items={otherServices.map((s) => ({
+          key: s.slug,
+          to: `/services/${s.slug}`,
+          image: `https://loremflickr.com/500/360/${encodeURIComponent(s.image)}`,
+          title: t(`services.${s.key}n`),
+          subtitle: t(`services.categories.${s.categoryKey}`),
+        }))}
+      />
 
       <Footer />
     </div>

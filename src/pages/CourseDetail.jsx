@@ -1,8 +1,11 @@
-import { Link, useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Clock, GraduationCap, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Clock, GraduationCap, CheckCircle2, BookOpen } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
 import Footer from "../components/layout/Footer.jsx";
+import DetailHero from "../components/detail/DetailHero.jsx";
+import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
+import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useCourses, LEVEL_TONE } from "../data/courses.js";
 
@@ -49,56 +52,64 @@ export default function CourseDetail() {
   const tone = LEVEL_TONE[course.level] || "coffee";
   const hours = LEVEL_HOURS[course.level] || 8;
   const curriculum = CURRICULUM_BY_LEVEL[course.level] || CURRICULUM_BY_LEVEL["tous niveaux"];
+  const otherCourses = courses.filter((c) => c.id !== course.id).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-cream">
       <NavBar />
 
-      <section className="relative h-[46vh] min-h-[360px] overflow-hidden pt-16">
-        <img src={course.photo} alt={course.alt} className="absolute inset-0 w-full h-full object-cover" />
-        <div
-          className="absolute inset-0"
-          style={{ background: `linear-gradient(0deg, ${TONE_BG[tone]}ee 10%, rgba(30,26,23,0.35) 100%)` }}
-        />
-        <div className="relative h-full max-w-content mx-auto px-6 flex flex-col justify-end pb-12">
-          <Link to="/#learning" className="inline-flex items-center gap-1.5 text-cream-fixed/70 text-sm hover:text-cream-fixed transition-colors mb-4 w-fit">
-            <ArrowLeft size={14} />
-            {t("learning.heading")}
-          </Link>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <span className="inline-block text-xs font-medium uppercase tracking-wide bg-white/15 text-cream-fixed px-3 py-1 rounded-full mb-4">
-              {course.level}
-            </span>
-            <h1 className="font-display italic text-3xl sm:text-5xl text-cream-fixed max-w-2xl">{course.title}</h1>
-          </motion.div>
-        </div>
-      </section>
+      <DetailHero
+        image={course.photo}
+        overlay={`linear-gradient(0deg, ${TONE_BG[tone]}f2 5%, ${TONE_BG[tone]}80 45%, rgba(30,26,23,0.25) 100%)`}
+        backTo="/#learning"
+        backLabel={t("learning.heading")}
+        icon={GraduationCap}
+        badge={
+          <span className="text-xs font-medium uppercase tracking-widest text-cream-fixed/90">{course.level}</span>
+        }
+        title={course.title}
+      />
 
-      <section className="px-6 py-16 max-w-content mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-12">
+      <section className="px-6 py-20 max-w-content mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-14">
         <div>
-          <p className="text-lg text-stone leading-relaxed mb-10">{course.text || course.description}</p>
+          <p className="text-xl text-stone leading-relaxed mb-12 max-w-2xl">{course.text || course.description}</p>
 
-          <h2 className="font-display text-xl text-ink mb-5">{t("learning.curriculum")}</h2>
-          <ul className="space-y-4">
+          <p className="text-sm font-medium text-coffee uppercase tracking-widest mb-2 flex items-center gap-2">
+            <BookOpen size={14} />
+            {t("learning.curriculum")}
+          </p>
+          <h2 className="font-display italic text-2xl text-ink mb-8">
+            {course.title}
+          </h2>
+
+          <div className="relative pl-4 space-y-0">
             {curriculum.map((step, i) => (
-              <motion.li
+              <motion.div
                 key={step}
-                initial={{ opacity: 0, x: -12 }}
+                initial={{ opacity: 0, x: -14 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="flex items-start gap-3 text-stone"
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: i * 0.1 }}
+                className="relative flex items-start gap-4 pb-8 last:pb-0"
               >
-                <CheckCircle2 size={18} className="shrink-0 mt-0.5" style={{ color: TONE_BG[tone] }} />
-                {step}
-              </motion.li>
+                {i < curriculum.length - 1 && (
+                  <span className="absolute left-[15px] top-8 bottom-0 w-px bg-line" />
+                )}
+                <span
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-cream text-xs font-medium"
+                  style={{ background: TONE_BG[tone] }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-stone leading-relaxed pt-1">{step}</span>
+              </motion.div>
             ))}
-          </ul>
+          </div>
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit">
-          <div className="rounded-2xl border border-line bg-surface p-7">
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-line">
+          <DetailSidebarCard>
+            <div className="flex items-center gap-5 mb-7 pb-7 border-b border-line">
               <div className="flex items-center gap-2 text-sm text-ink-soft">
                 <Clock size={15} />
                 {hours}h
@@ -107,17 +118,33 @@ export default function CourseDetail() {
                 <GraduationCap size={15} />
                 {course.level}
               </div>
+              <CheckCircle2 size={15} className="text-emerald-600 ml-auto" />
             </div>
+            <p className="text-sm text-ink-soft mb-6">
+              Certificat de complétion inclus, animé par un formateur H-learning.
+            </p>
             <a
               href="/#rejoindre"
-              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors"
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
             >
               {t("learning.discover")}
               <ArrowRight size={15} />
             </a>
-          </div>
+          </DetailSidebarCard>
         </div>
       </section>
+
+      <RelatedGrid
+        eyebrow="H-learning"
+        heading="D'autres cours qui pourraient vous intéresser"
+        items={otherCourses.map((c) => ({
+          key: c.id,
+          to: `/cours/${c.id}`,
+          image: c.photo,
+          title: c.title,
+          subtitle: c.level,
+        }))}
+      />
 
       <Footer />
     </div>

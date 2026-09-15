@@ -1,10 +1,13 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight, Handshake } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
 import Footer from "../components/layout/Footer.jsx";
 import StoreBadges from "../components/ui/StoreBadges.jsx";
 import FAQ from "../components/sections/FAQ.jsx";
+import DetailHero from "../components/detail/DetailHero.jsx";
+import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
+import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { PARTNER_META, getPartnerContent, findPartnerBySlug } from "../data/partners.js";
 
@@ -17,77 +20,81 @@ export default function PartnerDetail() {
 
   const content = getPartnerContent(t, meta);
   const others = PARTNER_META.filter((p) => p.slug !== slug).slice(0, 3);
+  const gradientHex = meta.gradient.match(/#[0-9A-Fa-f]{6}/)[0];
 
   return (
     <div className="min-h-screen bg-cream">
       <NavBar />
 
-      {/* --- Hero --- */}
-      <section className="relative h-[50vh] min-h-[400px] overflow-hidden pt-16">
-        <img
-          src={`https://loremflickr.com/1600/900/${encodeURIComponent(meta.heroImage)}`}
-          alt={meta.name}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0" style={{ background: `linear-gradient(0deg, ${meta.gradient.match(/#[0-9A-Fa-f]{6}/)[0]}ee 10%, rgba(30,26,23,0.35) 100%)` }} />
-        <div className="relative h-full max-w-content mx-auto px-6 flex flex-col justify-end pb-12">
-          <Link to="/#partenaires" className="inline-flex items-center gap-1.5 text-cream-fixed/70 text-sm hover:text-cream-fixed transition-colors mb-4 w-fit">
-            <ArrowLeft size={14} />
-            {t("partners.heading")}
-          </Link>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center font-display text-2xl text-cream-fixed">
-                {meta.initial}
-              </div>
-              <div>
-                <h1 className="font-display italic text-3xl sm:text-4xl text-cream-fixed">{meta.name}</h1>
-                <p className="text-cream-fixed/70 text-sm">{content.role}</p>
-              </div>
-            </div>
-          </motion.div>
+      <DetailHero
+        image={`https://loremflickr.com/1600/1000/${encodeURIComponent(meta.heroImage)}`}
+        overlay={`linear-gradient(0deg, ${gradientHex}f0 5%, ${gradientHex}90 45%, rgba(30,26,23,0.2) 100%)`}
+        backTo="/#partenaires"
+        backLabel={t("partners.heading")}
+        title={meta.name}
+      >
+        <div className="flex items-center gap-4 mt-5">
+          <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center font-display text-2xl text-cream-fixed shrink-0">
+            {meta.initial}
+          </div>
+          <p className="text-cream-fixed/80 text-base">{content.role}</p>
         </div>
-      </section>
+      </DetailHero>
 
       {/* --- Description + schéma/visuel + stats --- */}
-      <section className="px-6 py-16 max-w-content mx-auto grid lg:grid-cols-[1.4fr_1fr] gap-12">
+      <section className="px-6 py-20 max-w-content mx-auto grid lg:grid-cols-[1.4fr_1fr] gap-14">
         <div>
-          <p className="text-lg text-stone leading-relaxed mb-10">{content.longText}</p>
+          <p className="text-xl text-stone leading-relaxed mb-12 max-w-2xl">{content.longText}</p>
 
-          <h2 className="font-display text-xl text-ink mb-5">{t("partners.howItWorks")}</h2>
-          <ul className="space-y-4 mb-10">
+          <p className="text-sm font-medium text-coffee uppercase tracking-widest mb-2 flex items-center gap-2">
+            <Handshake size={14} />
+            {t("partners.howItWorks")}
+          </p>
+          <h2 className="font-display italic text-2xl text-ink mb-8">{meta.name}</h2>
+
+          <div className="relative">
             {content.highlights.map((h, i) => (
-              <motion.li
+              <motion.div
                 key={h}
-                initial={{ opacity: 0, x: -12 }}
+                initial={{ opacity: 0, x: -14 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="flex items-start gap-4 text-stone"
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: i * 0.1 }}
+                className="relative flex items-start gap-4 pb-8 last:pb-0"
               >
+                {i < content.highlights.length - 1 && (
+                  <span className="absolute left-[15px] top-8 bottom-0 w-px bg-line" />
+                )}
                 <span
                   className="w-8 h-8 rounded-full flex items-center justify-center text-cream text-xs font-medium shrink-0"
                   style={{ background: meta.gradient }}
                 >
                   {i + 1}
                 </span>
-                <span className="pt-1">{h}</span>
-              </motion.li>
+                <span className="text-stone leading-relaxed pt-1">{h}</span>
+              </motion.div>
             ))}
-          </ul>
+          </div>
         </div>
 
-        <div className="lg:sticky lg:top-24 h-fit space-y-6">
+        <div className="lg:sticky lg:top-24 h-fit space-y-5">
           {meta.Visual && (
-            <div className="rounded-2xl p-6 text-cream" style={{ background: meta.gradient }}>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="rounded-3xl p-6 text-cream shadow-[0_30px_60px_-30px_rgba(30,26,23,0.35)]"
+              style={{ background: meta.gradient }}
+            >
               <meta.Visual />
-            </div>
+            </motion.div>
           )}
           <div className="grid grid-cols-3 gap-3">
             {content.stats.map((s) => (
-              <div key={s.label} className="rounded-xl bg-surface border border-line p-3 text-center">
-                <p className="font-display text-lg text-ink leading-none">{s.value}</p>
-                <p className="text-[0.65rem] text-ink-soft mt-1.5 leading-tight">{s.label}</p>
+              <div key={s.label} className="rounded-2xl bg-surface border border-line p-4 text-center">
+                <p className="font-display text-xl text-ink leading-none">{s.value}</p>
+                <p className="text-[0.65rem] text-ink-soft mt-2 leading-tight">{s.label}</p>
               </div>
             ))}
           </div>
@@ -102,13 +109,15 @@ export default function PartnerDetail() {
               <StoreBadges to="#" />
             </div>
           )}
-          <a
-            href="/#rejoindre"
-            className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors"
-          >
-            {t("partners.workWith")} {meta.name}
-            <ArrowRight size={15} />
-          </a>
+          <DetailSidebarCard className="!p-5">
+            <a
+              href="/#rejoindre"
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
+            >
+              {t("partners.workWith")} {meta.name}
+              <ArrowRight size={15} />
+            </a>
+          </DetailSidebarCard>
         </div>
       </section>
 
@@ -121,27 +130,16 @@ export default function PartnerDetail() {
         />
       )}
 
-      {/* --- Autres partenaires --- */}
-      <section className="px-6 py-16 border-t border-line max-w-content mx-auto">
-        <h2 className="font-display text-xl text-ink mb-8">{t("partners.otherPartners")}</h2>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {others.map((p) => (
-            <Link
-              key={p.slug}
-              to={`/partenaires/${p.slug}`}
-              className="group rounded-2xl border border-line p-6 hover:shadow-lg transition-shadow"
-            >
-              <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center font-display text-cream mb-4"
-                style={{ background: p.gradient }}
-              >
-                {p.initial}
-              </div>
-              <p className="font-display text-ink group-hover:text-coffee-dark transition-colors">{p.name}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <RelatedGrid
+        eyebrow={t("partners.heading")}
+        heading={t("partners.otherPartners")}
+        items={others.map((p) => ({
+          key: p.slug,
+          to: `/partenaires/${p.slug}`,
+          image: `https://loremflickr.com/500/360/${encodeURIComponent(p.heroImage)}`,
+          title: p.name,
+        }))}
+      />
 
       <Footer />
     </div>
