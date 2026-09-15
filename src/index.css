@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1E1A17;
+  --color-ink-soft: #726A60;
+  /* Assombri par rapport à #A79E92 d'origine — l'ancienne valeur ne
+     passait pas le seuil de contraste WCAG AA (2.5:1 environ au lieu du
+     4.5:1 requis pour du texte normal), confirmé par un audit axe-core. */
+  --color-ink-faint: #7A705F;
+  --color-cream: #FAF7F2;
+  --color-line: #E7E0D6;
+  /* Assombri par rapport à #87807A d'origine, même raison (3.9:1 avant,
+     sous le seuil requis). */
+  --color-stone: #6E675F;
+
+  --color-coffee: #6F4A34;
+  --color-coffee-light: #B08968;
+  --color-coffee-dark: #4A3226;
+
+  /* Surface des cartes/blocs blancs posés sur le fond — séparé de "cream"
+     (qui est le fond de PAGE) pour pouvoir assombrir les cartes sans
+     changer le fond en thème sombre. */
+  --color-surface: #FFFFFF;
+
+  /* Valeurs FIXES, qui ne changent JAMAIS avec le thème clair/sombre —
+     pour les panneaux volontairement toujours sombres (bandeau héros
+     partenaire, panneau visuel du Hero, cadre vidéo Marketplace...). Ces
+     panneaux sont un choix de mise en page (contraste dramatique
+     intentionnel), pas une question de thème : ils doivent rester sombres
+     même quand le reste du site est en mode clair, et ne pas devenir
+     clairs quand le reste du site passe en mode sombre. */
+  --color-ink-fixed: #1E1A17;
+  --color-cream-fixed: #FAF7F2;
+
+  --font-display: "Fraunces", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --max-width-content: 73.75rem; /* 1180px */
+}
+
+/* Thème sombre — mêmes teintes café/crème de la marque, inversées pour
+   rester lisibles sur fond sombre. Activé en ajoutant la classe .dark sur
+   <html> (voir ThemeContext.jsx) — comme les composants utilisent déjà
+   les classes Tailwind générées à partir de ces variables (bg-cream,
+   text-ink, border-line...), rien d'autre à changer dans les composants :
+   les mêmes classes changent de valeur automatiquement. */
+.dark {
+  --color-ink: #F5F1EA;
+  --color-ink-soft: #B5AC9E;
+  /* Éclairci par rapport à #7D7568 d'origine — 4.06:1 sous le seuil requis,
+     confirmé par le même audit axe-core que la version claire. */
+  --color-ink-faint: #918878;
+  --color-cream: #221C16;
+  --color-line: #2E2822;
+  --color-stone: #9C9488;
+
+  --color-coffee: #C89A6B;
+  --color-coffee-light: #D9B98C;
+  /* Éclairci par rapport à #8B6144 d'origine — trop sombre pour du texte
+     sur fond déjà sombre (3.15:1), confirmé par le même audit axe-core. */
+  --color-coffee-dark: #B98861;
+
+  --color-surface: #282118;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background-color: var(--color-coffee);
+  color: var(--color-cream);
+}
+
+.snap-track {
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.snap-track::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-item {
+  scroll-snap-align: start;
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.word-reveal span {
+  display: inline-block;
+  animation: word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-coffee);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .word-reveal span {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
