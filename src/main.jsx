@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import * as Sentry from "@sentry/react";
 import App from "./App.jsx";
 import "./index.css";
 import { UserProvider } from "./context/Usercontext.jsx";
@@ -12,15 +11,20 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import ErrorBoundary from "./components/ui/ErrorBoundary.jsx";
 import NetworkStatusBanner from "./components/ui/NetworkStatusBanner.jsx";
 
-// Supervision des erreurs — n'a aucun effet tant que VITE_SENTRY_DSN n'est
-// pas renseigné dans .env (comportement par défaut, pas besoin de compte
-// pour développer). Créez un projet gratuit sur sentry.io quand vous serez
-// prêt à surveiller les erreurs en production.
+// Supervision des erreurs — importée dynamiquement, uniquement si
+// VITE_SENTRY_DSN est renseigné. Un simple `import * as Sentry` statique
+// exécutait le code du paquet à chaque chargement de page, même sans DSN
+// configuré — et ce code entrait en conflit avec le regroupement Rollup en
+// production, provoquant un plantage total du site ("React is not
+// defined") pour tout le monde, DSN ou pas. En important dynamiquement,
+// ce code n'est même pas chargé tant qu'aucune vraie clé n'est fournie.
 if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0.1,
+  import("@sentry/react").then((Sentry) => {
+    Sentry.init({
+      dsn: import.meta.env.VITE_SENTRY_DSN,
+      environment: import.meta.env.MODE,
+      tracesSampleRate: 0.1,
+    });
   });
 }
 

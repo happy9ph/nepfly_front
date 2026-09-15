@@ -1,5 +1,4 @@
 import { Component } from "react";
-import * as Sentry from "@sentry/react";
 import { AlertTriangle } from "lucide-react";
 
 /**
@@ -21,7 +20,9 @@ export default class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     console.error("Erreur non interceptée :", error, info);
     if (import.meta.env.VITE_SENTRY_DSN) {
-      Sentry.captureException(error, { extra: { componentStack: info?.componentStack } });
+      import("@sentry/react").then((Sentry) => {
+        Sentry.captureException(error, { extra: { componentStack: info?.componentStack } });
+      });
     }
   }
 
