@@ -26,14 +26,26 @@ export default function Register() {
     setLoading(true);
     try {
       await signUp(name, email, password);
-      await api.auth.requestOtp(email, "email", "register");
-      navigate("/verifier", { state: { email, purpose: "register" } });
     } catch (err) {
+      // L'inscription elle-même a échoué (e-mail déjà utilisé, etc.) —
+      // rien de créé, on reste sur ce formulaire avec l'erreur.
       if (err instanceof ApiError && err.status === 429) setLocked(true);
       else setError(err?.data?.detail || "Une erreur est survenue.");
-    } finally {
       setLoading(false);
+      return;
     }
+
+    // Le compte existe déjà à ce stade, même si la demande de code qui
+    // suit échoue — on avance donc toujours vers l'écran de vérification
+    // plutôt que de laisser croire que la création a échoué. Cet écran
+    // propose son propre bouton pour redemander un code si besoin.
+    try {
+      await api.auth.requestOtp(email, "email", "register");
+    } catch {
+      // Volontairement silencieux ici — l'écran de vérification gère
+      // lui-même l'absence de code reçu (bouton "Renvoyer le code").
+    }
+    navigate("/verifier", { state: { email, purpose: "register" } });
   }
 
   return (

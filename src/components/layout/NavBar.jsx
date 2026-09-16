@@ -33,7 +33,7 @@ export default function NavBar() {
     <>
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
-          scrolled ? "bg-cream/90 backdrop-blur-sm" : "bg-transparent"
+          scrolled ? "bg-cream/90 backdrop-blur-sm border-b border-line" : "bg-transparent"
         }`}
       >
         <div className="max-w-content mx-auto flex items-center justify-between px-6 py-5">
