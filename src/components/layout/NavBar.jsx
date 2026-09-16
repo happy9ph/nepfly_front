@@ -26,7 +26,7 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [menuOpen]);
 
-  const displayName = user?.full_name || user?.email || "";
+  const displayName = user?.full_name || "";
   const initial = displayName ? displayName[0].toUpperCase() : "";
 
   return (
