@@ -33,7 +33,7 @@ export default function NavBar() {
     <>
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
-          scrolled ? "bg-cream/90 backdrop-blur-sm border-b border-line" : "bg-transparent"
+          scrolled ? "bg-cream/90 backdrop-blur-sm" : "bg-transparent"
         }`}
       >
         <div className="max-w-content mx-auto flex items-center justify-between px-6 py-5">
@@ -49,13 +49,10 @@ export default function NavBar() {
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                className="flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 rounded-full border border-ink/20 transition-colors duration-300 hover:bg-ink/[0.04]"
+                className="flex items-center  pl-1.5 pr-1.5 py-1.5 rounded-full border border-ink/20 transition-colors duration-300 hover:bg-ink/[0.04]"
               >
                 <span className="w-7 h-7 rounded-full bg-[#C89A3D] text-ink flex items-center justify-center text-xs font-semibold">
                   {initial}
-                </span>
-                <span className="text-sm font-medium text-ink max-w-[9rem] truncate">
-                  {displayName}
                 </span>
               </button>
 
