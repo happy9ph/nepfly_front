@@ -4,6 +4,26 @@
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+// Les navigateurs modernes bloquent de plus en plus les cookies tiers dès
+// que le site et l'API vivent sur deux domaines différents (Vercel +
+// Render, notamment) — même correctement réglés en SameSite=None; Secure,
+// confirmé en production. Le jeton de rafraîchissement est donc stocké ici
+// et renvoyé explicitement, plutôt que de compter sur le cookie httpOnly
+// (qui reste posé par le serveur, mais n'est plus la source fiable).
+const REFRESH_TOKEN_KEY = "hc_refresh_token";
+
+function saveRefreshToken(token) {
+  if (token) localStorage.setItem(REFRESH_TOKEN_KEY, token);
+}
+
+function getRefreshToken() {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+function clearRefreshToken() {
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
@@ -60,21 +80,40 @@ export const api = {
   // Authentification par e-mail + mot de passe
   auth: {
     signIn: (email, password) =>
-      request("/api/v1/auth/login", { method: "POST", body: { email, password } }),
+      request("/api/v1/auth/login", { method: "POST", body: { email, password } }).then((data) => {
+        saveRefreshToken(data?.refresh_token);
+        return data;
+      }),
     signUp: (name, email, password) =>
       request("/api/v1/auth/register", { method: "POST", body: { full_name: name, email, password } }),
     me: (token) => request("/api/v1/auth/me", { token }),
-    // Renouvelle l'access_token à partir du cookie refresh_token (httpOnly).
-    // Ne prend aucun paramètre : le cookie est envoyé automatiquement.
-    refresh: () => request("/api/v1/auth/refresh", { method: "POST" }),
-    logout: () => request("/api/v1/auth/logout", { method: "POST" }),
+    // Renouvelle l'access_token à partir du jeton de rafraîchissement
+    // stocké localement — le cookie httpOnly est envoyé aussi (au cas où),
+    // mais ce corps JSON est la source réellement fiable désormais (voir
+    // commentaire sur REFRESH_TOKEN_KEY plus haut).
+    refresh: () =>
+      request("/api/v1/auth/refresh", { method: "POST", body: { refresh_token: getRefreshToken() } }).then(
+        (data) => {
+          saveRefreshToken(data?.refresh_token);
+          return data;
+        }
+      ),
+    logout: () => {
+      clearRefreshToken();
+      return request("/api/v1/auth/logout", { method: "POST" });
+    },
 
     // Connexion par code à usage unique (email ou WhatsApp) — utilisée
     // notamment par les partenaires lors de leur première connexion.
     requestOtp: (identifier, channel, purpose = "login") =>
       request("/api/v1/auth/otp/request", { method: "POST", body: { identifier, channel, purpose } }),
     verifyOtp: (identifier, channel, code, purpose = "login") =>
-      request("/api/v1/auth/otp/verify", { method: "POST", body: { identifier, channel, purpose, code } }),
+      request("/api/v1/auth/otp/verify", { method: "POST", body: { identifier, channel, purpose, code } }).then(
+        (data) => {
+          saveRefreshToken(data?.refresh_token);
+          return data;
+        }
+      ),
     changePassword: (token, currentPassword, newPassword) =>
       request("/api/v1/auth/change-password", {
         method: "POST",
@@ -92,6 +131,9 @@ export const api = {
       request("/api/v1/auth/oauth/complete", {
         method: "POST",
         body: { access_token: accessToken, refresh_token: refreshToken },
+      }).then((data) => {
+        saveRefreshToken(data?.refresh_token);
+        return data;
       }),
   },
 
