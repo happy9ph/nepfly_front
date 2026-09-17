@@ -51,7 +51,7 @@ export default function NavBar() {
                 aria-expanded={menuOpen}
                 className="flex items-center  pl-1.5 pr-1.5 py-1.5 rounded-full border border-ink/20 transition-colors duration-300 hover:bg-ink/[0.04]"
               >
-                <span className="w-7 h-7 rounded-full bg-[#C89A3D] text-ink flex items-center justify-center text-xs font-semibold">
+                <span className="w-8 h-8 rounded-full bg-[#C89A3D] text-ink flex items-center justify-center text-xs font-semibold">
                   {initial}
                 </span>
               </button>
