@@ -124,7 +124,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-cream md:flex">
-      <AdminSidebar user={user} onSignOut={signOut} view={view} onViewChange={setView} />
+      <AdminSidebar
+        user={user}
+        onSignOut={signOut}
+        view={view}
+        onViewChange={setView}
+        counts={{ applications: applications.filter((a) => a.status === "pending").length }}
+      />
 
       <div className="flex-1 min-w-0">
         <header className="md:hidden sticky top-0 z-10 bg-cream/95 backdrop-blur-sm border-b border-line px-4 py-4 flex items-center justify-between">
