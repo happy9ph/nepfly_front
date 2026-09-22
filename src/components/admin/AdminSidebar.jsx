@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink } from "lucide-react";
 
 const NAV_ITEMS = [
-  { key: "applications", label: "Candidatures", hint: "Partenaires", icon: Users },
-  { key: "requests", label: "Toutes les demandes", hint: "Apps & paiements", icon: ClipboardList },
+  { key: "applications", label: "Candidatures", icon: Users },
+  { key: "requests", label: "Toutes les demandes", icon: ClipboardList },
 ];
 
+const GOLD = "#C89A3D";
+
 /**
- * Sidebar admin.
- * - Desktop : colonne fixe à gauche.
- * - Mobile  : barre de navigation fixée en bas (le header mobile du dashboard garde le logo).
- * `counts` est optionnel : { applications: 3, requests: 5 } affiche une pastille à côté de l'entrée.
+ * Sidebar admin sombre (style "UptimeRobot") aux couleurs H-Company.
+ * `counts` (optionnel) : { applications: 3, requests: 2 } → pastilles.
  */
 export default function AdminSidebar({ user, onSignOut, view, onViewChange, counts = {} }) {
   const displayName = user?.full_name || user?.email || "Administrateur";
@@ -19,103 +19,85 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
   return (
     <>
       {/* ───────── Desktop ───────── */}
-      <aside className="hidden md:flex md:w-72 shrink-0 flex-col border-r border-line bg-surface h-screen sticky top-0">
-        {/* Marque */}
-        <div className="px-6 pt-7 pb-6">
-          <Link to="/" className="flex items-center gap-3 group">
-            <span className="relative w-10 h-10 rounded-xl bg-ink text-cream flex items-center justify-center font-display text-lg shrink-0 transition-transform group-hover:-rotate-3">
-              H
-              <span className="absolute -right-1 -bottom-1 w-3 h-3 rounded-full bg-coffee ring-2 ring-surface" />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-display text-xl text-ink leading-tight">H-Company</span>
-              <span className="block text-[11px] uppercase tracking-[0.16em] text-ink-faint mt-0.5">
-                Espace admin
-              </span>
-            </span>
+      <aside className="hidden md:flex md:w-64 shrink-0 flex-col bg-ink text-cream h-screen sticky top-0">
+        {/* Logo */}
+        <div className="px-6 pt-7 pb-8">
+          <Link to="/" className="flex items-center gap-2 font-display text-[22px] leading-none tracking-tight">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: GOLD }} />
+            H-Company
           </Link>
         </div>
 
-        <div className="mx-6 h-px bg-line" />
-
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 overflow-y-auto" aria-label="Navigation admin">
-          <p className="px-3 mb-3 text-[11px] uppercase tracking-[0.16em] text-ink-faint">Gestion</p>
-          <ul className="space-y-1.5">
-            {NAV_ITEMS.map(({ key, label, hint, icon: Icon }) => {
-              const active = view === key;
-              const count = counts[key];
-              return (
-                <li key={key}>
-                  <button
-                    onClick={() => onViewChange(key)}
-                    aria-current={active ? "page" : undefined}
-                    className={`group relative w-full flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-xl text-left transition-all ${
-                      active ? "bg-cream" : "hover:bg-cream/60"
-                    }`}
+        <nav className="flex-1 px-3 space-y-1" aria-label="Navigation admin">
+          {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
+            const active = view === key;
+            const count = counts[key];
+            return (
+              <button
+                key={key}
+                onClick={() => onViewChange(key)}
+                aria-current={active ? "page" : undefined}
+                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition-colors ${
+                  active ? "bg-white/[0.08] text-cream font-medium" : "text-cream/60 hover:bg-white/[0.04] hover:text-cream"
+                }`}
+              >
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+                    active ? "ring-2 ring-offset-2 ring-offset-ink" : ""
+                  }`}
+                  style={active ? { color: GOLD, "--tw-ring-color": GOLD } : undefined}
+                >
+                  <Icon size={17} strokeWidth={1.8} />
+                </span>
+                <span className="flex-1 text-left truncate">{label}</span>
+                {count > 0 && (
+                  <span
+                    className="min-w-[20px] h-5 px-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center text-ink"
+                    style={{ backgroundColor: GOLD }}
                   >
-                    <span
-                      className={`absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-coffee transition-opacity ${
-                        active ? "opacity-100" : "opacity-0"
-                      }`}
-                    />
-                    <span
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        active
-                          ? "bg-coffee text-white shadow-sm"
-                          : "bg-cream/70 text-ink-soft group-hover:text-ink"
-                      }`}
-                    >
-                      <Icon size={17} strokeWidth={1.8} />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className={`block text-sm font-medium truncate ${active ? "text-ink" : "text-ink-soft group-hover:text-ink"}`}>
-                        {label}
-                      </span>
-                      <span className="block text-xs text-ink-faint truncate">{hint}</span>
-                    </span>
-                    {count > 0 && (
-                      <span
-                        className={`min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-semibold flex items-center justify-center ${
-                          active ? "bg-ink text-cream" : "bg-amber-50 text-amber-700"
-                        }`}
-                      >
-                        {count > 99 ? "99+" : count}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                    {count > 99 ? "99+" : count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Utilisateur */}
-        <div className="p-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-line bg-cream/50 p-3">
-            <span className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C89A3D] to-coffee text-white flex items-center justify-center text-sm font-semibold shrink-0">
+        <div className="px-4 pb-6 pt-4 space-y-4">
+          <div className="flex items-center gap-3 px-1">
+            <span className="relative w-11 h-11 rounded-full bg-white/[0.08] flex items-center justify-center font-display text-lg shrink-0">
               {initial}
+              <span className="absolute right-2.5 bottom-3 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: GOLD }} />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-ink truncate">{displayName}</p>
-              <p className="text-xs text-ink-faint truncate">Administrateur</p>
+              <p className="text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-xs text-cream/50">Administrateur</p>
             </div>
             <button
               onClick={onSignOut}
               title="Se déconnecter"
               aria-label="Se déconnecter"
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-ink-soft hover:bg-surface hover:text-red-600 transition-colors shrink-0"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/50 hover:bg-white/[0.06] hover:text-red-300 transition-colors"
             >
-              <LogOut size={17} strokeWidth={1.8} />
+              <LogOut size={16} />
             </button>
           </div>
+          <Link
+            to="/"
+            className="flex items-center justify-center gap-2 w-full rounded-xl bg-coffee hover:bg-coffee-dark text-white text-sm font-medium py-3 transition-colors"
+          >
+            Voir le site
+            <ExternalLink size={14} />
+          </Link>
         </div>
       </aside>
 
       {/* ───────── Mobile : barre du bas ───────── */}
       <nav
         aria-label="Navigation admin"
-        className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface/95 backdrop-blur-md border-t border-line grid grid-cols-2"
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink text-cream grid grid-cols-2 border-t border-white/10"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
@@ -126,15 +108,21 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
               key={key}
               onClick={() => onViewChange(key)}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
-                active ? "text-ink" : "text-ink-faint"
+              className={`relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
+                active ? "text-cream" : "text-cream/50"
               }`}
             >
-              <span className={`absolute top-0 h-[2px] w-10 rounded-full bg-coffee transition-opacity ${active ? "opacity-100" : "opacity-0"}`} />
-              <span className="relative">
-                <Icon size={20} strokeWidth={active ? 2 : 1.7} />
+              <span
+                className={`absolute top-0 h-[2px] w-10 rounded-full ${active ? "opacity-100" : "opacity-0"}`}
+                style={{ backgroundColor: GOLD }}
+              />
+              <span className="relative" style={active ? { color: GOLD } : undefined}>
+                <Icon size={20} strokeWidth={1.8} />
                 {count > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-coffee text-white text-[10px] font-semibold flex items-center justify-center">
+                  <span
+                    className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full text-ink text-[10px] font-semibold flex items-center justify-center"
+                    style={{ backgroundColor: GOLD }}
+                  >
                     {count > 9 ? "9+" : count}
                   </span>
                 )}

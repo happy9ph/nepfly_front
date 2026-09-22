@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Loader2, Clock, Repeat, X } from "lucide-react";
 
 const PAYMENT_OPTIONS = [
@@ -34,6 +34,11 @@ export default function OffersPanel({ offers, onCreate }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(offers.length === 0);
+
+  // Les offres arrivent après l'ouverture du panneau : on referme le formulaire si elles existent.
+  useEffect(() => {
+    setShowForm(offers.length === 0);
+  }, [offers.length]);
 
   const canAddMore = offers.length < MAX_OFFERS;
 

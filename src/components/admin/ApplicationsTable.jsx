@@ -1,57 +1,79 @@
 import { useMemo, useState } from "react";
-import { Search, Inbox, ChevronRight, X } from "lucide-react";
+import { Search, Filter, ArrowUpDown, ChevronDown, Eye, Clock, Check, X, MoreHorizontal, Inbox } from "lucide-react";
 
 const STATUS_FILTERS = [
-  { key: "all", label: "Toutes" },
+  { key: "all", label: "Tous les statuts" },
   { key: "pending", label: "En attente" },
   { key: "approved", label: "Approuvées" },
   { key: "rejected", label: "Rejetées" },
 ];
 
-const STATUS_BADGE = {
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-  approved: "bg-[#F1EAE0] text-coffee-dark border-coffee-light",
-  rejected: "bg-red-50 text-red-700 border-red-200",
+const SORTS = [
+  { key: "pending_first", label: "En attente d'abord" },
+  { key: "recent", label: "Plus récentes" },
+  { key: "oldest", label: "Plus anciennes" },
+  { key: "name", label: "Nom A → Z" },
+];
+
+const STATUS = {
+  pending: { label: "En attente", icon: Clock, halo: "bg-amber-100", dot: "bg-amber-500", text: "text-amber-700", bar: "bg-amber-400", filled: 6, step: "Reçue" },
+  approved: { label: "Approuvée", icon: Check, halo: "bg-[#F1EAE0]", dot: "bg-coffee", text: "text-coffee-dark", bar: "bg-coffee", filled: 12, step: "Contrat" },
+  rejected: { label: "Rejetée", icon: X, halo: "bg-red-100", dot: "bg-red-500", text: "text-red-600", bar: "bg-red-400", filled: 18, step: "Rejetée" },
 };
 
-const STATUS_DOT = {
-  pending: "bg-amber-500",
-  approved: "bg-coffee",
-  rejected: "bg-red-500",
-};
+const BAR_COUNT = 18;
 
-const STATUS_LABEL = {
-  pending: "En attente",
-  approved: "Approuvée",
-  rejected: "Rejetée",
-};
+export function timeAgo(value) {
+  const diff = Date.now() - new Date(value).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 60) return `${Math.max(min, 1)} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d} j`;
+  return `${Math.floor(d / 30)} mois`;
+}
 
-function formatDate(value) {
-  return new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+/** Petit sélecteur façon "pill" basé sur un <select> natif (accessible et léger). */
+function PillSelect({ icon: Icon, value, onChange, options, className = "" }) {
+  return (
+    <label className={`relative flex items-center ${className}`}>
+      <Icon size={14} className="absolute left-3 text-ink-soft pointer-events-none" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none w-full bg-surface border border-line rounded-xl pl-8 pr-8 py-2.5 text-sm text-ink outline-none cursor-pointer hover:border-coffee-light focus:border-coffee-light transition-colors"
+      >
+        {options.map((o) => (
+          <option key={o.key} value={o.key}>{o.label}</option>
+        ))}
+      </select>
+      <ChevronDown size={14} className="absolute right-3 text-ink-soft pointer-events-none" />
+    </label>
+  );
 }
 
 export default function ApplicationsTable({ applications, filter, onFilterChange, selectedId, onSelect }) {
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("pending_first");
 
-  const counts = useMemo(
-    () =>
-      STATUS_FILTERS.reduce((acc, f) => {
-        acc[f.key] = f.key === "all" ? applications.length : applications.filter((a) => a.status === f.key).length;
-        return acc;
-      }, {}),
-    [applications]
-  );
-
-  const filtered = useMemo(() => {
+  const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return applications
+    const list = applications
       .filter((a) => filter === "all" || a.status === filter)
-      .filter(
-        (a) =>
-          !q ||
-          [a.company, a.contact_name, a.category, a.email].some((v) => v?.toLowerCase().includes(q))
-      );
-  }, [applications, filter, query]);
+      .filter((a) => !q || [a.company, a.contact_name, a.category, a.email].some((v) => v?.toLowerCase().includes(q)));
+
+    const byDate = (a, b) => new Date(b.created_at) - new Date(a.created_at);
+    return [...list].sort((a, b) => {
+      if (sort === "recent") return byDate(a, b);
+      if (sort === "oldest") return -byDate(a, b);
+      if (sort === "name") return (a.company || "").localeCompare(b.company || "", "fr");
+      // pending_first
+      if (a.status === "pending" && b.status !== "pending") return -1;
+      if (b.status === "pending" && a.status !== "pending") return 1;
+      return byDate(a, b);
+    });
+  }, [applications, filter, query, sort]);
 
   function handleKey(e, id) {
     if (e.key === "Enter" || e.key === " ") {
@@ -61,146 +83,109 @@ export default function ApplicationsTable({ applications, filter, onFilterChange
   }
 
   return (
-    <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+    <div>
       {/* Barre d'outils */}
-      <div className="p-3 border-b border-line flex flex-col xl:flex-row gap-3 xl:items-center xl:justify-between">
-        <div className="flex gap-1 p-1 bg-cream/70 rounded-xl overflow-x-auto" role="tablist">
-          {STATUS_FILTERS.map((f) => {
-            const active = filter === f.key;
-            return (
-              <button
-                key={f.key}
-                role="tab"
-                aria-selected={active}
-                onClick={() => onFilterChange(f.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                  active ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"
-                }`}
-              >
-                {f.key !== "all" && <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[f.key]}`} />}
-                {f.label}
-                <span
-                  className={`text-[11px] min-w-[20px] px-1.5 py-0.5 rounded-full ${
-                    active ? "bg-ink text-cream" : "bg-line/70 text-ink-faint"
-                  }`}
-                >
-                  {counts[f.key]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="flex items-center gap-2 bg-surface border border-line rounded-xl px-3.5 py-2.5 text-sm text-ink">
+          <span className="w-3.5 h-3.5 rounded border border-line bg-cream" />
+          <span className="tabular-nums">
+            {rows.length}<span className="text-ink-faint"> / {applications.length}</span>
+          </span>
+        </span>
+        <PillSelect icon={Filter} value={filter} onChange={onFilterChange} options={STATUS_FILTERS} />
 
-        <label className="relative flex items-center xl:w-56">
-          <Search size={15} className="absolute left-3 text-ink-faint pointer-events-none" />
+        <div className="flex-1 min-w-[12px]" />
+
+        <label className="relative flex items-center w-full sm:w-60 order-last sm:order-none">
+          <Search size={14} className="absolute left-3 text-ink-faint pointer-events-none" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher…"
-            className="w-full text-sm bg-cream/50 border border-line rounded-xl pl-9 pr-8 py-2 outline-none placeholder:text-ink-faint focus:border-coffee-light focus:bg-surface transition-colors [&::-webkit-search-cancel-button]:hidden"
+            placeholder="Rechercher un partenaire…"
+            className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none placeholder:text-ink-faint focus:border-coffee-light transition-colors"
           />
-          {query && (
-            <button
-              onClick={() => setQuery("")}
-              aria-label="Effacer la recherche"
-              className="absolute right-2 w-5 h-5 rounded-full flex items-center justify-center text-ink-faint hover:bg-line hover:text-ink"
-            >
-              <X size={12} />
-            </button>
-          )}
         </label>
+        <PillSelect icon={ArrowUpDown} value={sort} onChange={setSort} options={SORTS} className="sm:w-52" />
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center px-6 py-14">
-          <span className="w-12 h-12 rounded-2xl bg-cream flex items-center justify-center text-ink-faint mb-3">
-            <Inbox size={22} strokeWidth={1.6} />
-          </span>
-          <p className="text-sm font-medium text-ink">
-            {query ? "Aucun résultat" : "Aucune candidature ici"}
-          </p>
+      {/* Liste */}
+      {rows.length === 0 ? (
+        <div className="bg-surface border border-line rounded-2xl px-6 py-14 text-center">
+          <Inbox size={22} className="mx-auto text-ink-faint mb-3" strokeWidth={1.6} />
+          <p className="text-sm font-medium text-ink">{query ? "Aucun résultat" : "Aucune candidature ici"}</p>
           <p className="text-xs text-ink-soft mt-1">
-            {query ? `Rien ne correspond à « ${query} ».` : "Les nouvelles candidatures apparaîtront dans cette liste."}
+            {query ? `Rien ne correspond à « ${query} ».` : "Les nouvelles candidatures apparaîtront ici."}
           </p>
         </div>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-ink-faint bg-cream/30 border-b border-line">
-              <th className="px-5 py-3 font-medium">Entreprise</th>
-              <th className="px-5 py-3 font-medium hidden sm:table-cell">Catégorie</th>
-              <th className="px-5 py-3 font-medium">Statut</th>
-              <th className="px-5 py-3 font-medium hidden md:table-cell">Reçue le</th>
-              <th className="w-8 hidden sm:table-cell" aria-hidden="true" />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((app) => {
-              const selected = selectedId === app.id;
-              return (
-                <tr
-                  key={app.id}
-                  tabIndex={0}
-                  aria-selected={selected}
-                  onClick={() => onSelect(app.id)}
-                  onKeyDown={(e) => handleKey(e, app.id)}
-                  className={`group border-b border-line/60 last:border-0 cursor-pointer transition-colors outline-none focus-visible:bg-cream/80 ${
-                    selected ? "bg-cream" : "hover:bg-cream/50"
-                  }`}
-                >
-                  <td className="relative px-5 py-3.5">
-                    <span
-                      className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-coffee transition-opacity ${
-                        selected ? "opacity-100" : "opacity-0"
-                      }`}
-                    />
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-display text-base shrink-0 transition-colors ${
-                          selected ? "bg-coffee text-white" : "bg-cream text-coffee-dark"
-                        }`}
-                      >
-                        {app.company?.[0]?.toUpperCase() || "?"}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-ink font-medium truncate">{app.company}</p>
-                        <p className="text-ink-soft text-xs mt-0.5 truncate">
-                          {app.contact_name}
-                          <span className="sm:hidden"> · {app.category}</span>
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 hidden sm:table-cell">
-                    <span className="inline-block text-xs text-ink-soft bg-cream/80 border border-line rounded-lg px-2 py-1 max-w-[160px] truncate align-middle">
+        <ul className="bg-surface border border-line rounded-2xl overflow-hidden divide-y divide-line">
+          {rows.map((app) => {
+            const st = STATUS[app.status] || STATUS.pending;
+            const Icon = st.icon;
+            const selected = selectedId === app.id;
+            return (
+              <li
+                key={app.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selected}
+                onClick={() => onSelect(app.id)}
+                onKeyDown={(e) => handleKey(e, app.id)}
+                className={`group flex items-center gap-3 sm:gap-4 px-4 py-3.5 cursor-pointer outline-none transition-colors focus-visible:bg-cream ${
+                  selected ? "bg-cream" : "hover:bg-cream/50"
+                }`}
+              >
+                {/* Icône de statut avec halo */}
+                <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${st.halo}`}>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-white ${st.dot}`}>
+                    <Icon size={11} strokeWidth={3} />
+                  </span>
+                </span>
+
+                {/* Nom + méta */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] text-ink font-medium truncate">{app.company}</p>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-ink-soft min-w-0">
+                    <span className="shrink-0 uppercase tracking-wide text-[10px] font-medium border border-line rounded px-1.5 py-px bg-cream/60 max-w-[120px] truncate">
                       {app.category}
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap ${STATUS_BADGE[app.status]}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[app.status]}`} />
-                      {STATUS_LABEL[app.status]}
+                    <span className="truncate">
+                      <span className={st.text}>{st.label}</span> · {app.contact_name}
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-ink-soft text-xs whitespace-nowrap hidden md:table-cell">
-                    {formatDate(app.created_at)}
-                  </td>
-                  <td className="pr-4 hidden sm:table-cell">
-                    <ChevronRight
-                      size={16}
-                      className={`text-ink-faint transition-all ${
-                        selected ? "opacity-100 text-coffee" : "opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"
-                      }`}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+
+                {/* Action rapide */}
+                {app.status === "pending" && (
+                  <span className="hidden md:flex items-center gap-1.5 text-xs font-medium text-cream bg-ink rounded-full px-3 py-1.5 shrink-0">
+                    <Eye size={13} /> À traiter
+                  </span>
+                )}
+
+                {/* Ancienneté */}
+                <span className="hidden lg:flex items-center gap-1.5 text-xs text-ink-faint w-16 shrink-0" title={new Date(app.created_at).toLocaleString("fr-FR")}>
+                  <Clock size={12} />
+                  {timeAgo(app.created_at)}
+                </span>
+
+                {/* Barre de progression façon "uptime" */}
+                <div className="hidden sm:block shrink-0 text-right">
+                  <div className="flex gap-[2px]">
+                    {Array.from({ length: BAR_COUNT }).map((_, i) => (
+                      <span key={i} className={`w-[4px] h-4 rounded-[1px] ${i < st.filled ? st.bar : "bg-line"}`} />
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-ink-soft mt-1">{st.step}</p>
+                </div>
+
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-faint group-hover:text-ink group-hover:bg-surface shrink-0">
+                  <MoreHorizontal size={16} />
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
