@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           <button onClick={signOut} className="text-xs text-ink-soft">Déconnexion</button>
         </header>
 
-        <main className="px-5 md:px-10 py-8 md:py-10 max-w-6xl">
+        <main className="px-5 md:px-10 py-8 md:py-10 pb-28 md:pb-10 max-w-6xl">
           {view === "requests" ? (
             <>
               <div className="mb-8">
