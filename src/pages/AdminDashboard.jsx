@@ -1,22 +1,30 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  LogOut, RefreshCw, Clock, CheckCircle2, X, ChevronDown, ChevronUp, MoreHorizontal, Gift, ArrowRight, Loader2,
+  LogOut, RefreshCw, Clock, CheckCircle2, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
+  Gift, ArrowRight, Loader2, Download, Search, Users, ClipboardList, Filter, Copy, Mail,
+  TrendingUp, TrendingDown, AlertCircle, Sparkles,
 } from "lucide-react";
 import { useUser } from "../context/Usercontext.jsx";
 import { api } from "../lib/api.js";
 import AdminSidebar from "../components/admin/AdminSidebar.jsx";
-import ApplicationsTable, { timeAgo } from "../components/admin/ApplicationsTable.jsx";
+import ApplicationsTable, { timeAgo, exportApplicationsCsv, isTyping } from "../components/admin/ApplicationsTable.jsx";
 import ApplicationDetail from "../components/admin/ApplicationDetail.jsx";
 import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
+import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
 
-/* Titre avec le point doré, façon "Monitors." */
+const GOLD = "#C89A3D";
+const AUTO_REFRESH_MS = 60_000;
+const DAY = 24 * 3600 * 1000;
+
+/* ───────── Petits composants de mise en page ───────── */
+
 function Title({ children, as: Tag = "h1", className = "" }) {
   return (
     <Tag className={`font-display text-ink ${className}`}>
       {children}
-      <span className="text-[#C89A3D]">.</span>
+      <span style={{ color: GOLD }}>.</span>
     </Tag>
   );
 }
@@ -33,6 +41,44 @@ function SideCard({ title, children, action }) {
   );
 }
 
+function Metric({ value, label, tone = "text-ink" }) {
+  return (
+    <div>
+      <p className={`text-xl font-semibold tabular-nums ${tone}`}>{value}</p>
+      <p className="text-xs text-ink-soft mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+/** Anneau de progression SVG (part des candidatures traitées). */
+function Ring({ pct, children, color = GOLD }) {
+  const r = 34;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative w-[88px] h-[88px]">
+      <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+        <circle cx="40" cy="40" r={r} fill="none" strokeWidth="6" className="stroke-line" />
+        <circle
+          cx="40" cy="40" r={r} fill="none" strokeWidth="6" strokeLinecap="round"
+          stroke={color} strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100}
+          style={{ transition: "stroke-dashoffset .6s ease" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+    </div>
+  );
+}
+
+function formatSince(date) {
+  if (!date) return "—";
+  const s = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (s < 20) return "à l'instant";
+  if (s < 60) return `il y a ${s} s`;
+  return `il y a ${Math.floor(s / 60)} min`;
+}
+
+const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || "");
+
 export default function AdminDashboard() {
   const { user, isAuthenticated, isLoading, withAuth, signOut } = useUser();
   const [applications, setApplications] = useState([]);
@@ -44,28 +90,83 @@ export default function AdminDashboard() {
   const [pageStatus, setPageStatus] = useState("loading");
   const [loadError, setLoadError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [pendingAppsCount, setPendingAppsCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [, setTick] = useState(0);
 
+  const knownIdsRef = useRef(null);
+  const visibleIdsRef = useRef([]);
+  const searchRef = useRef(null);
+
+  /* ───────── Notifications ───────── */
+  const pushToast = useCallback((text, type = "success") => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setToasts((t) => [...t.slice(-3), { id, text, type }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4500);
+  }, []);
+
+  /* ───────── Chargements ───────── */
   const loadApplications = useCallback(
-    async ({ silent = false } = {}) => {
+    async ({ silent = false, detectNew = false } = {}) => {
       if (!silent) setPageStatus("loading");
       setLoadError(null);
       try {
         const apps = await withAuth((token) => api.admin.listApplications(token));
+        if (detectNew && knownIdsRef.current) {
+          const fresh = apps.filter((a) => !knownIdsRef.current.has(a.id));
+          if (fresh.length) {
+            pushToast(
+              fresh.length === 1
+                ? `Nouvelle candidature : ${fresh[0].company}`
+                : `${fresh.length} nouvelles candidatures`,
+              "info"
+            );
+          }
+        }
+        knownIdsRef.current = new Set(apps.map((a) => a.id));
         setApplications(apps);
+        setLastUpdated(new Date());
         setPageStatus("ready");
       } catch (err) {
-        setLoadError(err?.data?.detail || "Impossible de charger les candidatures.");
-        setPageStatus("error");
+        if (silent) {
+          pushToast("Actualisation impossible, nouvel essai dans une minute.", "error");
+        } else {
+          setLoadError(err?.data?.detail || "Impossible de charger les candidatures.");
+          setPageStatus("error");
+        }
       }
+      // Compteur des demandes d'apps pour la pastille de la sidebar
+      withAuth((token) => api.admin.pendingApps(token))
+        .then((list) => setPendingAppsCount(Array.isArray(list) ? list.length : 0))
+        .catch(() => {});
     },
-    [withAuth]
+    [withAuth, pushToast]
   );
 
+  const isAdmin = !isLoading && isAuthenticated && user?.role === "admin";
+
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user?.role === "admin") loadApplications();
-  }, [isLoading, isAuthenticated, user, loadApplications]);
+    if (isAdmin) loadApplications();
+  }, [isAdmin, loadApplications]);
+
+  // Rafraîchissement automatique (onglet visible uniquement)
+  useEffect(() => {
+    if (!isAdmin || pageStatus !== "ready") return undefined;
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") loadApplications({ silent: true, detectNew: true });
+    }, AUTO_REFRESH_MS);
+    return () => clearInterval(t);
+  }, [isAdmin, pageStatus, loadApplications]);
+
+  // Fait vivre le libellé « mis à jour il y a… »
+  useEffect(() => {
+    const t = setInterval(() => setTick((x) => x + 1), 15_000);
+    return () => clearInterval(t);
+  }, []);
 
   const loadContract = useCallback(
     async (id) => {
@@ -91,6 +192,7 @@ export default function AdminDashboard() {
     [withAuth]
   );
 
+  /* ───────── Actions ───────── */
   function handleSelect(id) {
     setSelectedId(id);
     const app = applications.find((a) => a.id === id);
@@ -100,19 +202,25 @@ export default function AdminDashboard() {
     loadOffers(id);
   }
 
-  function closeDetail() {
-    setSelectedId(null);
-  }
+  const closeDetail = () => setSelectedId(null);
 
   async function handleRefresh() {
     setRefreshing(true);
-    await loadApplications({ silent: true });
+    await loadApplications({ silent: true, detectNew: true });
     setRefreshing(false);
+  }
+
+  function handleExport() {
+    const ids = visibleIdsRef.current;
+    const list = ids.length ? ids.map((id) => applications.find((a) => a.id === id)).filter(Boolean) : applications;
+    exportApplicationsCsv(list);
+    pushToast(`${list.length} candidature${list.length > 1 ? "s" : ""} exportée${list.length > 1 ? "s" : ""} en CSV.`);
   }
 
   async function handleCreateOffer(payload) {
     await withAuth((token) => api.admin.createOffer(token, selectedId, payload));
     await loadOffers(selectedId);
+    pushToast("Offre envoyée au partenaire.");
   }
 
   async function handleApprove() {
@@ -131,10 +239,48 @@ export default function AdminDashboard() {
     setContract(updated);
   }
 
-  // Panneau de détail : fermeture avec Échap + blocage du scroll de la page
+  async function handleBulkStatus(ids, status) {
+    const results = await Promise.allSettled(ids.map((id) => withAuth((token) => api.admin.updateStatus(token, id, status))));
+    const ok = results.filter((r) => r.status === "fulfilled").length;
+    const ko = ids.length - ok;
+    await loadApplications({ silent: true });
+    const verb = status === "approved" ? "approuvée" : "rejetée";
+    pushToast(
+      `${ok} candidature${ok > 1 ? "s" : ""} ${verb}${ok > 1 ? "s" : ""}${ko ? ` · ${ko} échec${ko > 1 ? "s" : ""}` : ""}.`,
+      ko ? "error" : "success"
+    );
+  }
+
+  const handleVisibleChange = useCallback((ids) => {
+    visibleIdsRef.current = ids;
+  }, []);
+
+  async function copyEmail(email) {
+    try {
+      await navigator.clipboard.writeText(email);
+      pushToast("Email copié dans le presse-papiers.");
+    } catch {
+      pushToast("Impossible de copier l'email.", "error");
+    }
+  }
+
+  /* ───────── Navigation dans le panneau (précédent / suivant) ───────── */
+  const navRef = useRef(() => {});
+  navRef.current = (dir) => {
+    const ids = visibleIdsRef.current;
+    const idx = ids.indexOf(selectedId);
+    const next = ids[idx + dir];
+    if (idx !== -1 && next != null) handleSelect(next);
+  };
+
   useEffect(() => {
-    if (!selectedId) return;
-    const onKey = (e) => e.key === "Escape" && closeDetail();
+    if (!selectedId) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape" && !paletteOpen) return closeDetail();
+      if (isTyping(document.activeElement) || e.metaKey || e.ctrlKey) return;
+      if (e.key === "ArrowLeft" || e.key === "k") navRef.current(-1);
+      if (e.key === "ArrowRight" || e.key === "j") navRef.current(1);
+    };
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -142,34 +288,95 @@ export default function AdminDashboard() {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [selectedId]);
+  }, [selectedId, paletteOpen]);
 
+  /* ───────── Palette : Ctrl/⌘ + K ───────── */
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isAdmin]);
+
+  const paletteActions = [
+    { id: "go-apps", label: "Aller aux candidatures", icon: Users, run: () => { setView("applications"); closeDetail(); } },
+    { id: "go-requests", label: "Aller à toutes les demandes", icon: ClipboardList, run: () => { setView("requests"); closeDetail(); } },
+    { id: "f-pending", label: "Filtrer : en attente", icon: Filter, run: () => { setView("applications"); setFilter("pending"); } },
+    { id: "f-all", label: "Afficher toutes les candidatures", icon: Filter, run: () => { setView("applications"); setFilter("all"); } },
+    { id: "refresh", label: "Actualiser les données", icon: RefreshCw, hint: "auto toutes les 60 s", run: handleRefresh },
+    { id: "export", label: "Exporter la liste en CSV", icon: Download, run: handleExport },
+    { id: "search", label: "Rechercher dans la liste", icon: Search, hint: "/", run: () => { setView("applications"); setTimeout(() => searchRef.current?.focus(), 50); } },
+    { id: "logout", label: "Se déconnecter", icon: LogOut, run: signOut },
+  ];
+
+  /* ───────── Statistiques ───────── */
   const stats = useMemo(() => {
+    const now = Date.now();
     const pending = applications.filter((a) => a.status === "pending");
     const approved = applications.filter((a) => a.status === "approved").length;
     const rejected = applications.filter((a) => a.status === "rejected").length;
-    const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
-    const oldestPending = [...pending].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     const decided = approved + rejected;
+    const ts = (a) => new Date(a.created_at).getTime();
+
+    // 14 derniers jours
+    const startToday = new Date();
+    startToday.setHours(0, 0, 0, 0);
+    const days = Array.from({ length: 14 }, (_, i) => {
+      const start = startToday.getTime() - (13 - i) * DAY;
+      return { start, count: 0, date: new Date(start) };
+    });
+    applications.forEach((a) => {
+      const t = ts(a);
+      const idx = Math.floor((t - days[0].start) / DAY);
+      if (idx >= 0 && idx < 14) days[idx].count += 1;
+    });
+    const last7 = applications.filter((a) => ts(a) >= now - 7 * DAY).length;
+    const prev7 = applications.filter((a) => ts(a) >= now - 14 * DAY && ts(a) < now - 7 * DAY).length;
+    const trend = prev7 === 0 ? (last7 > 0 ? 100 : 0) : Math.round(((last7 - prev7) / prev7) * 100);
+
+    // Par domaine
+    const catMap = new Map();
+    applications.forEach((a) => {
+      const k = a.category || "Autre";
+      catMap.set(k, (catMap.get(k) || 0) + 1);
+    });
+    const categories = [...catMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+
     return {
       total: applications.length,
       pending: pending.length,
       approved,
       rejected,
       decided,
+      decidedPct: applications.length ? Math.round((decided / applications.length) * 100) : 0,
       approvalRate: decided ? Math.round((approved / decided) * 100) : null,
-      lastWeek: applications.filter((a) => new Date(a.created_at).getTime() >= weekAgo).length,
-      oldestPending,
+      last7,
+      prev7,
+      trend,
+      days,
+      maxDay: Math.max(1, ...days.map((d) => d.count)),
+      categories,
+      oldestPending: [...pending].sort((a, b) => ts(a) - ts(b)),
     };
   }, [applications]);
 
   const selectedApplication = applications.find((a) => a.id === selectedId) || null;
+  const navIds = visibleIdsRef.current;
+  const navIndex = selectedId != null ? navIds.indexOf(selectedId) : -1;
 
   /* ───────── États d'accès ───────── */
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="animate-spin text-coffee" size={22} />
+      <div className="min-h-screen bg-ink flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-cream">
+          <p className="font-display text-2xl">H-Company<span style={{ color: GOLD }}>.</span></p>
+          <Loader2 className="animate-spin text-cream/50" size={18} />
+        </div>
       </div>
     );
   }
@@ -197,8 +404,8 @@ export default function AdminDashboard() {
 
   const statusTone =
     stats.pending > 0
-      ? { halo: "bg-amber-100", core: "bg-amber-500", Icon: Clock }
-      : { halo: "bg-[#F1EAE0]", core: "bg-coffee", Icon: CheckCircle2 };
+      ? { core: "bg-amber-500", Icon: Clock, ring: "#F59E0B" }
+      : { core: "bg-coffee", Icon: CheckCircle2, ring: GOLD };
 
   return (
     <div className="min-h-screen bg-cream md:flex">
@@ -206,52 +413,88 @@ export default function AdminDashboard() {
         user={user}
         onSignOut={signOut}
         view={view}
-        onViewChange={(v) => { setView(v); setSelectedId(null); }}
-        counts={{ applications: stats.pending }}
+        onViewChange={(v) => { setView(v); closeDetail(); }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount }}
+        onOpenPalette={() => setPaletteOpen(true)}
       />
 
       <div className="flex-1 min-w-0">
         {/* Header mobile */}
         <header className="md:hidden sticky top-0 z-20 bg-ink text-cream px-4 py-3.5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display text-lg">
-            <span className="w-2 h-2 rounded-full bg-[#C89A3D]" />
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: GOLD }} />
             H-Company
           </Link>
-          <button onClick={signOut} aria-label="Se déconnecter" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/60 hover:bg-white/10">
-            <LogOut size={17} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPaletteOpen(true)} aria-label="Rechercher" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10">
+              <Search size={17} />
+            </button>
+            <button onClick={signOut} aria-label="Se déconnecter" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10">
+              <LogOut size={17} />
+            </button>
+          </div>
         </header>
 
-        <main className="px-4 sm:px-6 lg:px-12 py-8 lg:py-12 pb-28 md:pb-12 max-w-[1320px]">
+        <main className="px-4 sm:px-6 lg:px-12 py-8 lg:py-12 pb-28 md:pb-12 max-w-[1360px]">
           {view === "requests" ? (
             <>
               <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> Demandes</p>
                 <Title className="text-3xl">Toutes les demandes</Title>
                 <p className="text-sm text-ink-soft mt-1">Apps et paiements, tous partenaires confondus.</p>
               </div>
               <AllRequestsPanel withAuth={withAuth} api={api} />
             </>
           ) : (
-            <div className="grid xl:grid-cols-[minmax(0,1fr)_300px] gap-6 lg:gap-8 items-start">
+            <div className="grid xl:grid-cols-[minmax(0,1fr)_310px] gap-6 lg:gap-8 items-start">
               {/* ───────── Colonne principale ───────── */}
               <div className="min-w-0">
-                <div className="flex items-center justify-between gap-4 mb-6">
-                  <Title className="text-3xl">Candidatures</Title>
-                  <button
-                    onClick={handleRefresh}
-                    disabled={refreshing || pageStatus === "loading"}
-                    className="flex items-center gap-2 rounded-xl bg-coffee hover:bg-coffee-dark text-white text-sm font-medium pl-4 pr-4 py-2.5 disabled:opacity-60 transition-colors shadow-sm"
-                  >
-                    <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-                    Actualiser
-                  </button>
+                <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+                  <div>
+                    <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> Candidatures</p>
+                    <Title className="text-3xl">Candidatures</Title>
+                    <p className="flex items-center gap-2 text-xs text-ink-soft mt-2">
+                      <span className="relative flex w-2 h-2">
+                        <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+                        <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+                      </span>
+                      En direct · mis à jour {formatSince(lastUpdated)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleExport}
+                      disabled={pageStatus !== "ready" || applications.length === 0}
+                      className="flex items-center gap-2 rounded-xl border border-line bg-surface hover:border-coffee-light text-ink text-sm font-medium px-4 py-2.5 disabled:opacity-50 transition-colors"
+                    >
+                      <Download size={15} /> <span className="hidden sm:inline">Exporter</span>
+                    </button>
+                    <div className="flex rounded-xl bg-coffee text-white shadow-sm overflow-hidden">
+                      <button
+                        onClick={handleRefresh}
+                        disabled={refreshing || pageStatus === "loading"}
+                        className="flex items-center gap-2 text-sm font-medium pl-4 pr-3.5 py-2.5 hover:bg-coffee-dark disabled:opacity-60 transition-colors"
+                      >
+                        <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+                        Actualiser
+                      </button>
+                      <span className="w-px bg-white/25 my-2" />
+                      <button
+                        onClick={() => setPaletteOpen(true)}
+                        aria-label="Plus d'actions"
+                        className="px-2.5 hover:bg-coffee-dark transition-colors"
+                      >
+                        <ChevronDown size={15} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {pageStatus === "loading" && <SkeletonTable rows={4} />}
+                {pageStatus === "loading" && <SkeletonTable rows={5} />}
 
                 {pageStatus === "error" && (
                   <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-center justify-between gap-4">
-                    <p className="text-sm text-red-700">{loadError}</p>
+                    <p className="flex items-center gap-2 text-sm text-red-700"><AlertCircle size={16} /> {loadError}</p>
                     <button onClick={() => loadApplications()} className="text-sm font-medium text-red-700 bg-surface border border-red-200 rounded-xl px-4 py-2 hover:bg-red-100">
                       Réessayer
                     </button>
@@ -265,10 +508,14 @@ export default function AdminDashboard() {
                     onFilterChange={setFilter}
                     selectedId={selectedId}
                     onSelect={handleSelect}
+                    onBulkStatus={handleBulkStatus}
+                    onVisibleChange={handleVisibleChange}
+                    keyboardEnabled={!selectedApplication && !paletteOpen}
+                    searchRef={searchRef}
                   />
                 )}
 
-                {/* Carte « À traiter » façon onboarding */}
+                {/* Carte « À traiter » */}
                 {pageStatus === "ready" && stats.pending > 0 && !todoHidden && (
                   <div className="mt-8 bg-surface border border-line rounded-2xl p-6 md:p-8">
                     <div className="flex items-start justify-between gap-4">
@@ -278,7 +525,7 @@ export default function AdminDashboard() {
                         </h2>
                         <div className="flex flex-wrap items-center gap-3 mt-3">
                           <span className="flex items-center gap-1.5 text-xs font-medium text-coffee-dark bg-[#F1EAE0] rounded-lg px-2.5 py-1.5">
-                            <Gift size={13} /> {stats.decided}/{stats.total} traitées
+                            <Sparkles size={13} /> {stats.decided}/{stats.total} traitées
                           </span>
                           <span className="text-sm text-ink-soft">Les plus anciennes en premier.</span>
                         </div>
@@ -302,35 +549,43 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="h-2 rounded-full bg-line/70 mt-6 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-coffee transition-all"
-                        style={{ width: `${stats.total ? (stats.decided / stats.total) * 100 : 0}%` }}
-                      />
+                      <div className="h-full rounded-full bg-coffee transition-all duration-700" style={{ width: `${stats.decidedPct}%` }} />
                     </div>
 
                     {todoOpen && (
                       <ol className="mt-6 space-y-3">
-                        {stats.oldestPending.slice(0, 3).map((app, i) => (
-                          <li key={app.id}>
-                            <button
-                              onClick={() => handleSelect(app.id)}
-                              className="w-full flex items-center gap-4 text-left rounded-2xl border border-line hover:border-coffee-light hover:bg-cream/40 px-4 md:px-5 py-4 transition-colors group"
-                            >
-                              <span className="w-10 h-10 rounded-full bg-cream flex items-center justify-center text-sm font-semibold text-ink shrink-0">
-                                {i + 1}
-                              </span>
-                              <span className="flex-1 min-w-0">
-                                <span className="block text-sm font-semibold text-ink truncate">{app.company}</span>
-                                <span className="block text-xs text-ink-soft mt-0.5 truncate">
-                                  {app.category} · reçue il y a {timeAgo(app.created_at)}
+                        {stats.oldestPending.slice(0, 3).map((app, i) => {
+                          const days = Math.floor((Date.now() - new Date(app.created_at).getTime()) / DAY);
+                          const urgent = days >= 7;
+                          return (
+                            <li key={app.id}>
+                              <button
+                                onClick={() => handleSelect(app.id)}
+                                className="w-full flex items-center gap-4 text-left rounded-2xl border border-line hover:border-coffee-light hover:bg-cream/40 px-4 md:px-5 py-4 transition-colors group"
+                              >
+                                <span className="w-10 h-10 rounded-full bg-cream flex items-center justify-center text-sm font-semibold text-ink shrink-0">
+                                  {i + 1}
                                 </span>
-                              </span>
-                              <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-coffee-dark">
-                                Traiter <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-                              </span>
-                            </button>
-                          </li>
-                        ))}
+                                <span className="flex-1 min-w-0">
+                                  <span className="flex items-center gap-2">
+                                    <span className="text-sm font-semibold text-ink truncate">{app.company}</span>
+                                    {urgent && (
+                                      <span className="text-[10px] font-semibold uppercase tracking-wide text-red-700 bg-red-50 border border-red-200 rounded px-1.5 py-px shrink-0">
+                                        Urgent
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="block text-xs text-ink-soft mt-0.5 truncate">
+                                    {app.category} · reçue il y a {timeAgo(app.created_at)}
+                                  </span>
+                                </span>
+                                <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-coffee-dark">
+                                  Traiter <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
                       </ol>
                     )}
                   </div>
@@ -346,19 +601,20 @@ export default function AdminDashboard() {
                   </>
                 ) : (
                   <>
+                    {/* Statut actuel */}
                     <SideCard title="Statut actuel">
                       <div className="flex justify-center mb-5">
-                        <span className={`w-16 h-16 rounded-full flex items-center justify-center ${statusTone.halo}`}>
-                          <span className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${statusTone.core}`}>
-                            <statusTone.Icon size={18} strokeWidth={2.4} />
+                        <Ring pct={stats.decidedPct} color={statusTone.ring}>
+                          <span className={`w-11 h-11 rounded-full flex items-center justify-center text-white ${statusTone.core}`}>
+                            <statusTone.Icon size={19} strokeWidth={2.4} />
                           </span>
-                        </span>
+                        </Ring>
                       </div>
                       <div className="grid grid-cols-3 text-center">
                         {[
                           { key: "pending", label: "En attente", value: stats.pending, cls: "text-amber-600" },
-                          { key: "approved", label: "Approuvées", value: stats.approved, cls: "text-ink" },
-                          { key: "rejected", label: "Rejetées", value: stats.rejected, cls: "text-ink" },
+                          { key: "approved", label: "Approuvées", value: stats.approved, cls: "text-coffee-dark" },
+                          { key: "rejected", label: "Rejetées", value: stats.rejected, cls: "text-red-600" },
                         ].map((s) => (
                           <button
                             key={s.key}
@@ -371,46 +627,100 @@ export default function AdminDashboard() {
                         ))}
                       </div>
                       <p className="text-sm text-ink-soft text-center mt-4">
-                        {stats.total} candidature{stats.total > 1 ? "s" : ""} au total.
+                        {stats.decidedPct}% traitées sur {stats.total} candidature{stats.total > 1 ? "s" : ""}.
                       </p>
                       <div className="flex justify-center mt-3">
                         <button
                           onClick={() => setView("requests")}
                           className="flex items-center gap-1.5 text-xs font-medium text-cream bg-ink hover:bg-coffee-dark rounded-lg px-3 py-1.5 transition-colors"
                         >
-                          <Gift size={12} className="text-[#C89A3D]" />
-                          Demandes d'apps & paiements
+                          <Gift size={12} style={{ color: GOLD }} />
+                          Demandes d'apps{pendingAppsCount > 0 ? ` (${pendingAppsCount})` : ""}
                         </button>
                       </div>
                     </SideCard>
 
+                    {/* Tendance 14 jours */}
                     <SideCard
-                      title="Activité"
-                      action={<MoreHorizontal size={16} className="text-ink-faint" />}
+                      title="14 derniers jours"
+                      action={
+                        <span
+                          className={`flex items-center gap-1 text-xs font-semibold rounded-md px-2 py-1 ${
+                            stats.trend >= 0 ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50"
+                          }`}
+                          title="7 derniers jours vs 7 jours précédents"
+                        >
+                          {stats.trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                          {stats.trend > 0 ? "+" : ""}{stats.trend}%
+                        </span>
+                      }
                     >
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-5">
-                        <div>
-                          <p className={`text-xl font-semibold tabular-nums ${stats.approvalRate === null ? "text-ink" : stats.approvalRate >= 50 ? "text-coffee-dark" : "text-red-600"}`}>
-                            {stats.approvalRate === null ? "—" : `${stats.approvalRate}%`}
-                          </p>
-                          <p className="text-xs text-ink-soft mt-0.5">Taux d'approbation</p>
-                        </div>
-                        <div>
-                          <p className="text-xl font-semibold text-ink tabular-nums">{stats.lastWeek}</p>
-                          <p className="text-xs text-ink-soft mt-0.5">Reçues en 7 jours</p>
-                        </div>
-                        <div>
-                          <p className="text-xl font-semibold text-ink tabular-nums">
-                            {stats.oldestPending[0] ? timeAgo(stats.oldestPending[0].created_at) : "—"}
-                          </p>
-                          <p className="text-xs text-ink-soft mt-0.5">Plus ancienne en attente</p>
-                        </div>
-                        <div>
-                          <p className="text-xl font-semibold text-ink tabular-nums">{stats.decided}</p>
-                          <p className="text-xs text-ink-soft mt-0.5">Décisions prises</p>
-                        </div>
+                      <div className="flex items-end gap-[5px] h-24">
+                        {stats.days.map((d, i) => {
+                          const h = d.count === 0 ? 6 : Math.max(12, (d.count / stats.maxDay) * 100);
+                          const isToday = i === stats.days.length - 1;
+                          return (
+                            <div key={d.start} className="group relative flex-1 h-full flex items-end">
+                              <div
+                                className={`w-full rounded-[4px] transition-all ${
+                                  d.count === 0 ? "bg-line" : isToday ? "" : "bg-coffee/80 group-hover:bg-coffee"
+                                }`}
+                                style={{ height: `${h}%`, ...(isToday && d.count > 0 ? { backgroundColor: GOLD } : {}) }}
+                              />
+                              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-cream text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                {d.date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {d.count}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-[10px] text-ink-faint mt-2">
+                        <span>{stats.days[0].date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}</span>
+                        <span>Aujourd'hui</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-5 mt-5 pt-5 border-t border-line">
+                        <Metric
+                          value={stats.approvalRate === null ? "—" : `${stats.approvalRate}%`}
+                          label="Taux d'approbation"
+                          tone={stats.approvalRate === null ? "text-ink" : stats.approvalRate >= 50 ? "text-coffee-dark" : "text-red-600"}
+                        />
+                        <Metric value={stats.last7} label="Reçues en 7 jours" />
+                        <Metric
+                          value={stats.oldestPending[0] ? timeAgo(stats.oldestPending[0].created_at) : "—"}
+                          label="Plus ancienne en attente"
+                          tone={stats.oldestPending[0] && Date.now() - new Date(stats.oldestPending[0].created_at).getTime() > 7 * DAY ? "text-red-600" : "text-ink"}
+                        />
+                        <Metric value={stats.decided} label="Décisions prises" />
                       </div>
                     </SideCard>
+
+                    {/* Par domaine */}
+                    {stats.categories.length > 0 && (
+                      <SideCard title="Par domaine">
+                        <ul className="space-y-3.5">
+                          {stats.categories.map(([name, count]) => (
+                            <li key={name}>
+                              <div className="flex items-center justify-between text-sm mb-1.5">
+                                <span className="text-ink truncate pr-3">{name}</span>
+                                <span className="text-ink-soft tabular-nums text-xs">
+                                  {count} · {Math.round((count / stats.total) * 100)}%
+                                </span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-line/70 overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-coffee transition-all duration-700"
+                                  style={{ width: `${(count / stats.categories[0][1]) * 100}%` }}
+                                />
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </SideCard>
+                    )}
+
+                    <p className="hidden xl:flex items-center justify-center gap-1.5 text-[11px] text-ink-faint">
+                      Astuce : <kbd className="font-sans border border-line bg-surface rounded px-1.5 py-px">{isMac ? "⌘" : "Ctrl"} K</kbd> pour tout piloter au clavier
+                    </p>
                   </>
                 )}
               </aside>
@@ -425,20 +735,53 @@ export default function AdminDashboard() {
           <style>{`
             @keyframes hc-slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
             @keyframes hc-fade { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes hc-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
           `}</style>
-          <div
-            className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]"
-            style={{ animation: "hc-fade .2s ease-out" }}
-            onClick={closeDetail}
-          />
+          <div className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]" style={{ animation: "hc-fade .2s ease-out" }} onClick={closeDetail} />
           <div
             className="absolute right-0 top-0 h-full w-full max-w-xl bg-cream shadow-2xl flex flex-col"
             style={{ animation: "hc-slide .28s cubic-bezier(.2,.8,.2,1)" }}
           >
-            <div className="flex items-center justify-between px-5 py-4 bg-ink text-cream shrink-0">
-              <p className="text-sm font-medium">
-                Candidature<span className="text-[#C89A3D]">.</span>
+            <div className="flex items-center gap-2 px-4 py-3 bg-ink text-cream shrink-0">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => navRef.current(-1)}
+                  disabled={navIndex <= 0}
+                  aria-label="Candidature précédente"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 disabled:opacity-30"
+                >
+                  <ChevronLeft size={17} />
+                </button>
+                <button
+                  onClick={() => navRef.current(1)}
+                  disabled={navIndex === -1 || navIndex >= navIds.length - 1}
+                  aria-label="Candidature suivante"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 disabled:opacity-30"
+                >
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+              <p className="text-sm font-medium flex-1 min-w-0 truncate">
+                Candidature<span style={{ color: GOLD }}>.</span>
+                {navIndex >= 0 && <span className="text-cream/50 font-normal ml-2 tabular-nums">{navIndex + 1} / {navIds.length}</span>}
               </p>
+              <button
+                onClick={() => copyEmail(selectedApplication.email)}
+                title="Copier l'email"
+                aria-label="Copier l'email"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 hover:text-cream"
+              >
+                <Copy size={15} />
+              </button>
+              <a
+                href={`mailto:${selectedApplication.email}`}
+                title="Écrire au partenaire"
+                aria-label="Écrire au partenaire"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 hover:text-cream"
+              >
+                <Mail size={15} />
+              </a>
+              <span className="w-px h-5 bg-white/15 mx-1" />
               <button
                 onClick={closeDetail}
                 aria-label="Fermer"
@@ -459,10 +802,51 @@ export default function AdminDashboard() {
                 withAuth={withAuth}
                 api={api}
               />
+              <p className="hidden md:flex items-center justify-center gap-3 text-[11px] text-ink-faint mt-4">
+                <span>← → naviguer</span><span>Échap fermer</span>
+              </p>
             </div>
           </div>
         </div>
       )}
+
+      {/* ───────── Palette de commandes ───────── */}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        applications={applications}
+        actions={paletteActions}
+        onSelectApplication={(id) => { setView("applications"); handleSelect(id); }}
+      />
+
+      {/* ───────── Notifications ───────── */}
+      <div className="fixed z-[60] bottom-20 md:bottom-6 right-4 left-4 md:left-auto flex flex-col items-end gap-2 pointer-events-none" aria-live="polite">
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className="pointer-events-auto w-full md:w-auto md:max-w-sm flex items-center gap-3 bg-ink text-cream rounded-xl pl-3.5 pr-2 py-2.5 shadow-2xl text-sm"
+            style={{ animation: "hc-toast .25s ease-out" }}
+          >
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                t.type === "error" ? "bg-red-500/20 text-red-300" : t.type === "info" ? "text-ink" : "bg-emerald-500/20 text-emerald-300"
+              }`}
+              style={t.type === "info" ? { backgroundColor: GOLD } : undefined}
+            >
+              {t.type === "error" ? <AlertCircle size={14} /> : t.type === "info" ? <Sparkles size={13} /> : <CheckCircle2 size={14} />}
+            </span>
+            <span className="flex-1">{t.text}</span>
+            <button
+              onClick={() => setToasts((all) => all.filter((x) => x.id !== t.id))}
+              aria-label="Fermer"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/50 hover:bg-white/10 hover:text-cream"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        ))}
+        <style>{`@keyframes hc-toast { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }`}</style>
+      </div>
     </div>
   );
 }

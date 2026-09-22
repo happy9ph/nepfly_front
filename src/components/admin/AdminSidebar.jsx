@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut, ExternalLink } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink, Search } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "applications", label: "Candidatures", icon: Users },
@@ -7,28 +7,44 @@ const NAV_ITEMS = [
 ];
 
 const GOLD = "#C89A3D";
+const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || "");
 
 /**
- * Sidebar admin sombre (style "UptimeRobot") aux couleurs H-Company.
- * `counts` (optionnel) : { applications: 3, requests: 2 } → pastilles.
+ * Sidebar admin sombre aux couleurs H-Company.
+ * Props optionnelles :
+ *  - counts : { applications: 3, requests: 2 } → pastilles
+ *  - onOpenPalette : ouvre la palette de commandes
  */
-export default function AdminSidebar({ user, onSignOut, view, onViewChange, counts = {} }) {
+export default function AdminSidebar({ user, onSignOut, view, onViewChange, counts = {}, onOpenPalette }) {
   const displayName = user?.full_name || user?.email || "Administrateur";
   const initial = displayName ? displayName[0].toUpperCase() : "A";
 
   return (
     <>
-      {/* ───────── Desktop ───────── */}
       <aside className="hidden md:flex md:w-64 shrink-0 flex-col bg-ink text-cream h-screen sticky top-0">
-        {/* Logo */}
-        <div className="px-6 pt-7 pb-8">
+        <div className="px-6 pt-7 pb-6">
           <Link to="/" className="flex items-center gap-2 font-display text-[22px] leading-none tracking-tight">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: GOLD }} />
             H-Company
           </Link>
         </div>
 
-        {/* Navigation */}
+        {onOpenPalette && (
+          <div className="px-3 mb-5">
+            <button
+              onClick={onOpenPalette}
+              className="w-full flex items-center gap-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.06] px-3.5 py-2.5 text-sm text-cream/50 transition-colors"
+            >
+              <Search size={15} />
+              <span className="flex-1 text-left">Rechercher…</span>
+              <kbd className="text-[10px] font-sans border border-white/15 rounded-md px-1.5 py-0.5 text-cream/60">
+                {isMac ? "⌘" : "Ctrl"} K
+              </kbd>
+            </button>
+          </div>
+        )}
+
+        <p className="px-6 mb-2 text-[10px] uppercase tracking-[0.18em] text-cream/30 font-semibold">Gestion</p>
         <nav className="flex-1 px-3 space-y-1" aria-label="Navigation admin">
           {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
             const active = view === key;
@@ -43,9 +59,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
                 }`}
               >
                 <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-                    active ? "ring-2 ring-offset-2 ring-offset-ink" : ""
-                  }`}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${active ? "ring-2 ring-offset-2 ring-offset-ink" : ""}`}
                   style={active ? { color: GOLD, "--tw-ring-color": GOLD } : undefined}
                 >
                   <Icon size={17} strokeWidth={1.8} />
@@ -64,7 +78,6 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
           })}
         </nav>
 
-        {/* Utilisateur */}
         <div className="px-4 pb-6 pt-4 space-y-4">
           <div className="flex items-center gap-3 px-1">
             <span className="relative w-11 h-11 rounded-full bg-white/[0.08] flex items-center justify-center font-display text-lg shrink-0">
@@ -73,7 +86,9 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
             </span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-xs text-cream/50">Administrateur</p>
+              <p className="flex items-center gap-1.5 text-xs text-cream/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Administrateur
+              </p>
             </div>
             <button
               onClick={onSignOut}
@@ -94,7 +109,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
         </div>
       </aside>
 
-      {/* ───────── Mobile : barre du bas ───────── */}
+      {/* Mobile : barre du bas */}
       <nav
         aria-label="Navigation admin"
         className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink text-cream grid grid-cols-2 border-t border-white/10"
@@ -108,9 +123,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
               key={key}
               onClick={() => onViewChange(key)}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
-                active ? "text-cream" : "text-cream/50"
-              }`}
+              className={`relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${active ? "text-cream" : "text-cream/50"}`}
             >
               <span
                 className={`absolute top-0 h-[2px] w-10 rounded-full ${active ? "opacity-100" : "opacity-0"}`}
