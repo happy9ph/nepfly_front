@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
-import { Check, X, DollarSign, Loader2 } from "lucide-react";
+import { Check, X, DollarSign, Loader2, Package, TrendingUp, Wallet } from "lucide-react";
 
-const STATUS_TONE = {
-  requested: "bg-amber-50 text-amber-700",
-  active: "bg-[#F1EAE0] text-coffee-dark",
-  suspended: "bg-red-50 text-red-700",
-  rejected: "bg-line text-ink-faint",
+const STATUS = {
+  requested: { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
+  active: { label: "Active", cls: "bg-[#F1EAE0] text-coffee-dark border-coffee-light", dot: "bg-coffee" },
+  suspended: { label: "Suspendue", cls: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
+  rejected: { label: "Refusée", cls: "bg-line/60 text-ink-faint border-line", dot: "bg-ink-faint" },
 };
 
-const STATUS_LABEL = {
-  requested: "En attente",
-  active: "Active",
-  suspended: "Suspendue",
-  rejected: "Refusée",
-};
+const inputCls =
+  "w-full text-sm rounded-xl border border-line bg-surface px-3 py-2 outline-none placeholder:text-ink-faint focus:border-coffee-light";
 
 export default function PartnerAppsPanel({ applicationId, withAuth, api }) {
   const [apps, setApps] = useState([]);
@@ -71,84 +67,126 @@ export default function PartnerAppsPanel({ applicationId, withAuth, api }) {
     }
   }
 
-  if (loading) return <p className="text-xs text-ink-faint">Chargement des apps…</p>;
-  if (apps.length === 0) return <p className="text-xs text-ink-faint">Aucune app pour ce partenaire.</p>;
+  if (loading) {
+    return (
+      <div className="space-y-2.5">
+        {[0, 1].map((i) => (
+          <div key={i} className="h-24 rounded-2xl bg-cream/70 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (apps.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-line px-5 py-8 text-center">
+        <Package size={20} className="mx-auto text-ink-faint mb-2" strokeWidth={1.6} />
+        <p className="text-sm text-ink-soft">Ce partenaire n'a encore demandé aucune app.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-2">
-      {apps.map((app) => (
-        <div key={app.id} className="border border-line rounded-xl p-3">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div>
-              <p className="text-sm font-medium text-ink">{app.name}</p>
-              <p className="text-xs text-ink-soft">
-                {app.total_revenue.toFixed(0)} $ revenu · {app.total_owed.toFixed(0)} $ dû
-              </p>
+    <div className="space-y-2.5">
+      {apps.map((app) => {
+        const st = STATUS[app.status] || STATUS.requested;
+        const busy = busyId === app.id;
+        const formOpen = revenueFormFor === app.id;
+        return (
+          <div key={app.id} className="rounded-2xl border border-line bg-surface overflow-hidden">
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-9 h-9 rounded-xl bg-cream text-coffee-dark flex items-center justify-center shrink-0">
+                    <Package size={16} strokeWidth={1.8} />
+                  </span>
+                  <p className="text-sm font-semibold text-ink truncate">{app.name}</p>
+                </div>
+                <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${st.cls}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
+                  {st.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mt-3.5">
+                <div className="rounded-xl bg-cream/50 px-3 py-2">
+                  <p className="flex items-center gap-1 text-[11px] text-ink-faint"><TrendingUp size={11} /> Revenu total</p>
+                  <p className="text-sm font-semibold text-ink mt-0.5">{app.total_revenue.toFixed(0)} $</p>
+                </div>
+                <div className="rounded-xl bg-cream/50 px-3 py-2">
+                  <p className="flex items-center gap-1 text-[11px] text-ink-faint"><Wallet size={11} /> Montant dû</p>
+                  <p className={`text-sm font-semibold mt-0.5 ${app.total_owed > 0 ? "text-coffee-dark" : "text-ink"}`}>
+                    {app.total_owed.toFixed(0)} $
+                  </p>
+                </div>
+              </div>
+
+              {app.status === "requested" && (
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <button
+                    onClick={() => updateStatus(app.id, "active")}
+                    disabled={busy}
+                    className="flex items-center justify-center gap-1.5 text-xs font-medium rounded-lg bg-coffee text-white py-2 hover:bg-coffee-dark disabled:opacity-50 transition-colors"
+                  >
+                    {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                    Approuver
+                  </button>
+                  <button
+                    onClick={() => updateStatus(app.id, "rejected")}
+                    disabled={busy}
+                    className="flex items-center justify-center gap-1.5 text-xs font-medium rounded-lg border border-line text-ink-soft py-2 hover:bg-red-50 hover:text-red-700 hover:border-red-200 disabled:opacity-50 transition-colors"
+                  >
+                    <X size={13} />
+                    Refuser
+                  </button>
+                </div>
+              )}
+
+              {app.status === "active" && !formOpen && (
+                <button
+                  onClick={() => setRevenueFormFor(app.id)}
+                  className="mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-medium rounded-lg border border-dashed border-coffee-light text-coffee-dark py-2 hover:bg-cream transition-colors"
+                >
+                  <DollarSign size={13} />
+                  Ajouter un revenu
+                </button>
+              )}
             </div>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_TONE[app.status]}`}>
-              {STATUS_LABEL[app.status]}
-            </span>
-          </div>
 
-          <div className="flex gap-2 mt-2">
-            {app.status === "requested" && (
-              <>
-                <button
-                  onClick={() => updateStatus(app.id, "active")}
-                  disabled={busyId === app.id}
-                  className="flex items-center gap-1 text-xs font-medium text-coffee-dark hover:underline disabled:opacity-50"
-                >
-                  {busyId === app.id ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-                  Approuver
-                </button>
-                <button
-                  onClick={() => updateStatus(app.id, "rejected")}
-                  disabled={busyId === app.id}
-                  className="flex items-center gap-1 text-xs font-medium text-ink-faint hover:underline disabled:opacity-50"
-                >
-                  <X size={12} />
-                  Refuser
-                </button>
-              </>
-            )}
-            {app.status === "active" && (
-              <button
-                onClick={() => setRevenueFormFor(revenueFormFor === app.id ? null : app.id)}
-                className="flex items-center gap-1 text-xs font-medium text-coffee-dark hover:underline"
-              >
-                <DollarSign size={12} />
-                Ajouter un revenu
-              </button>
+            {formOpen && (
+              <form onSubmit={(e) => submitRevenue(e, app.id)} className="border-t border-line bg-cream/40 p-4">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <label className="block">
+                    <span className="block text-[11px] font-medium text-ink-soft mb-1">Montant ($)</span>
+                    <input type="number" min="0" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} required autoFocus />
+                  </label>
+                  <label className="block">
+                    <span className="block text-[11px] font-medium text-ink-soft mb-1">Commission ($)</span>
+                    <input type="number" min="0" placeholder="0" value={commission} onChange={(e) => setCommission(e.target.value)} className={inputCls} />
+                  </label>
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="flex items-center gap-1.5 text-xs font-medium bg-ink text-cream rounded-full px-4 py-2 disabled:opacity-50 hover:bg-coffee-dark transition-colors"
+                  >
+                    {busy ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                    Enregistrer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setRevenueFormFor(null); setAmount(""); setCommission(""); }}
+                    className="text-xs font-medium text-ink-soft px-3 py-2 hover:text-ink"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </form>
             )}
           </div>
-
-          {revenueFormFor === app.id && (
-            <form onSubmit={(e) => submitRevenue(e, app.id)} className="flex gap-2 mt-2">
-              <input
-                type="number"
-                placeholder="Montant $"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-24 border border-line rounded-lg px-2 py-1 text-xs outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Commission $"
-                value={commission}
-                onChange={(e) => setCommission(e.target.value)}
-                className="w-28 border border-line rounded-lg px-2 py-1 text-xs outline-none"
-              />
-              <button
-                type="submit"
-                disabled={busyId === app.id}
-                className="text-xs font-medium bg-ink text-cream rounded-lg px-3 py-1 disabled:opacity-50"
-              >
-                Ajouter
-              </button>
-            </form>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

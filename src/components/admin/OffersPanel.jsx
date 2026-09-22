@@ -1,16 +1,33 @@
 import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Clock, Repeat, X } from "lucide-react";
 
 const PAYMENT_OPTIONS = [
-  { value: "monthly", label: "Mensuel" },
-  { value: "quarterly", label: "Trimestriel" },
-  { value: "annual", label: "Annuel" },
-  { value: "one_time", label: "Paiement unique" },
+  { value: "monthly", label: "Mensuel", short: "/ mois" },
+  { value: "quarterly", label: "Trimestriel", short: "/ trimestre" },
+  { value: "annual", label: "Annuel", short: "/ an" },
+  { value: "one_time", label: "Unique", short: "une fois" },
 ];
 
-const STATUS_LABEL = { proposed: "Envoyée", accepted: "Acceptée", declined: "Déclinée" };
+const STATUS = {
+  proposed: { label: "Envoyée", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  accepted: { label: "Acceptée", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  declined: { label: "Déclinée", cls: "bg-line/60 text-ink-faint border-line" },
+};
 
+const MAX_OFFERS = 3;
 const EMPTY_FORM = { title: "", price: "", duration_months: "12", payment_mode: "monthly", description: "" };
+
+const inputCls =
+  "w-full text-sm rounded-xl border border-line bg-surface px-3.5 py-2.5 outline-none placeholder:text-ink-faint focus:border-coffee-light transition-colors";
+
+function Field({ label, children, className = "" }) {
+  return (
+    <label className={`block ${className}`}>
+      <span className="block text-xs font-medium text-ink-soft mb-1.5">{label}</span>
+      {children}
+    </label>
+  );
+}
 
 export default function OffersPanel({ offers, onCreate }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -18,7 +35,7 @@ export default function OffersPanel({ offers, onCreate }) {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(offers.length === 0);
 
-  const canAddMore = offers.length < 3;
+  const canAddMore = offers.length < MAX_OFFERS;
 
   function update(key, value) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -48,101 +65,143 @@ export default function OffersPanel({ offers, onCreate }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-ink-faint text-xs uppercase tracking-wide">Offres ({offers.length}/3)</p>
+      {/* Jauge 0/3 */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {Array.from({ length: MAX_OFFERS }).map((_, i) => (
+              <span key={i} className={`h-1.5 w-6 rounded-full ${i < offers.length ? "bg-coffee" : "bg-line"}`} />
+            ))}
+          </div>
+          <span className="text-xs text-ink-faint">
+            {offers.length}/{MAX_OFFERS} offres
+          </span>
+        </div>
         {canAddMore && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 text-xs font-medium text-coffee hover:text-coffee-dark"
+            className="flex items-center gap-1 text-xs font-medium text-coffee-dark bg-cream hover:bg-[#F1EAE0] rounded-full px-3 py-1.5 transition-colors"
           >
-            <Plus size={14} /> Ajouter
+            <Plus size={13} /> Nouvelle offre
           </button>
         )}
       </div>
 
+      {/* Liste des offres */}
       {offers.length > 0 && (
-        <div className="space-y-2 mb-4">
-          {offers.map((o) => (
-            <div key={o.id} className="flex items-center justify-between bg-cream/60 rounded-xl px-4 py-3 text-sm">
-              <div>
-                <p className="text-ink font-medium">{o.title} : {o.price.toFixed(0)} $</p>
-                <p className="text-ink-soft text-xs">{o.duration_months} mois · {PAYMENT_OPTIONS.find(p => p.value === o.payment_mode)?.label}</p>
+        <div className="space-y-2.5 mb-4">
+          {offers.map((o) => {
+            const mode = PAYMENT_OPTIONS.find((p) => p.value === o.payment_mode);
+            const st = STATUS[o.status] || STATUS.proposed;
+            return (
+              <div
+                key={o.id}
+                className={`rounded-2xl border p-4 transition-colors ${
+                  o.status === "accepted" ? "border-emerald-200 bg-emerald-50/40" : "border-line bg-cream/30"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-ink truncate">{o.title}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-ink-soft">
+                      <span className="flex items-center gap-1"><Clock size={11} /> {o.duration_months} mois</span>
+                      <span className="flex items-center gap-1"><Repeat size={11} /> {mode?.label}</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-2xl text-ink leading-none">
+                      {o.price.toFixed(0)}<span className="text-base text-ink-soft"> $</span>
+                    </p>
+                    <p className="text-[11px] text-ink-faint mt-1">{mode?.short}</p>
+                  </div>
+                </div>
+                {o.description && <p className="text-xs text-ink-soft mt-2.5 leading-relaxed">{o.description}</p>}
+                <div className="mt-3">
+                  <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full border ${st.cls}`}>{st.label}</span>
+                </div>
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                o.status === "accepted" ? "bg-coffee/10 text-coffee-dark" : o.status === "declined" ? "bg-line text-ink-faint" : "bg-amber-50 text-amber-700"
-              }`}>
-                {STATUS_LABEL[o.status]}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
+      {/* Formulaire */}
       {showForm && canAddMore && (
-        <form onSubmit={handleSubmit} className="bg-cream/60 rounded-xl p-4 space-y-3">
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-coffee-light/60 bg-cream/40 p-4 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-ink">Nouvelle offre</p>
+            {offers.length > 0 && (
+              <button type="button" onClick={() => setShowForm(false)} aria-label="Fermer" className="text-ink-faint hover:text-ink">
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          <Field label="Nom de l'offre">
+            <input type="text" placeholder="ex : Pro" value={form.title} onChange={(e) => update("title", e.target.value)} className={inputCls} required />
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              placeholder="Nom de l'offre (ex: Pro)"
-              value={form.title}
-              onChange={(e) => update("title", e.target.value)}
-              className="col-span-2 text-sm rounded-lg border border-line px-3 py-2 outline-none focus:border-coffee-light"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Prix ($)"
-              value={form.price}
-              onChange={(e) => update("price", e.target.value)}
-              className="text-sm rounded-lg border border-line px-3 py-2 outline-none focus:border-coffee-light"
-              required
-              min="0"
-            />
-            <input
-              type="number"
-              placeholder="Durée (mois)"
-              value={form.duration_months}
-              onChange={(e) => update("duration_months", e.target.value)}
-              className="text-sm rounded-lg border border-line px-3 py-2 outline-none focus:border-coffee-light"
-              required
-              min="1"
-            />
-            <select
-              value={form.payment_mode}
-              onChange={(e) => update("payment_mode", e.target.value)}
-              className="col-span-2 text-sm rounded-lg border border-line px-3 py-2 outline-none focus:border-coffee-light bg-surface"
-            >
+            <Field label="Prix ($)">
+              <input type="number" placeholder="0" value={form.price} onChange={(e) => update("price", e.target.value)} className={inputCls} required min="0" />
+            </Field>
+            <Field label="Durée (mois)">
+              <input type="number" value={form.duration_months} onChange={(e) => update("duration_months", e.target.value)} className={inputCls} required min="1" />
+            </Field>
+          </div>
+
+          <div>
+            <span className="block text-xs font-medium text-ink-soft mb-1.5">Paiement</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {PAYMENT_OPTIONS.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => update("payment_mode", p.value)}
+                  className={`text-xs font-medium rounded-lg px-2 py-2 border transition-colors ${
+                    form.payment_mode === p.value
+                      ? "bg-ink text-cream border-ink"
+                      : "bg-surface text-ink-soft border-line hover:border-coffee-light"
+                  }`}
+                >
+                  {p.label}
+                </button>
               ))}
-            </select>
+            </div>
+          </div>
+
+          <Field label="Description (optionnel)">
             <textarea
-              placeholder="Description (optionnel)"
+              placeholder="Ce qui est inclus dans cette offre…"
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
               rows={2}
-              className="col-span-2 text-sm rounded-lg border border-line px-3 py-2 outline-none focus:border-coffee-light resize-none"
+              className={`${inputCls} resize-none`}
             />
-          </div>
-          {error && <p className="text-xs text-red-600">{error}</p>}
-          <div className="flex gap-2">
+          </Field>
+
+          {error && <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+
+          <div className="flex items-center gap-2 pt-1">
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-1.5 rounded-full bg-ink text-cream text-xs font-medium px-4 py-2 disabled:opacity-60"
+              className="flex items-center gap-1.5 rounded-full bg-ink text-cream text-sm font-medium px-5 py-2.5 disabled:opacity-60 hover:bg-coffee-dark transition-colors"
             >
-              {saving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
               Envoyer l'offre
             </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="text-xs font-medium text-ink-soft px-4 py-2"
-            >
-              Annuler
-            </button>
+            {offers.length > 0 && (
+              <button type="button" onClick={() => setShowForm(false)} className="text-sm font-medium text-ink-soft px-4 py-2.5 hover:text-ink">
+                Annuler
+              </button>
+            )}
           </div>
         </form>
+      )}
+
+      {!canAddMore && (
+        <p className="text-xs text-ink-faint text-center">Limite de {MAX_OFFERS} offres atteinte pour ce partenaire.</p>
       )}
     </div>
   );

@@ -1,18 +1,49 @@
 import { useEffect, useState } from "react";
-import { Check, X, Send, Loader2 } from "lucide-react";
+import {
+  Check, X, Send, Loader2, Mail, Calendar, Tag, FileText, CheckCircle2,
+  AlertCircle, Package, MousePointerClick, Gavel, BadgePercent,
+} from "lucide-react";
 import OffersPanel from "./OffersPanel.jsx";
 import PartnerAppsPanel from "./PartnerAppsPanel.jsx";
 
-const STATUS_LABEL = {
-  pending: "En attente",
-  approved: "Approuvée",
-  rejected: "Rejetée",
+const STATUS = {
+  pending: { label: "En attente", badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
+  approved: { label: "Approuvée", badge: "bg-[#F1EAE0] text-coffee-dark border-coffee-light", dot: "bg-coffee" },
+  rejected: { label: "Rejetée", badge: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
 };
+
+function Section({ icon: Icon, title, aside, children }) {
+  return (
+    <section className="px-6 py-6 border-t border-line">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <span className="w-7 h-7 rounded-lg bg-cream flex items-center justify-center text-coffee-dark">
+            <Icon size={14} strokeWidth={2} />
+          </span>
+          {title}
+        </h3>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function InfoTile({ icon: Icon, label, children }) {
+  return (
+    <div className="rounded-xl border border-line bg-cream/40 px-3.5 py-3 min-w-0">
+      <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-faint mb-1">
+        <Icon size={12} /> {label}
+      </p>
+      <div className="text-sm text-ink truncate">{children}</div>
+    </div>
+  );
+}
 
 export default function ApplicationDetail({ application, contract, offers, onApprove, onReject, onSaveContract, onCreateOffer, withAuth, api }) {
   const [draft, setDraft] = useState(contract?.content || "");
   const [saving, setSaving] = useState(false);
-  const [deciding, setDeciding] = useState(false);
+  const [deciding, setDeciding] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
@@ -22,22 +53,32 @@ export default function ApplicationDetail({ application, contract, offers, onApp
 
   if (!application) {
     return (
-      <div className="bg-surface border border-line rounded-2xl p-10 text-center text-sm text-ink-soft h-full flex items-center justify-center">
-        Sélectionnez une candidature dans la liste pour voir le détail.
+      <div className="bg-surface border border-dashed border-line rounded-3xl px-8 py-16 text-center">
+        <span className="mx-auto w-14 h-14 rounded-2xl bg-cream flex items-center justify-center text-coffee mb-4">
+          <MousePointerClick size={24} strokeWidth={1.6} />
+        </span>
+        <p className="font-display text-lg text-ink mb-1">Aucune candidature sélectionnée</p>
+        <p className="text-sm text-ink-soft max-w-xs mx-auto">
+          Choisissez une candidature dans la liste pour voir son détail, envoyer des offres et gérer le contrat.
+        </p>
       </div>
     );
   }
 
-  async function handleDecision(status) {
-    setDeciding(true);
+  const status = STATUS[application.status] || STATUS.pending;
+  const signed = contract?.status === "signed";
+  const dirty = draft !== (contract?.content || "");
+
+  async function handleDecision(next) {
+    setDeciding(next);
     setFeedback(null);
     try {
-      await (status === "approved" ? onApprove() : onReject());
-      setFeedback({ type: "success", text: status === "approved" ? "Candidature approuvée." : "Candidature rejetée." });
+      await (next === "approved" ? onApprove() : onReject());
+      setFeedback({ type: "success", text: next === "approved" ? "Candidature approuvée. Le contrat est prêt ci-dessous." : "Candidature rejetée." });
     } catch (err) {
       setFeedback({ type: "error", text: err?.data?.detail || "Une erreur est survenue." });
     } finally {
-      setDeciding(false);
+      setDeciding(null);
     }
   }
 
@@ -46,7 +87,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
     setFeedback(null);
     try {
       await onSaveContract(draft);
-      setFeedback({ type: "success", text: "Contrat mis à jour : visible immédiatement dans le dashboard du partenaire." });
+      setFeedback({ type: "success", text: "Contrat enregistré : visible immédiatement dans le dashboard du partenaire." });
     } catch (err) {
       setFeedback({ type: "error", text: err?.data?.detail || "Impossible d'enregistrer le contrat." });
     } finally {
@@ -55,99 +96,150 @@ export default function ApplicationDetail({ application, contract, offers, onApp
   }
 
   return (
-    <div className="bg-surface border border-line rounded-2xl p-6 space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="font-display text-xl text-ink">{application.company}</h2>
-          <p className="text-sm text-ink-soft mt-0.5">{application.contact_name} · {application.email}</p>
-        </div>
-        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-cream text-ink-soft whitespace-nowrap">
-          {STATUS_LABEL[application.status]}
-        </span>
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-ink-faint text-xs uppercase tracking-wide mb-1">Domaine</p>
-          <p className="text-ink">{application.category}</p>
-        </div>
-        <div>
-          <p className="text-ink-faint text-xs uppercase tracking-wide mb-1">Reçue le</p>
-          <p className="text-ink">{new Date(application.created_at).toLocaleDateString("fr-FR")}</p>
-        </div>
-      </div>
-
-      {application.message && (
-        <div>
-          <p className="text-ink-faint text-xs uppercase tracking-wide mb-1.5">Message</p>
-          <p className="text-sm text-ink-soft bg-cream/60 rounded-xl p-4 leading-relaxed">{application.message}</p>
-        </div>
-      )}
-
-      <OffersPanel offers={offers || []} onCreate={(payload) => onCreateOffer(payload)} />
-
-      {application.status === "pending" && (
-        <div className="flex gap-3 pt-2">
-          <button
-            onClick={() => handleDecision("approved")}
-            disabled={deciding}
-            className="flex items-center gap-2 rounded-full bg-coffee text-white text-sm font-medium px-5 py-2.5 disabled:opacity-60 hover:bg-coffee-dark transition-colors"
-          >
-            {deciding ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-            Approuver
-          </button>
-          <button
-            onClick={() => handleDecision("rejected")}
-            disabled={deciding}
-            className="flex items-center gap-2 rounded-full border border-line text-ink-soft text-sm font-medium px-5 py-2.5 disabled:opacity-60 hover:bg-cream transition-colors"
-          >
-            <X size={16} />
-            Rejeter
-          </button>
-        </div>
-      )}
-
-      {application.status === "approved" && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-ink-faint text-xs uppercase tracking-wide">Contrat envoyé au partenaire</p>
-            {contract?.status === "signed" && (
-              <span className="text-xs font-medium text-coffee-dark">
-                Signé le {new Date(contract.signed_at).toLocaleDateString("fr-FR")}
+    <div className="bg-surface border border-line rounded-3xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      {/* En-tête */}
+      <div className="relative px-6 pt-6 pb-5 bg-gradient-to-b from-cream/70 to-surface">
+        <div className="flex items-start gap-4">
+          <span className="w-14 h-14 rounded-2xl bg-ink text-cream flex items-center justify-center font-display text-2xl shrink-0 shadow-sm">
+            {application.company?.[0]?.toUpperCase() || "?"}
+          </span>
+          <div className="flex-1 min-w-0 pt-0.5">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="font-display text-2xl text-ink leading-tight break-words">{application.company}</h2>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 ${status.badge}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                {status.label}
               </span>
-            )}
+            </div>
+            <p className="text-sm text-ink-soft mt-1">{application.contact_name}</p>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 mt-5">
+          <InfoTile icon={Tag} label="Domaine">{application.category}</InfoTile>
+          <InfoTile icon={Calendar} label="Reçue le">
+            {new Date(application.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+          </InfoTile>
+          <div className="col-span-2">
+            <InfoTile icon={Mail} label="Email">
+              <a href={`mailto:${application.email}`} className="hover:text-coffee-dark underline-offset-4 hover:underline">
+                {application.email}
+              </a>
+            </InfoTile>
+          </div>
+        </div>
+
+        {application.message && (
+          <blockquote className="mt-4 border-l-[3px] border-coffee-light bg-cream/50 rounded-r-xl px-4 py-3 text-sm text-ink-soft leading-relaxed italic">
+            « {application.message} »
+          </blockquote>
+        )}
+      </div>
+
+      {/* Décision */}
+      {application.status === "pending" && (
+        <Section icon={Gavel} title="Décision">
+          <p className="text-xs text-ink-soft mb-4">
+            Approuver la candidature crée automatiquement un contrat modifiable pour ce partenaire.
+          </p>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              onClick={() => handleDecision("approved")}
+              disabled={!!deciding}
+              className="flex items-center justify-center gap-2 rounded-xl bg-coffee text-white text-sm font-medium px-4 py-3 disabled:opacity-60 hover:bg-coffee-dark transition-colors shadow-sm"
+            >
+              {deciding === "approved" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+              Approuver
+            </button>
+            <button
+              onClick={() => handleDecision("rejected")}
+              disabled={!!deciding}
+              className="flex items-center justify-center gap-2 rounded-xl border border-line text-ink-soft text-sm font-medium px-4 py-3 disabled:opacity-60 hover:border-red-200 hover:bg-red-50 hover:text-red-700 transition-colors"
+            >
+              {deciding === "rejected" ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+              Rejeter
+            </button>
+          </div>
+        </Section>
+      )}
+
+      {/* Offres */}
+      <Section icon={BadgePercent} title="Offres commerciales">
+        <OffersPanel offers={offers || []} onCreate={(payload) => onCreateOffer(payload)} />
+      </Section>
+
+      {/* Contrat */}
+      {application.status === "approved" && (
+        <Section
+          icon={FileText}
+          title="Contrat"
+          aside={
+            signed ? (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                <CheckCircle2 size={12} /> Signé
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-ink-faint bg-cream px-2.5 py-1 rounded-full">
+                {dirty ? "Modifications non enregistrées" : "Non signé"}
+              </span>
+            )
+          }
+        >
+          {signed && (
+            <p className="text-xs text-emerald-700 mb-3">
+              Signé par le partenaire le{" "}
+              {new Date(contract.signed_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+              Le contrat n'est plus modifiable.
+            </p>
+          )}
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            disabled={contract?.status === "signed"}
-            rows={9}
-            className="w-full text-sm text-ink bg-cream/60 rounded-xl p-4 leading-relaxed border border-transparent focus:border-coffee-light outline-none disabled:opacity-70 resize-y font-sans"
+            disabled={signed}
+            rows={10}
+            placeholder="Rédigez ici les termes du contrat…"
+            className="w-full text-sm text-ink bg-cream/40 rounded-xl p-4 leading-relaxed border border-line focus:border-coffee-light focus:bg-surface outline-none disabled:opacity-70 disabled:cursor-not-allowed resize-y font-sans transition-colors"
           />
-          {contract?.status !== "signed" && (
-            <button
-              onClick={handleSaveContract}
-              disabled={saving || draft === contract?.content}
-              className="mt-3 flex items-center gap-2 rounded-full bg-ink text-cream text-sm font-medium px-5 py-2.5 disabled:opacity-40 hover:bg-coffee-dark transition-colors"
-            >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-              Enregistrer et envoyer au partenaire
-            </button>
+          {!signed && (
+            <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+              <span className="text-xs text-ink-faint">{draft.length} caractères</span>
+              <button
+                onClick={handleSaveContract}
+                disabled={saving || !dirty}
+                className="flex items-center gap-2 rounded-full bg-ink text-cream text-sm font-medium px-5 py-2.5 disabled:opacity-40 hover:bg-coffee-dark transition-colors"
+              >
+                {saving ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+                Enregistrer et envoyer
+              </button>
+            </div>
           )}
-        </div>
+        </Section>
       )}
 
+      {/* Apps */}
       {application.status === "approved" && (
-        <div className="pt-5 mt-5 border-t border-line">
-          <p className="text-ink-faint text-xs uppercase tracking-wide mb-3">Apps du partenaire</p>
+        <Section icon={Package} title="Apps du partenaire">
           <PartnerAppsPanel applicationId={application.id} withAuth={withAuth} api={api} />
-        </div>
+        </Section>
       )}
 
       {feedback && (
-        <p className={`text-sm ${feedback.type === "success" ? "text-coffee-dark" : "text-red-600"}`}>
-          {feedback.text}
-        </p>
+        <div className="px-6 pb-6">
+          <div
+            role="status"
+            className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm border ${
+              feedback.type === "success"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                : "bg-red-50 border-red-200 text-red-700"
+            }`}
+          >
+            {feedback.type === "success" ? <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> : <AlertCircle size={16} className="mt-0.5 shrink-0" />}
+            <span className="flex-1">{feedback.text}</span>
+            <button onClick={() => setFeedback(null)} aria-label="Fermer" className="opacity-60 hover:opacity-100">
+              <X size={14} />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
