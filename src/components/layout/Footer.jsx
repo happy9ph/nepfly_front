@@ -168,7 +168,6 @@ export default function Footer() {
           background: var(--hc-surface);
           color: var(--hc-ink);
           font-family: 'Inter', sans-serif;
-          border-top: 1px solid var(--hc-line-strong);
           padding: 4.5rem 1.5rem 2.5rem;
         }
         .hc-footer-inner { max-width: 68rem; margin: 0 auto; }
