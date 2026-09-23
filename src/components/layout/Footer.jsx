@@ -122,7 +122,6 @@ function LanguageToggle() {
 const THEME_OPTIONS = [
   { mode: "light", Icon: Sun, label: "Clair" },
   { mode: "dark", Icon: Moon, label: "Sombre" },
-  { mode: "system", Icon: Monitor, label: "Auto" },
 ];
 
 function ThemeToggle() {
