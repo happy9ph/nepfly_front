@@ -21,7 +21,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
 
   return (
     <>
-      <aside className="hidden md:flex md:w-64 shrink-0 flex-col bg-ink text-cream h-screen sticky top-0">
+      <aside className="hidden md:flex md:w-64 shrink-0 flex-col bg-coffee text-cream h-screen sticky top-0">
         <div className="px-6 pt-7 pb-6">
           <Link to="/" className="flex items-center gap-2 font-display text-[22px] leading-none tracking-tight">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: GOLD }} />
@@ -101,7 +101,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
           </div>
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 w-full rounded-xl bg-coffee hover:bg-coffee-dark text-white text-sm font-medium py-3 transition-colors"
+            className="flex items-center justify-center gap-2 w-full rounded-xl bg-white hover:bg-coffee-dark text-white text-sm font-medium py-3 transition-colors"
           >
             Voir le site
             <ExternalLink size={14} />
