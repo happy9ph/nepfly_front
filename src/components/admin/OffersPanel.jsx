@@ -9,8 +9,8 @@ const PAYMENT_OPTIONS = [
 ];
 
 const STATUS = {
-  proposed: { label: "Envoyée", cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  accepted: { label: "Acceptée", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  proposed: { label: "Envoyée", cls: "bg-latte-soft text-coffee-dark border-latte-light" },
+  accepted: { label: "Acceptée", cls: "bg-latte-soft text-coffee-dark border-coffee-light" },
   declined: { label: "Déclinée", cls: "bg-line/60 text-ink-faint border-line" },
 };
 
@@ -85,7 +85,7 @@ export default function OffersPanel({ offers, onCreate }) {
         {canAddMore && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 text-xs font-medium text-coffee-dark bg-cream hover:bg-[#F1EAE0] rounded-full px-3 py-1.5 transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-coffee-dark bg-cream hover:bg-latte-soft rounded-full px-3 py-1.5 transition-colors"
           >
             <Plus size={13} /> Nouvelle offre
           </button>
@@ -102,7 +102,7 @@ export default function OffersPanel({ offers, onCreate }) {
               <div
                 key={o.id}
                 className={`rounded-2xl border p-4 transition-colors ${
-                  o.status === "accepted" ? "border-emerald-200 bg-emerald-50/40" : "border-line bg-cream/30"
+                  o.status === "accepted" ? "border-coffee-light bg-latte-soft/50" : "border-line bg-cream/30"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">

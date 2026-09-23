@@ -5,9 +5,9 @@ const METHOD_ICON = { card: CreditCard, airtel_money: Smartphone, mtn_momo: Smar
 const METHOD_LABEL = { card: "Carte", airtel_money: "Airtel Money", mtn_momo: "MTN MoMo" };
 
 const PAYMENT_STATUS = {
-  completed: { label: "Complété", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  pending: { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  failed: { label: "Échoué", cls: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
+  completed: { label: "Complété", cls: "bg-latte-soft text-coffee-dark border-coffee-light", dot: "bg-coffee" },
+  pending: { label: "En attente", cls: "bg-latte-soft text-coffee-dark border-latte-light", dot: "bg-latte" },
+  failed: { label: "Échoué", cls: "bg-line/60 text-ink-soft border-line", dot: "bg-ink-faint" },
 };
 
 function formatDate(value) {
@@ -97,9 +97,9 @@ export default function AllRequestsPanel({ withAuth, api }) {
   }
 
   const cards = [
-    { label: "Apps à valider", value: apps.length, icon: Package, tone: "bg-amber-50 text-amber-700" },
+    { label: "Apps à valider", value: apps.length, icon: Package, tone: "bg-latte-soft text-coffee-dark" },
     { label: "Total encaissé", value: `${summary.collected.toFixed(0)} $`, icon: Wallet, tone: "bg-ink text-cream" },
-    { label: "Paiements en attente", value: summary.pendingPayments, icon: Clock, tone: "bg-[#F1EAE0] text-coffee-dark" },
+    { label: "Paiements en attente", value: summary.pendingPayments, icon: Clock, tone: "bg-latte-soft text-coffee-dark" },
   ];
 
   return (
@@ -138,8 +138,8 @@ export default function AllRequestsPanel({ withAuth, api }) {
                   <span className="w-11 h-11 rounded-xl bg-cream flex items-center justify-center text-coffee-dark group-hover:bg-coffee group-hover:text-white transition-colors">
                     <Package size={19} strokeWidth={1.8} />
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border bg-latte-soft text-coffee-dark border-latte-light">
+                    <span className="w-1.5 h-1.5 rounded-full bg-latte animate-pulse" />
                     En attente
                   </span>
                 </div>

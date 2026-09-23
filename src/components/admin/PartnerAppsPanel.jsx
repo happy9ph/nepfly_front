@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Check, X, DollarSign, Loader2, Package, TrendingUp, Wallet } from "lucide-react";
 
 const STATUS = {
-  requested: { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  active: { label: "Active", cls: "bg-[#F1EAE0] text-coffee-dark border-coffee-light", dot: "bg-coffee" },
-  suspended: { label: "Suspendue", cls: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
+  requested: { label: "En attente", cls: "bg-latte-soft text-coffee-dark border-latte-light", dot: "bg-latte" },
+  active: { label: "Active", cls: "bg-latte-soft text-coffee-dark border-coffee-light", dot: "bg-coffee" },
+  suspended: { label: "Suspendue", cls: "bg-chocolate text-cream-fixed border-chocolate", dot: "bg-latte" },
   rejected: { label: "Refusée", cls: "bg-line/60 text-ink-faint border-line", dot: "bg-ink-faint" },
 };
 
@@ -134,7 +134,7 @@ export default function PartnerAppsPanel({ applicationId, withAuth, api }) {
                   <button
                     onClick={() => updateStatus(app.id, "rejected")}
                     disabled={busy}
-                    className="flex items-center justify-center gap-1.5 text-xs font-medium rounded-lg border border-line text-ink-soft py-2 hover:bg-red-50 hover:text-red-700 hover:border-red-200 disabled:opacity-50 transition-colors"
+                    className="flex items-center justify-center gap-1.5 text-xs font-medium rounded-lg border border-line text-ink-soft py-2 hover:bg-line/50 hover:text-ink hover:border-ink-faint disabled:opacity-50 transition-colors"
                   >
                     <X size={13} />
                     Refuser

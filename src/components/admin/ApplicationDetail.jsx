@@ -7,9 +7,9 @@ import OffersPanel from "./OffersPanel.jsx";
 import PartnerAppsPanel from "./PartnerAppsPanel.jsx";
 
 const STATUS = {
-  pending: { label: "En attente", badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  approved: { label: "Approuvée", badge: "bg-[#F1EAE0] text-coffee-dark border-coffee-light", dot: "bg-coffee" },
-  rejected: { label: "Rejetée", badge: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
+  pending: { label: "En attente", badge: "bg-latte-soft text-coffee-dark border-latte-light", dot: "bg-latte" },
+  approved: { label: "Approuvée", badge: "bg-latte-soft text-coffee-dark border-coffee-light", dot: "bg-coffee" },
+  rejected: { label: "Rejetée", badge: "bg-line/60 text-ink-soft border-line", dot: "bg-ink-faint" },
 };
 
 function Section({ icon: Icon, title, aside, children }) {
@@ -154,7 +154,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
             <button
               onClick={() => handleDecision("rejected")}
               disabled={!!deciding}
-              className="flex items-center justify-center gap-2 rounded-xl border border-line text-ink-soft text-sm font-medium px-4 py-3 disabled:opacity-60 hover:border-red-200 hover:bg-red-50 hover:text-red-700 transition-colors"
+              className="flex items-center justify-center gap-2 rounded-xl border border-line text-ink-soft text-sm font-medium px-4 py-3 disabled:opacity-60 hover:border-ink-faint hover:bg-line/50 hover:text-ink transition-colors"
             >
               {deciding === "rejected" ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
               Rejeter
@@ -175,7 +175,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
           title="Contrat"
           aside={
             signed ? (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-coffee-dark bg-latte-soft border border-coffee-light px-2.5 py-1 rounded-full">
                 <CheckCircle2 size={12} /> Signé
               </span>
             ) : (
@@ -186,7 +186,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
           }
         >
           {signed && (
-            <p className="text-xs text-emerald-700 mb-3">
+            <p className="text-xs text-coffee-dark mb-3">
               Signé par le partenaire le{" "}
               {new Date(contract.signed_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
               Le contrat n'est plus modifiable.
@@ -229,7 +229,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
             role="status"
             className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm border ${
               feedback.type === "success"
-                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                ? "bg-latte-soft border-coffee-light text-coffee-dark"
                 : "bg-red-50 border-red-200 text-red-700"
             }`}
           >

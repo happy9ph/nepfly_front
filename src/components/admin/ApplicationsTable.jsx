@@ -19,9 +19,9 @@ const SORTS = [
 ];
 
 export const STATUS = {
-  pending: { label: "En attente", icon: Clock, halo: "bg-amber-100", dot: "bg-amber-500", text: "text-amber-700", bar: "bg-amber-400", filled: 6, step: "Reçue" },
-  approved: { label: "Approuvée", icon: Check, halo: "bg-[#F1EAE0]", dot: "bg-coffee", text: "text-coffee-dark", bar: "bg-coffee", filled: 12, step: "Contrat" },
-  rejected: { label: "Rejetée", icon: X, halo: "bg-red-100", dot: "bg-red-500", text: "text-red-600", bar: "bg-red-400", filled: 18, step: "Rejetée" },
+  pending: { label: "En attente", icon: Clock, halo: "bg-latte-soft", dot: "bg-latte", text: "text-coffee-dark", bar: "bg-latte", filled: 6, step: "Reçue" },
+  approved: { label: "Approuvée", icon: Check, halo: "bg-latte-soft", dot: "bg-coffee", text: "text-coffee-dark", bar: "bg-coffee", filled: 12, step: "Contrat" },
+  rejected: { label: "Rejetée", icon: X, halo: "bg-line", dot: "bg-ink-faint", text: "text-ink-soft", bar: "bg-ink-faint", filled: 18, step: "Rejetée" },
 };
 
 const BAR_COUNT = 18;
@@ -294,7 +294,7 @@ export default function ApplicationsTable({
             grouped ? "bg-ink text-cream border-ink" : "bg-surface border-line text-ink-soft hover:text-ink hover:border-coffee-light"
           }`}
         >
-          <Layers size={14} className={grouped ? "text-[#C89A3D]" : ""} />
+          <Layers size={14} className={grouped ? "text-latte" : ""} />
           {grouped ? "Groupé par domaine" : "Grouper par domaine"}
         </button>
 
@@ -325,7 +325,7 @@ export default function ApplicationsTable({
 
       {/* Barre d'actions groupées */}
       {checked.size > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 bg-ink text-cream rounded-2xl pl-4 pr-2 py-2 shadow-lg">
+        <div className="mb-3 flex flex-wrap items-center gap-2 bg-ink-fixed text-cream-fixed rounded-2xl pl-4 pr-2 py-2 shadow-lg">
           <p className="text-sm mr-auto">
             <span className="font-semibold">{checked.size}</span> sélectionnée{checked.size > 1 ? "s" : ""}
             {pendingChecked.length !== checked.size && (
@@ -346,7 +346,7 @@ export default function ApplicationsTable({
                 onClick={() => runBulk("rejected")}
                 disabled={!!bulkBusy || pendingChecked.length === 0}
                 className={`flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-2 disabled:opacity-40 transition-colors ${
-                  confirmReject ? "bg-red-500 text-white hover:bg-red-600" : "bg-white/10 hover:bg-white/15"
+                  confirmReject ? "bg-cream-fixed text-ink-fixed hover:bg-white" : "bg-white/10 hover:bg-white/15"
                 }`}
               >
                 {bulkBusy === "rejected" ? <Loader2 size={13} className="animate-spin" /> : <X size={13} />}
@@ -389,7 +389,7 @@ export default function ApplicationsTable({
                   <p className="text-[11px] text-ink-faint shrink-0">
                     {group.items.length}
                     {group.items.some((a) => a.status === "pending") && (
-                      <span className="text-amber-700"> · {group.items.filter((a) => a.status === "pending").length} en attente</span>
+                      <span className="text-coffee-dark"> · {group.items.filter((a) => a.status === "pending").length} en attente</span>
                     )}
                   </p>
                 </div>
@@ -411,10 +411,10 @@ export default function ApplicationsTable({
                       onClick={() => { setCursor(ordered.findIndex((a) => a.id === app.id)); onSelect(app.id); }}
                       onKeyDown={(e) => handleRowKey(e, app.id)}
                       className={`group relative flex items-center gap-3 sm:gap-4 px-4 py-3.5 cursor-pointer outline-none transition-colors focus-visible:bg-cream ${
-                        isChecked ? "bg-[#F1EAE0]/60" : selected ? "bg-cream" : "hover:bg-cream/50"
+                        isChecked ? "bg-latte-soft/60" : selected ? "bg-cream" : "hover:bg-cream/50"
                       }`}
                     >
-                      {isCursor && <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#C89A3D]" />}
+                      {isCursor && <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-latte" />}
 
                       <Checkbox state={isChecked ? "on" : "off"} onClick={() => toggle(app.id)} label={`Sélectionner ${app.company}`} />
 

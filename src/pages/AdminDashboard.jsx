@@ -14,7 +14,8 @@ import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
 
-const GOLD = "#C89A3D";
+const GOLD = "var(--color-latte)"; // café au lait — suit le thème clair/sombre
+const LATTE = GOLD;
 const AUTO_REFRESH_MS = 60_000;
 const DAY = 24 * 3600 * 1000;
 
@@ -60,8 +61,8 @@ function Ring({ pct, children, color = GOLD }) {
         <circle cx="40" cy="40" r={r} fill="none" strokeWidth="6" className="stroke-line" />
         <circle
           cx="40" cy="40" r={r} fill="none" strokeWidth="6" strokeLinecap="round"
-          stroke={color} strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100}
-          style={{ transition: "stroke-dashoffset .6s ease" }}
+          strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100}
+          style={{ stroke: color, transition: "stroke-dashoffset .6s ease" }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">{children}</div>
@@ -372,10 +373,10 @@ export default function AdminDashboard() {
   /* ───────── États d'accès ───────── */
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-ink flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4 text-cream">
+      <div className="min-h-screen bg-ink-fixed flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-cream-fixed">
           <p className="font-display text-2xl">H-Company<span style={{ color: GOLD }}>.</span></p>
-          <Loader2 className="animate-spin text-cream/50" size={18} />
+          <Loader2 className="animate-spin text-cream-fixed/50" size={18} />
         </div>
       </div>
     );
@@ -383,7 +384,7 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated || user?.role !== "admin") {
     return (
-      <div className="min-h-screen bg-ink flex items-center justify-center px-6">
+      <div className="min-h-screen bg-ink-fixed flex items-center justify-center px-6">
         <div className="bg-surface rounded-3xl p-8 md:p-10 max-w-md w-full text-center">
           <Title className="text-3xl mb-3">Espace admin</Title>
           <p className="text-ink-soft text-sm mb-7">
@@ -404,7 +405,7 @@ export default function AdminDashboard() {
 
   const statusTone =
     stats.pending > 0
-      ? { core: "bg-amber-500", Icon: Clock, ring: "#F59E0B" }
+      ? { core: "bg-latte", Icon: Clock, ring: LATTE }
       : { core: "bg-coffee", Icon: CheckCircle2, ring: GOLD };
 
   return (
@@ -420,16 +421,16 @@ export default function AdminDashboard() {
 
       <div className="flex-1 min-w-0">
         {/* Header mobile */}
-        <header className="md:hidden sticky top-0 z-20 bg-ink text-cream px-4 py-3.5 flex items-center justify-between">
+        <header className="md:hidden sticky top-0 z-20 bg-ink-fixed text-cream-fixed px-4 py-3.5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display text-lg">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: GOLD }} />
             H-Company
           </Link>
           <div className="flex items-center gap-1">
-            <button onClick={() => setPaletteOpen(true)} aria-label="Rechercher" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10">
+            <button onClick={() => setPaletteOpen(true)} aria-label="Rechercher" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10">
               <Search size={17} />
             </button>
-            <button onClick={signOut} aria-label="Se déconnecter" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10">
+            <button onClick={signOut} aria-label="Se déconnecter" className="w-9 h-9 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10">
               <LogOut size={17} />
             </button>
           </div>
@@ -455,8 +456,8 @@ export default function AdminDashboard() {
                     <Title className="text-3xl">Candidatures</Title>
                     <p className="flex items-center gap-2 text-xs text-ink-soft mt-2">
                       <span className="relative flex w-2 h-2">
-                        <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-                        <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="absolute inline-flex w-full h-full rounded-full bg-coffee-light opacity-60 animate-ping" />
+                        <span className="relative inline-flex w-2 h-2 rounded-full bg-coffee" />
                       </span>
                       En direct · mis à jour {formatSince(lastUpdated)}
                     </p>
@@ -524,7 +525,7 @@ export default function AdminDashboard() {
                           {stats.pending} candidature{stats.pending > 1 ? "s attendent" : " attend"} votre décision
                         </h2>
                         <div className="flex flex-wrap items-center gap-3 mt-3">
-                          <span className="flex items-center gap-1.5 text-xs font-medium text-coffee-dark bg-[#F1EAE0] rounded-lg px-2.5 py-1.5">
+                          <span className="flex items-center gap-1.5 text-xs font-medium text-coffee-dark bg-latte-soft rounded-lg px-2.5 py-1.5">
                             <Sparkles size={13} /> {stats.decided}/{stats.total} traitées
                           </span>
                           <span className="text-sm text-ink-soft">Les plus anciennes en premier.</span>
@@ -570,7 +571,7 @@ export default function AdminDashboard() {
                                   <span className="flex items-center gap-2">
                                     <span className="text-sm font-semibold text-ink truncate">{app.company}</span>
                                     {urgent && (
-                                      <span className="text-[10px] font-semibold uppercase tracking-wide text-red-700 bg-red-50 border border-red-200 rounded px-1.5 py-px shrink-0">
+                                      <span className="text-[10px] font-semibold uppercase tracking-wide text-cream-fixed bg-chocolate rounded px-1.5 py-px shrink-0">
                                         Urgent
                                       </span>
                                     )}
@@ -612,9 +613,9 @@ export default function AdminDashboard() {
                       </div>
                       <div className="grid grid-cols-3 text-center">
                         {[
-                          { key: "pending", label: "En attente", value: stats.pending, cls: "text-amber-600" },
+                          { key: "pending", label: "En attente", value: stats.pending, cls: "text-coffee" },
                           { key: "approved", label: "Approuvées", value: stats.approved, cls: "text-coffee-dark" },
-                          { key: "rejected", label: "Rejetées", value: stats.rejected, cls: "text-red-600" },
+                          { key: "rejected", label: "Rejetées", value: stats.rejected, cls: "text-ink-soft" },
                         ].map((s) => (
                           <button
                             key={s.key}
@@ -646,7 +647,7 @@ export default function AdminDashboard() {
                       action={
                         <span
                           className={`flex items-center gap-1 text-xs font-semibold rounded-md px-2 py-1 ${
-                            stats.trend >= 0 ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50"
+                            stats.trend >= 0 ? "text-coffee-dark bg-latte-soft" : "text-ink-soft bg-line/60"
                           }`}
                           title="7 derniers jours vs 7 jours précédents"
                         >
@@ -667,7 +668,7 @@ export default function AdminDashboard() {
                                 }`}
                                 style={{ height: `${h}%`, ...(isToday && d.count > 0 ? { backgroundColor: GOLD } : {}) }}
                               />
-                              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-cream text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink-fixed text-cream-fixed text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 {d.date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {d.count}
                               </span>
                             </div>
@@ -682,13 +683,13 @@ export default function AdminDashboard() {
                         <Metric
                           value={stats.approvalRate === null ? "—" : `${stats.approvalRate}%`}
                           label="Taux d'approbation"
-                          tone={stats.approvalRate === null ? "text-ink" : stats.approvalRate >= 50 ? "text-coffee-dark" : "text-red-600"}
+                          tone={stats.approvalRate === null ? "text-ink" : stats.approvalRate >= 50 ? "text-coffee-dark" : "text-ink-soft"}
                         />
                         <Metric value={stats.last7} label="Reçues en 7 jours" />
                         <Metric
                           value={stats.oldestPending[0] ? timeAgo(stats.oldestPending[0].created_at) : "—"}
                           label="Plus ancienne en attente"
-                          tone={stats.oldestPending[0] && Date.now() - new Date(stats.oldestPending[0].created_at).getTime() > 7 * DAY ? "text-red-600" : "text-ink"}
+                          tone={stats.oldestPending[0] && Date.now() - new Date(stats.oldestPending[0].created_at).getTime() > 7 * DAY ? "text-coffee" : "text-ink"}
                         />
                         <Metric value={stats.decided} label="Décisions prises" />
                       </div>
@@ -737,18 +738,18 @@ export default function AdminDashboard() {
             @keyframes hc-fade { from { opacity: 0; } to { opacity: 1; } }
             @keyframes hc-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
           `}</style>
-          <div className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]" style={{ animation: "hc-fade .2s ease-out" }} onClick={closeDetail} />
+          <div className="absolute inset-0 bg-ink-fixed/50 backdrop-blur-[2px]" style={{ animation: "hc-fade .2s ease-out" }} onClick={closeDetail} />
           <div
             className="absolute right-0 top-0 h-full w-full max-w-xl bg-cream shadow-2xl flex flex-col"
             style={{ animation: "hc-slide .28s cubic-bezier(.2,.8,.2,1)" }}
           >
-            <div className="flex items-center gap-2 px-4 py-3 bg-ink text-cream shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 bg-ink-fixed text-cream-fixed shrink-0">
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => navRef.current(-1)}
                   disabled={navIndex <= 0}
                   aria-label="Candidature précédente"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 disabled:opacity-30"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10 disabled:opacity-30"
                 >
                   <ChevronLeft size={17} />
                 </button>
@@ -756,20 +757,20 @@ export default function AdminDashboard() {
                   onClick={() => navRef.current(1)}
                   disabled={navIndex === -1 || navIndex >= navIds.length - 1}
                   aria-label="Candidature suivante"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 disabled:opacity-30"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10 disabled:opacity-30"
                 >
                   <ChevronRight size={17} />
                 </button>
               </div>
               <p className="text-sm font-medium flex-1 min-w-0 truncate">
                 Candidature<span style={{ color: GOLD }}>.</span>
-                {navIndex >= 0 && <span className="text-cream/50 font-normal ml-2 tabular-nums">{navIndex + 1} / {navIds.length}</span>}
+                {navIndex >= 0 && <span className="text-cream-fixed/50 font-normal ml-2 tabular-nums">{navIndex + 1} / {navIds.length}</span>}
               </p>
               <button
                 onClick={() => copyEmail(selectedApplication.email)}
                 title="Copier l'email"
                 aria-label="Copier l'email"
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 hover:text-cream"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10 hover:text-cream-fixed"
               >
                 <Copy size={15} />
               </button>
@@ -777,7 +778,7 @@ export default function AdminDashboard() {
                 href={`mailto:${selectedApplication.email}`}
                 title="Écrire au partenaire"
                 aria-label="Écrire au partenaire"
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 hover:text-cream"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10 hover:text-cream-fixed"
               >
                 <Mail size={15} />
               </a>
@@ -785,7 +786,7 @@ export default function AdminDashboard() {
               <button
                 onClick={closeDetail}
                 aria-label="Fermer"
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/70 hover:bg-white/10 hover:text-cream"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-cream-fixed/70 hover:bg-white/10 hover:text-cream-fixed"
               >
                 <X size={17} />
               </button>
@@ -824,12 +825,12 @@ export default function AdminDashboard() {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto w-full md:w-auto md:max-w-sm flex items-center gap-3 bg-ink text-cream rounded-xl pl-3.5 pr-2 py-2.5 shadow-2xl text-sm"
+            className="pointer-events-auto w-full md:w-auto md:max-w-sm flex items-center gap-3 bg-ink-fixed text-cream-fixed rounded-xl pl-3.5 pr-2 py-2.5 shadow-2xl text-sm"
             style={{ animation: "hc-toast .25s ease-out" }}
           >
             <span
               className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                t.type === "error" ? "bg-red-500/20 text-red-300" : t.type === "info" ? "text-ink" : "bg-emerald-500/20 text-emerald-300"
+                t.type === "error" ? "bg-red-500/20 text-red-300" : t.type === "info" ? "text-ink-fixed" : "bg-latte/25 text-latte"
               }`}
               style={t.type === "info" ? { backgroundColor: GOLD } : undefined}
             >
@@ -839,7 +840,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setToasts((all) => all.filter((x) => x.id !== t.id))}
               aria-label="Fermer"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/50 hover:bg-white/10 hover:text-cream"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream-fixed/50 hover:bg-white/10 hover:text-cream-fixed"
             >
               <X size={13} />
             </button>

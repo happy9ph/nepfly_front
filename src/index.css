@@ -36,6 +36,11 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --max-width-content: 73.75rem; /* 1180px */
+    /* Chocolat & café au lait */
+  --color-chocolate: #3B271C;
+  --color-latte: #C49A6C;
+  --color-latte-light: #E4D2BC;
+  --color-latte-soft: #F3EBE0;
 }
 
 /* Thème sombre — mêmes teintes café/crème de la marque, inversées pour
@@ -61,6 +66,11 @@
   --color-coffee-dark: #B98861;
 
   --color-surface: #282118;
+
+  --color-chocolate: #5A3A28;
+  --color-latte: #D2AE84;
+  --color-latte-light: #4A3A2C;
+  --color-latte-soft: #2F261D;
 }
 
 html {
