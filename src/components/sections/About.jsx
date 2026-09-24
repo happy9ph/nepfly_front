@@ -36,7 +36,7 @@ function Stage({ Icon, tag, text, index, isLast }) {
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.9, delay: 0.2, ease: "easeInOut" }}
             style={{ transformOrigin: "top" }}
-            className="absolute inset-0 bg-gradient-to-b from-[#C89A3D] to-coffee-light"
+            className="absolute inset-0 bg-linear-to-b from-coffee to-coffee-light"
           />
         </div>
       )}
@@ -76,7 +76,7 @@ function PartnerConstellation() {
           </div>
           <div className="flex-1 h-px bg-line relative overflow-hidden">
             <motion.div
-              className="absolute inset-y-0 left-0 bg-[#C89A3D]"
+              className="absolute inset-y-0 left-0 bg-coffee"
               style={{ scaleX: lineProgress, transformOrigin: "left" }}
             />
           </div>

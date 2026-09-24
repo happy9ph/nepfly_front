@@ -16,6 +16,7 @@
   --color-coffee: #6F4A34;
   --color-coffee-light: #B08968;
   --color-coffee-dark: #4A3226;
+  --color-on-coffee: #FAF7F2; /* identique à cream en clair */
 
   /* Surface des cartes/blocs blancs posés sur le fond — séparé de "cream"
      (qui est le fond de PAGE) pour pouvoir assombrir les cartes sans
@@ -51,34 +52,28 @@
    les mêmes classes changent de valeur automatiquement. */
 .dark {
   --color-ink: #D4CFC7;
-  /* Gris chaud plutôt que blanc/crème — 8,8:1 de contraste contre le
-     nouveau fond café, confortable sans l'effet "néon" du blanc pur. */
-  --color-ink-soft: #A79E93;
-  /* 5,2:1 — texte secondaire, toujours un gris, juste plus sourd. */
-  --color-ink-faint: #9C9484;
-  /* 4,53:1 — repasse au-dessus du seuil AA. */
-  --color-cream: #3C2A1E;
-  /* Le fond n'est plus du noir mais un vrai café — cohérent avec
-     --color-coffee du thème clair plutôt qu'une inversion mécanique. */
-  --color-line: #5A4530;
-  --color-stone: #B0A692;
+  --color-ink-soft: #B2A99C;
+  --color-ink-faint: #B2A896;
+  --color-cream: #4A3C2C;
+  /* Fond nettement remonté (café au lait moyen, plus un chocolat noir) —
+     c'est le vrai correctif pour "trop lourd". */
+  --color-line: #6B5843;
+  --color-stone: #B7AC98;
+  /* 4,75:1 — reste lisible même utilisé en texte de paragraphe (text-lg). */
 
-  --color-coffee: #D9A873;
-  /* Un latte clair vient remplacer le café foncé du mode clair — 6,4:1
-     contre le fond, net pour les liens et accents sans être criard. */
-  --color-coffee-light: #E7C69A;
-  --color-coffee-dark: #8B5E3C;
+  --color-coffee: #BA8B5E;
+  /* Désaturé et un cran plus mat que l'or brillant précédent. */
+  --color-coffee-light: #CBA478;
+  --color-coffee-dark: #8F6642;
 
-  --color-surface: #48341F;
-  /* Un cran plus clair que le fond, dans la même famille café, pour que
-     les cartes restent détachées. */
-
+  --color-surface: #5B4A38;
   --color-chocolate: #241509;
-  /* Encore plus profond que le fond — réservé aux panneaux volontairement
-     très sombres, cohérent avec son rôle en mode clair. */
-  --color-latte: #CDA475;
-  --color-latte-light: #3A2A1B;
-  --color-latte-soft: #2E2013;
+
+  --color-on-coffee: #211408;
+
+  --color-latte: #C9A575;
+  --color-latte-light: #4A3A2A;
+  --color-latte-soft: #362B1E;
 }
 
 html {

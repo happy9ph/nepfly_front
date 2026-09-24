@@ -140,7 +140,7 @@ export default function Hero() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-4 py-1.5 mb-6"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-4 py-1.5 mb-6"
             >
               <Mark size={16} />
               <span className="text-xs font-medium text-ink-soft">{t("hero.badge")}</span>
