@@ -50,29 +50,36 @@
    text-ink, border-line...), rien d'autre à changer dans les composants :
    les mêmes classes changent de valeur automatiquement. */
 .dark {
-  --color-ink: #F5F1EA;
-  --color-ink-soft: #B5AC9E;
-  /* Éclairci par rapport à #7D7568 d'origine — 4.06:1 sous le seuil requis,
-     confirmé par le même audit axe-core que la version claire. */
-  --color-ink-faint: #918878;
-  --color-cream: #221C16;
-  --color-line: #2E2822;
-  --color-stone: #9C9488;
+  /* Texte principal */
+  --color-ink: #F4EFE8;
+  --color-ink-soft: #C2B8AA;
+  --color-ink-faint: #A69B8D;
 
-  --color-coffee: #C89A6B;
-  --color-coffee-light: #D9B98C;
-  /* Éclairci par rapport à #8B6144 d'origine — trop sombre pour du texte
-     sur fond déjà sombre (3.15:1), confirmé par le même audit axe-core. */
-  --color-coffee-dark: #B98861;
+  /* Fond principal */
+  --color-cream: #181411;
 
-  --color-surface: #282118;
+  /* Bordures */
+  --color-line: #332A23;
 
-  --color-chocolate: #5A3A28;
-  --color-latte: #D2AE84;
-  --color-latte-light: #4A3A2C;
-  --color-latte-soft: #2F261D;
+  /* Texte secondaire */
+  --color-stone: #AAA094;
+
+  /* Accent café */
+  --color-coffee: #C99A6B;
+  --color-coffee-light: #E0BB91;
+  --color-coffee-dark: #B77E50;
+
+  /* Cartes / surfaces */
+  --color-surface: #211B17;
+
+  /* Chocolat */
+  --color-chocolate: #6A4630;
+
+  /* Latte */
+  --color-latte: #D5AE82;
+  --color-latte-light: #514034;
+  --color-latte-soft: #30261F;
 }
-
 html {
   scroll-behavior: smooth;
 }
