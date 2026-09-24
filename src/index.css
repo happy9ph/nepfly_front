@@ -50,32 +50,35 @@
    text-ink, border-line...), rien d'autre à changer dans les composants :
    les mêmes classes changent de valeur automatiquement. */
 .dark {
-  --color-ink: #EFE8DB;
-  /* Toujours un crème chaud, mais le vrai changement est le fond
-     ci-dessous — 11,4:1 de contraste, confortable sans être criard. */
-  --color-ink-soft: #B9AD98;
-  /* 6,3:1 contre le nouveau fond. */
-  --color-ink-faint: #A0947C;
-  /* 4,65:1 — repasse au-dessus du seuil AA avec le fond éclairci. */
-  --color-cream: #332B22;
-  /* Fond remonté d'un cran (brun café moyen plutôt que quasi-noir) —
-     c'est le principal changement : moins de poids visuel sans perdre
-     l'identité "sombre". */
-  --color-line: #453A2E;
-  --color-stone: #A89C8A;
+  --color-ink: #D4CFC7;
+  /* Gris chaud plutôt que blanc/crème — 8,8:1 de contraste contre le
+     nouveau fond café, confortable sans l'effet "néon" du blanc pur. */
+  --color-ink-soft: #A79E93;
+  /* 5,2:1 — texte secondaire, toujours un gris, juste plus sourd. */
+  --color-ink-faint: #9C9484;
+  /* 4,53:1 — repasse au-dessus du seuil AA. */
+  --color-cream: #3C2A1E;
+  /* Le fond n'est plus du noir mais un vrai café — cohérent avec
+     --color-coffee du thème clair plutôt qu'une inversion mécanique. */
+  --color-line: #5A4530;
+  --color-stone: #B0A692;
 
-  --color-coffee: #C9976A;
-  /* 5,4:1 contre le nouveau fond, reste net pour les liens/accents. */
-  --color-coffee-light: #D8AF85;
-  --color-coffee-dark: #AD7E56;
+  --color-coffee: #D9A873;
+  /* Un latte clair vient remplacer le café foncé du mode clair — 6,4:1
+     contre le fond, net pour les liens et accents sans être criard. */
+  --color-coffee-light: #E7C69A;
+  --color-coffee-dark: #8B5E3C;
 
-  --color-surface: #3A3128;
-  /* Un cran au-dessus du fond pour que les cartes restent détachées. */
+  --color-surface: #48341F;
+  /* Un cran plus clair que le fond, dans la même famille café, pour que
+     les cartes restent détachées. */
 
-  --color-chocolate: #5C3F2C;
-  --color-latte: #CBA57C;
-  --color-latte-light: #4F4032;
-  --color-latte-soft: #362D22;
+  --color-chocolate: #241509;
+  /* Encore plus profond que le fond — réservé aux panneaux volontairement
+     très sombres, cohérent avec son rôle en mode clair. */
+  --color-latte: #CDA475;
+  --color-latte-light: #3A2A1B;
+  --color-latte-soft: #2E2013;
 }
 
 html {
