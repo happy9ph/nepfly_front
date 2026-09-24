@@ -50,38 +50,32 @@
    text-ink, border-line...), rien d'autre à changer dans les composants :
    les mêmes classes changent de valeur automatiquement. */
 .dark {
-  --color-ink: #E8E0D2;
-  /* Assombri par rapport à #F5F1EA d'origine — 12,3:1 contre le fond,
-     toujours largement au-dessus du seuil AA (4,5:1) mais moins agressif
-     qu'un blanc quasi pur sur fond quasi noir. */
-  --color-ink-soft: #A79C8C;
-  /* Réchauffé par rapport à #B5AC9E — 5,97:1, confortable pour du texte
-     secondaire. */
-  --color-ink-faint: #948970;
-  /* Éclairci et réchauffé par rapport à #918878 d'origine, qui restait
-     sous le seuil requis (4,06:1) — passe maintenant à 4,66:1, confirmé
-     par le même calcul de contraste que la version claire. */
-  --color-cream: #262019;
-  /* Éclairci par rapport à #221C16 — casse l'effet "trou noir" du fond
-     sans perdre la profondeur du thème sombre. */
-  --color-line: #342D24;
-  --color-stone: #948A7B;
+  --color-ink: #EFE8DB;
+  /* Toujours un crème chaud, mais le vrai changement est le fond
+     ci-dessous — 11,4:1 de contraste, confortable sans être criard. */
+  --color-ink-soft: #B9AD98;
+  /* 6,3:1 contre le nouveau fond. */
+  --color-ink-faint: #A0947C;
+  /* 4,65:1 — repasse au-dessus du seuil AA avec le fond éclairci. */
+  --color-cream: #332B22;
+  /* Fond remonté d'un cran (brun café moyen plutôt que quasi-noir) —
+     c'est le principal changement : moins de poids visuel sans perdre
+     l'identité "sombre". */
+  --color-line: #453A2E;
+  --color-stone: #A89C8A;
 
-  --color-coffee: #BC8F63;
-  /* Légèrement désaturé par rapport à #C89A6B — moins "néon" sur fond
-     sombre, contraste 5,56:1 contre le fond, toujours net pour les liens
-     et accents. */
-  --color-coffee-light: #CDA97C;
-  --color-coffee-dark: #A97B54;
+  --color-coffee: #C9976A;
+  /* 5,4:1 contre le nouveau fond, reste net pour les liens/accents. */
+  --color-coffee-light: #D8AF85;
+  --color-coffee-dark: #AD7E56;
 
-  --color-surface: #2C251D;
-  /* Éclairci légèrement par rapport à #282118 pour garder les cartes
-     visiblement détachées du fond, même adouci. */
+  --color-surface: #3A3128;
+  /* Un cran au-dessus du fond pour que les cartes restent détachées. */
 
-  --color-chocolate: #4F3524;
-  --color-latte: #C29F77;
-  --color-latte-light: #453629;
-  --color-latte-soft: #2B2318;
+  --color-chocolate: #5C3F2C;
+  --color-latte: #CBA57C;
+  --color-latte-light: #4F4032;
+  --color-latte-soft: #362D22;
 }
 
 html {
