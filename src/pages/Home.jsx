@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import NavBar from "../components/layout/NavBar.jsx";
 import Footer from "../components/layout/Footer.jsx";
 import Hero from "../components/sections/Hero.jsx";
@@ -16,6 +16,7 @@ import JoinForm from "../components/sections/JoinForm.jsx";
 import FAQ from "../components/sections/FAQ.jsx";
 import AdSpace from "../components/sections/AdSpace.jsx";
 import SectionReveal from "../components/ui/SectionReveal.jsx";
+import BrandLoader from "../components/ui/BrandLoader.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
 export default function Home() {
@@ -25,6 +26,19 @@ export default function Home() {
   // portail de chargement global comme avant : chaque section ci-dessous
   // gère sa propre révélation, l'une après l'autre, au fil du défilement.
   const [fontsReady, setFontsReady] = useState(false);
+  // Écran de marque animé (lettre H, façon "ta-dum" Netflix) uniquement au
+  // tout premier chargement du site pour cette session — pas à chaque retour
+  // sur la home, ce qui deviendrait vite lassant.
+  const firstVisit = useRef(
+    (() => {
+      try {
+        return !sessionStorage.getItem("hc_home_seen");
+      } catch {
+        return true;
+      }
+    })()
+  ).current;
+  const [minTimeElapsed, setMinTimeElapsed] = useState(!firstVisit);
 
   useEffect(() => {
     (document.fonts?.ready || Promise.resolve()).then(() => setFontsReady(true));
@@ -37,6 +51,14 @@ export default function Home() {
       // stockage indisponible — au pire, le squelette réapparaît, rien de grave.
     }
   }, []);
+
+  useEffect(() => {
+    if (!firstVisit) return;
+    // Temps minimum pour laisser l'animation du H se jouer entièrement,
+    // même si les polices sont prêtes quasi instantanément.
+    const timer = setTimeout(() => setMinTimeElapsed(true), 1100);
+    return () => clearTimeout(timer);
+  }, [firstVisit]);
 
   // Défile jusqu'à l'ancre indiquée dans l'URL (#rejoindre, #services...)
   // une fois le contenu prêt — une navigation programmatique (ex: après
@@ -69,7 +91,9 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [fontsReady]);
 
-  if (!fontsReady) return <div className="min-h-screen bg-cream" />;
+  if (!fontsReady || !minTimeElapsed) {
+    return firstVisit ? <BrandLoader visible /> : <div className="min-h-screen bg-cream" />;
+  }
 
   return (
     <div className="min-h-screen bg-cream">

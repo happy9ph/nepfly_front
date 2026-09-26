@@ -247,7 +247,7 @@ export default function Footer() {
 
         <div className="hc-footer-bottom">
           <span>
-            © {new Date().getFullYear()} H-Company sarl. {t("footer.rights")}
+            © {new Date().getFullYear()} H-Company. {t("footer.rights")}
             {" · "}
             <Link to="/confidentialite" className="hover:text-ink transition-colors">Confidentialité</Link>
             {" · "}

@@ -51,29 +51,38 @@
    text-ink, border-line...), rien d'autre à changer dans les composants :
    les mêmes classes changent de valeur automatiquement. */
 .dark {
-  --color-ink: #D4CFC7;
-  --color-ink-soft: #B2A99C;
-  --color-ink-faint: #B2A896;
-  --color-cream: #4A3C2C;
-  /* Fond nettement remonté (café au lait moyen, plus un chocolat noir) —
-     c'est le vrai correctif pour "trop lourd". */
-  --color-line: #6B5843;
+  /* Refonte : un vrai noir chaud (pas un brun "boueux") pour un mode sombre
+     premium — fond profond, cartes légèrement plus claires pour créer de la
+     profondeur, accent café/or qui ressort net dessus. */
+  --color-ink: #F1EAE0;
+  --color-ink-soft: #C7BCA9;
+  --color-ink-faint: #9C917E;
+  --color-cream: #14100C;
+  --color-line: #2A2319;
   --color-stone: #B7AC98;
-  /* 4,75:1 — reste lisible même utilisé en texte de paragraphe (text-lg). */
 
-  --color-coffee: #BA8B5E;
-  /* Désaturé et un cran plus mat que l'or brillant précédent. */
-  --color-coffee-light: #CBA478;
-  --color-coffee-dark: #8F6642;
+  --color-coffee: #D7A467;
+  /* Plus clair et plus saturé qu'avant — se détache franchement du fond noir. */
+  --color-coffee-light: #EAC38F;
+  --color-coffee-dark: #A97A47;
 
-  --color-surface: #5B4A38;
-  --color-chocolate: #241509;
+  /* Cartes/panneaux : un cran au-dessus du fond de page, pour une vraie
+     sensation d'élévation plutôt qu'un aplat brun uniforme. */
+  --color-surface: #1E1812;
+  --color-chocolate: #0A0705;
 
-  --color-on-coffee: #211408;
+  --color-on-coffee: #14100C;
 
-  --color-latte: #C9A575;
-  --color-latte-light: #4A3A2A;
-  --color-latte-soft: #362B1E;
+  --color-latte: #D7A467;
+  --color-latte-light: #3A2E1E;
+  --color-latte-soft: #241C13;
+}
+
+.dark body {
+  /* Léger halo radial derrière le contenu — évite le plat uniforme d'un
+     simple background-color sur toute la page. */
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(215, 164, 103, 0.08), transparent);
+  background-repeat: no-repeat;
 }
 
 html {

@@ -12,6 +12,7 @@ import ContractTab from "../components/dashboard/ContractTab.jsx";
 import ActivityTab from "../components/dashboard/ActivityTab.jsx";
 import { Skeleton, SkeletonCard, SkeletonStatRow } from "../components/ui/Skeleton.jsx";
 import { useToast } from "../context/ToastContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 const STATUS_LABELS = {
   pending: { label: "En attente d'approbation", tone: "pending" },
@@ -44,6 +45,7 @@ function StatusBadge({ status }) {
 
 export default function PartnerDashboard() {
   const { user, isAuthenticated, isLoading, withAuth, signOut } = useUser();
+  const { t } = useLanguage();
   const [application, setApplication] = useState(null);
   const [contract, setContract] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -192,7 +194,7 @@ export default function PartnerDashboard() {
         </header>
         <main className="max-w-2xl mx-auto px-6 py-16">
           <div className="mb-12">
-            <h1 className="font-display text-2xl text-ink mb-6 text-center">Mes services</h1>
+            <h1 className="font-display text-2xl text-ink mb-6 text-center">{t("myServices.heading")}</h1>
             <MyServicesPanel summary={services} />
           </div>
 
