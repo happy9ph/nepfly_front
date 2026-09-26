@@ -4,6 +4,8 @@ import Footer from "../components/layout/Footer.jsx";
 import Hero from "../components/sections/Hero.jsx";
 import About from "../components/sections/About.jsx";
 import Marketplace from "../components/sections/Marketplace.jsx";
+import ExploreServices from "../components/sections/ExploreServices.jsx";
+import ConnectWithUs from "../components/sections/ConnectWithUs.jsx";
 import Services from "../components/sections/Services.jsx";
 import Interpretation from "../components/sections/Interpretation.jsx";
 import Shopping from "../components/sections/Shopping.jsx";
@@ -84,6 +86,12 @@ export default function Home() {
         </SectionReveal>
         <SectionReveal variant="grid">
           <Services />
+        </SectionReveal>
+        <SectionReveal variant="grid">
+          <ExploreServices />
+        </SectionReveal>
+        <SectionReveal variant="split">
+          <ConnectWithUs />
         </SectionReveal>
         <SectionReveal variant="center">
           <Interpretation />

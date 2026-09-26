@@ -199,6 +199,14 @@ export const api = {
     listContactMessages: (token) => request("/api/v1/contact/admin", { token }),
     replyToContact: (token, id, admin_reply) =>
       request(`/api/v1/contact/admin/${id}`, { method: "PATCH", token, body: { admin_reply } }),
+    pendingSubscriptions: (token) => request("/api/v1/services/admin/pending", { token }),
+    listSubscriptions: (token) => request("/api/v1/services/admin", { token }),
+    updateSubscriptionStatus: (token, id, status, adminNote) =>
+      request(`/api/v1/services/admin/${id}/status`, {
+        method: "PATCH",
+        token,
+        body: { status, admin_note: adminNote || null },
+      }),
   },
 
   // Mes demandes (contact) — utilisateur connecté
@@ -215,6 +223,20 @@ export const api = {
   // Produits/services proposés sur la marketplace
   products: {
     list: () => request("/api/v1/products"),
+  },
+
+  // Abonnements des clients aux services H-Company (H-Transport, H-Restaurant,
+  // H-Learning, H-Money, H-Translate, H-Shopping...) — distinct de
+  // `partners.myApps`, qui concerne les partenaires exploitant un service.
+  services: {
+    catalog: () => request("/api/v1/services/catalog"),
+    mine: (token) => request("/api/v1/services/me", { token }),
+    request: (token, serviceKey, message) =>
+      request("/api/v1/services/me", {
+        method: "POST",
+        token,
+        body: { service_key: serviceKey, message: message || null },
+      }),
   },
 
   // Formulaire de contact / prise de contact générale

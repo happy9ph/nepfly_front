@@ -11,6 +11,7 @@ import AdminSidebar from "../components/admin/AdminSidebar.jsx";
 import ApplicationsTable, { timeAgo, exportApplicationsCsv, isTyping } from "../components/admin/ApplicationsTable.jsx";
 import ApplicationDetail from "../components/admin/ApplicationDetail.jsx";
 import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
+import ServiceSubscriptionsPanel from "../components/admin/ServiceSubscriptionsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
 
@@ -93,6 +94,7 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [pendingServiceSubsCount, setPendingServiceSubsCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -143,6 +145,10 @@ export default function AdminDashboard() {
       // Compteur des demandes d'apps pour la pastille de la sidebar
       withAuth((token) => api.admin.pendingApps(token))
         .then((list) => setPendingAppsCount(Array.isArray(list) ? list.length : 0))
+        .catch(() => {});
+      // Compteur des demandes d'abonnement aux services H-Company
+      withAuth((token) => api.admin.pendingSubscriptions(token))
+        .then((list) => setPendingServiceSubsCount(Array.isArray(list) ? list.length : 0))
         .catch(() => {});
     },
     [withAuth, pushToast]
@@ -415,7 +421,7 @@ export default function AdminDashboard() {
         onSignOut={signOut}
         view={view}
         onViewChange={(v) => { setView(v); closeDetail(); }}
-        counts={{ applications: stats.pending, requests: pendingAppsCount }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount }}
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
@@ -445,6 +451,17 @@ export default function AdminDashboard() {
                 <p className="text-sm text-ink-soft mt-1">Apps et paiements, tous partenaires confondus.</p>
               </div>
               <AllRequestsPanel withAuth={withAuth} api={api} />
+            </>
+          ) : view === "serviceRequests" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> Abonnements clients</p>
+                <Title className="text-3xl">Abonnements clients</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Demandes d'abonnement à H-Restaurant, H-Transport, H-Learning, H-Money, H-Translate et autres services, tous clients confondus.
+                </p>
+              </div>
+              <ServiceSubscriptionsPanel withAuth={withAuth} api={api} />
             </>
           ) : (
             <div className="grid xl:grid-cols-[minmax(0,1fr)_310px] gap-6 lg:gap-8 items-start">

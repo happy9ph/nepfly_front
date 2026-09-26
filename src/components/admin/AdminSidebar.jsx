@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut, ExternalLink, Search } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "applications", label: "Candidatures", icon: Users },
   { key: "requests", label: "Toutes les demandes", icon: ClipboardList },
+  { key: "serviceRequests", label: "Abonnements clients", icon: Compass },
 ];
 
 const GOLD = "var(--color-latte)"; // café au lait — suit le thème clair/sombre
@@ -112,7 +113,7 @@ export default function AdminSidebar({ user, onSignOut, view, onViewChange, coun
       {/* Mobile : barre du bas */}
       <nav
         aria-label="Navigation admin"
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-fixed text-cream-fixed grid grid-cols-2 border-t border-white/10"
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-fixed text-cream-fixed grid grid-cols-3 border-t border-white/10"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {

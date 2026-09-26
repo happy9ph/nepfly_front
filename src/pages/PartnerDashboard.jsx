@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { LayoutGrid, FileText, Activity, Tag, Boxes } from "lucide-react";
+import { LayoutGrid, FileText, Activity, Tag, Boxes, Compass } from "lucide-react";
 import { useUser } from "../context/Usercontext.jsx";
 import { api } from "../lib/api.js";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar.jsx";
 import OverviewTab from "../components/dashboard/OverviewTab.jsx";
 import OffersTab from "../components/dashboard/OffersTab.jsx";
 import AppsTab from "../components/dashboard/AppsTab.jsx";
+import MyServicesPanel from "../components/dashboard/MyServicesPanel.jsx";
 import ContractTab from "../components/dashboard/ContractTab.jsx";
 import ActivityTab from "../components/dashboard/ActivityTab.jsx";
 import { Skeleton, SkeletonCard, SkeletonStatRow } from "../components/ui/Skeleton.jsx";
@@ -21,6 +22,7 @@ const STATUS_LABELS = {
 const MOBILE_TABS = [
   { key: "overview", label: "Vue d'ensemble", icon: LayoutGrid },
   { key: "apps", label: "Mes apps", icon: Boxes },
+  { key: "services", label: "Mes services", icon: Compass },
   { key: "offers", label: "Offres", icon: Tag },
   { key: "contract", label: "Contrat", icon: FileText },
   { key: "activity", label: "Activité", icon: Activity },
@@ -49,6 +51,7 @@ export default function PartnerDashboard() {
   const [apps, setApps] = useState([]);
   const [billing, setBilling] = useState(null);
   const [contactMessages, setContactMessages] = useState([]);
+  const [services, setServices] = useState(null);
   const [stats, setStats] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [pageStatus, setPageStatus] = useState("loading"); // loading | ready | error
@@ -61,6 +64,11 @@ export default function PartnerDashboard() {
     try {
       const app = await withAuth((token) => api.partners.me(token)).catch(() => null);
       setApplication(app);
+
+      // Les abonnements aux services H-Company appartiennent à l'utilisateur,
+      // pas à sa candidature partenaire — on les charge dans tous les cas.
+      const svc = await withAuth((token) => api.services.mine(token)).catch(() => null);
+      setServices(svc);
 
       if (app) {
         const offersList = await withAuth((token) => api.partners.myOffers(token)).catch(() => []);
@@ -183,6 +191,11 @@ export default function PartnerDashboard() {
           <button onClick={signOut} className="text-sm text-ink-soft hover:text-ink">Se déconnecter</button>
         </header>
         <main className="max-w-2xl mx-auto px-6 py-16">
+          <div className="mb-12">
+            <h1 className="font-display text-2xl text-ink mb-6 text-center">Mes services</h1>
+            <MyServicesPanel summary={services} />
+          </div>
+
           <h1 className="font-display text-2xl text-ink mb-6 text-center">Mes demandes</h1>
           {contactMessages.length === 0 ? (
             <p className="text-ink-soft text-center">Aucune demande envoyée pour l'instant.</p>
@@ -291,6 +304,7 @@ export default function PartnerDashboard() {
             <OverviewTab application={application} stats={stats} activities={activities} />
           )}
           {activeTab === "apps" && <AppsTab apps={apps} billing={billing} onRequestApp={handleRequestApp} />}
+          {activeTab === "services" && <MyServicesPanel summary={services} />}
           {activeTab === "offers" && <OffersTab offers={offers} onAccept={handleAcceptOffer} />}
           {activeTab === "contract" && <ContractTab contract={contract} onSign={handleSign} />}
           {activeTab === "activity" && <ActivityTab activities={activities} />}

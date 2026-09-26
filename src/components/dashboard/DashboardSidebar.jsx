@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutGrid, FileText, Activity, Tag, Boxes, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { LayoutGrid, FileText, Activity, Tag, Boxes, Compass, Settings as SettingsIcon, LogOut } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "overview", label: "Vue d'ensemble", icon: LayoutGrid },
   { key: "apps", label: "Mes apps", icon: Boxes },
+  { key: "services", label: "Mes services", icon: Compass },
   { key: "offers", label: "Offres", icon: Tag },
   { key: "contract", label: "Contrat", icon: FileText },
   { key: "activity", label: "Activité", icon: Activity },
