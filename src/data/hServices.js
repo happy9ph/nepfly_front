@@ -5,7 +5,11 @@
 // (icône, couleur) associée à chaque `service_key`, indexée sur la même clé
 // que le backend (voir backend/app/routers/services.py::SERVICE_CATALOG).
 import { Bus, Package, BedDouble, UtensilsCrossed, GraduationCap, Banknote, Languages, ShoppingBag } from "lucide-react";
+import { BASE_URL } from "../lib/api.js";
 
+// Icônes de secours — utilisées uniquement quand le service n'a pas encore
+// de logo en base (logo_url absent), par ex. juste après la création d'un
+// nouveau service depuis l'admin, avant l'upload de son logo.
 export const SERVICE_PRESENTATION = {
   h_transport_bus: { Icon: Bus, fallbackLabel: "H-Transport (Bus)" },
   h_transport_colis: { Icon: Package, fallbackLabel: "H-Transport (Colis)" },
@@ -19,4 +23,13 @@ export const SERVICE_PRESENTATION = {
 
 export function presentationFor(key) {
   return SERVICE_PRESENTATION[key] || { Icon: Package, fallbackLabel: key };
+}
+
+// Construit l'URL absolue d'un logo servi par le backend (ex:
+// "/uploads/service-logos/h_restaurant.svg" -> "http://.../uploads/...").
+// `logoUrl` vient du catalogue (GET /api/v1/services/catalog) ; peut être
+// null si le service n'a pas encore de logo uploadé.
+export function logoSrc(logoUrl) {
+  if (!logoUrl) return null;
+  return `${BASE_URL}${logoUrl}`;
 }

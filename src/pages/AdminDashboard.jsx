@@ -12,6 +12,7 @@ import ApplicationsTable, { timeAgo, exportApplicationsCsv, isTyping } from "../
 import ApplicationDetail from "../components/admin/ApplicationDetail.jsx";
 import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
 import ServiceSubscriptionsPanel from "../components/admin/ServiceSubscriptionsPanel.jsx";
+import ServiceCatalogPanel from "../components/admin/ServiceCatalogPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
 
@@ -462,6 +463,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <ServiceSubscriptionsPanel withAuth={withAuth} api={api} />
+            </>
+          ) : view === "serviceCatalog" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> Catalogue services</p>
+                <Title className="text-3xl">Catalogue services</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Ajoute, modifie ou retire un service H-Company — libellés, description, logo et disponibilité.
+                </p>
+              </div>
+              <ServiceCatalogPanel withAuth={withAuth} api={api} />
             </>
           ) : (
             <div className="grid xl:grid-cols-[minmax(0,1fr)_310px] gap-6 lg:gap-8 items-start">

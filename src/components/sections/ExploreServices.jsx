@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { api } from "../../lib/api.js";
 import Reveal from "../ui/Reveal.jsx";
-import { presentationFor } from "../../data/hServices.js";
+import ServiceLogo from "../services/ServiceLogo.jsx";
 import SubscribeServiceModal from "../services/SubscribeServiceModal.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
@@ -60,7 +60,6 @@ export default function ExploreServices() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {catalog.map((raw, i) => {
               const service = localize(raw);
-              const { Icon } = presentationFor(service.key);
               return (
                 <Reveal key={service.key} delay={i * 0.05}>
                   <button
@@ -74,8 +73,8 @@ export default function ExploreServices() {
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <span className="w-10 h-10 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0">
-                        <Icon size={19} />
+                      <span className="w-10 h-10 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0 overflow-hidden">
+                        <ServiceLogo logoUrl={service.logo_url} serviceKey={service.key} size={19} />
                       </span>
                       {service.disabled ? (
                         <span className="text-[0.6rem] font-medium uppercase tracking-wide bg-line text-ink-faint px-2 py-0.5 rounded-full h-fit">

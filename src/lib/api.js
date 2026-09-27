@@ -2,7 +2,9 @@
 // L'URL de base se configure via la variable d'environnement VITE_API_URL
 // (voir .env.example). Aucune dépendance externe : fetch natif du navigateur.
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Exporté pour construire des URL absolues vers des fichiers servis par le
+// backend (logos de services uploadés, etc.) — voir data/hServices.js.
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // Les navigateurs modernes bloquent de plus en plus les cookies tiers dès
 // que le site et l'API vivent sur deux domaines différents (Vercel +
@@ -41,6 +43,10 @@ class NetworkError extends Error {
 }
 
 async function request(path, { method = "GET", body, token, headers = {} } = {}) {
+  // Un FormData (upload de fichier) ne doit pas être JSON.stringify()'d, et
+  // le Content-Type multipart avec sa boundary doit être posé par le
+  // navigateur lui-même, pas fixé ici en dur.
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   let res;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -51,11 +57,11 @@ async function request(path, { method = "GET", body, token, headers = {} } = {})
       // en dev (ports 8000 vs 5173), donc `credentials` doit être explicite.
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     });
   } catch {
     // Le fetch lui-même a échoué (serveur injoignable, coupure réseau,
@@ -207,6 +213,19 @@ export const api = {
         token,
         body: { status, admin_note: adminNote || null },
       }),
+    // Catalogue des services (libellés FR/EN, description, logo, activation)
+    listServiceCatalog: (token) => request("/api/v1/services/admin/catalog", { token }),
+    createServiceCatalogItem: (token, payload) =>
+      request("/api/v1/services/admin/catalog", { method: "POST", token, body: payload }),
+    updateServiceCatalogItem: (token, id, payload) =>
+      request(`/api/v1/services/admin/catalog/${id}`, { method: "PATCH", token, body: payload }),
+    deleteServiceCatalogItem: (token, id) =>
+      request(`/api/v1/services/admin/catalog/${id}`, { method: "DELETE", token }),
+    uploadServiceCatalogLogo: (token, id, file) => {
+      const form = new FormData();
+      form.append("file", file);
+      return request(`/api/v1/services/admin/catalog/${id}/logo`, { method: "POST", token, body: form });
+    },
   },
 
   // Mes demandes (contact) — utilisateur connecté

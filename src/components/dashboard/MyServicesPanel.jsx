@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Compass } from "lucide-react";
 import StatCard from "./StatCard.jsx";
-import { presentationFor } from "../../data/hServices.js";
+import ServiceLogo from "../services/ServiceLogo.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const STATUS_TONE = {
@@ -16,10 +16,11 @@ const STATUS_TONE = {
  * abonné, avec leur statut d'approbation. La demande elle-même se fait
  * depuis la section "Explorez nos services" de la page d'accueil ; ce
  * panneau est purement un suivi, à l'image de AppsTab côté partenaire. */
-export default function MyServicesPanel({ summary }) {
+export default function MyServicesPanel({ summary, catalog = [] }) {
   const { t } = useLanguage();
   const subscriptions = summary?.subscriptions || [];
   const statusLabel = (status) => t(`myServices.status${status.charAt(0).toUpperCase()}${status.slice(1)}`);
+  const logoByKey = Object.fromEntries(catalog.map((c) => [c.key, c.logo_url]));
 
   return (
     <div className="space-y-6">
@@ -55,14 +56,13 @@ export default function MyServicesPanel({ summary }) {
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
           {subscriptions.map((sub) => {
-            const { Icon } = presentationFor(sub.service_key);
             const catalogTr = t(`exploreServices.catalog.${sub.service_key}`);
             const label = (typeof catalogTr === "object" && catalogTr?.label) || sub.service_key;
             return (
               <div key={sub.id} className="bg-surface border border-line rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="w-9 h-9 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0">
-                    <Icon size={16} />
+                  <span className="w-9 h-9 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0 overflow-hidden">
+                    <ServiceLogo logoUrl={logoByKey[sub.service_key]} serviceKey={sub.service_key} size={16} />
                   </span>
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_TONE[sub.status]}`}>
                     {statusLabel(sub.status)}

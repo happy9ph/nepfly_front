@@ -54,6 +54,7 @@ export default function PartnerDashboard() {
   const [billing, setBilling] = useState(null);
   const [contactMessages, setContactMessages] = useState([]);
   const [services, setServices] = useState(null);
+  const [serviceCatalog, setServiceCatalog] = useState([]);
   const [stats, setStats] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [pageStatus, setPageStatus] = useState("loading"); // loading | ready | error
@@ -71,6 +72,8 @@ export default function PartnerDashboard() {
       // pas à sa candidature partenaire — on les charge dans tous les cas.
       const svc = await withAuth((token) => api.services.mine(token)).catch(() => null);
       setServices(svc);
+      const svcCatalog = await api.services.catalog().catch(() => []);
+      setServiceCatalog(svcCatalog || []);
 
       if (app) {
         const offersList = await withAuth((token) => api.partners.myOffers(token)).catch(() => []);
@@ -195,7 +198,7 @@ export default function PartnerDashboard() {
         <main className="max-w-2xl mx-auto px-6 py-16">
           <div className="mb-12">
             <h1 className="font-display text-2xl text-ink mb-6 text-center">{t("myServices.heading")}</h1>
-            <MyServicesPanel summary={services} />
+            <MyServicesPanel summary={services} catalog={serviceCatalog} />
           </div>
 
           <h1 className="font-display text-2xl text-ink mb-6 text-center">Mes demandes</h1>
@@ -306,7 +309,7 @@ export default function PartnerDashboard() {
             <OverviewTab application={application} stats={stats} activities={activities} />
           )}
           {activeTab === "apps" && <AppsTab apps={apps} billing={billing} onRequestApp={handleRequestApp} />}
-          {activeTab === "services" && <MyServicesPanel summary={services} />}
+          {activeTab === "services" && <MyServicesPanel summary={services} catalog={serviceCatalog} />}
           {activeTab === "offers" && <OffersTab offers={offers} onAccept={handleAcceptOffer} />}
           {activeTab === "contract" && <ContractTab contract={contract} onSign={handleSign} />}
           {activeTab === "activity" && <ActivityTab activities={activities} />}

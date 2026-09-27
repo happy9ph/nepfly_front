@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, X, Loader2, Compass, Inbox, AlertCircle, Users, Clock } from "lucide-react";
-import { presentationFor } from "../../data/hServices.js";
+import ServiceLogo from "../services/ServiceLogo.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const STATUS_STYLE = {
@@ -48,6 +48,7 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
   const { t, lang } = useLanguage();
   const [pending, setPending] = useState([]);
   const [all, setAll] = useState([]);
+  const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
@@ -58,15 +59,19 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
     return (typeof tr === "object" && tr?.label) || serviceKey;
   }
 
+  const logoByKey = Object.fromEntries(catalog.map((c) => [c.key, c.logo_url]));
+
   async function load() {
     setLoading(true);
     try {
-      const [p, a] = await Promise.all([
+      const [p, a, c] = await Promise.all([
         withAuth((token) => api.admin.pendingSubscriptions(token)).catch(() => []),
         withAuth((token) => api.admin.listSubscriptions(token)).catch(() => []),
+        api.services.catalog().catch(() => []),
       ]);
       setPending(p || []);
       setAll(a || []);
+      setCatalog(c || []);
       setError(null);
     } catch {
       setError(t("adminServices.loadError"));
@@ -152,13 +157,12 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {pending.map((sub) => {
-              const { Icon } = presentationFor(sub.service_key);
               const busy = busyId === sub.id;
               return (
                 <article key={sub.id} className="bg-surface border border-line rounded-2xl p-5 flex flex-col">
                   <div className="flex items-start justify-between mb-3">
-                    <span className="w-11 h-11 rounded-xl bg-cream flex items-center justify-center text-coffee-dark shrink-0">
-                      <Icon size={19} strokeWidth={1.8} />
+                    <span className="w-11 h-11 rounded-xl bg-cream flex items-center justify-center text-coffee-dark shrink-0 overflow-hidden">
+                      <ServiceLogo logoUrl={logoByKey[sub.service_key]} serviceKey={sub.service_key} size={19} />
                     </span>
                     <StatusBadge status={sub.status} t={t} />
                   </div>
@@ -227,13 +231,12 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
                 </thead>
                 <tbody>
                   {all.map((sub) => {
-                    const { Icon } = presentationFor(sub.service_key);
                     return (
                       <tr key={sub.id} className="border-b border-line/60 last:border-0 hover:bg-cream/40 transition-colors">
                         <td className="px-5 py-3.5">
                           <span className="flex items-center gap-2 text-ink">
-                            <span className="w-7 h-7 rounded-lg bg-cream flex items-center justify-center text-coffee-dark">
-                              <Icon size={13} />
+                            <span className="w-7 h-7 rounded-lg bg-cream flex items-center justify-center text-coffee-dark overflow-hidden">
+                              <ServiceLogo logoUrl={logoByKey[sub.service_key]} serviceKey={sub.service_key} size={13} />
                             </span>
                             {localizedLabel(sub.service_key)}
                           </span>
@@ -253,11 +256,10 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
 
             <div className="md:hidden space-y-2.5">
               {all.map((sub) => {
-                const { Icon } = presentationFor(sub.service_key);
                 return (
                   <div key={sub.id} className="bg-surface border border-line rounded-2xl p-4 flex items-start gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-coffee-dark shrink-0">
-                      <Icon size={17} />
+                    <span className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-coffee-dark shrink-0 overflow-hidden">
+                      <ServiceLogo logoUrl={logoByKey[sub.service_key]} serviceKey={sub.service_key} size={17} />
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">

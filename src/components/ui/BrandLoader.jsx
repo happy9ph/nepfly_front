@@ -1,6 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
 
-
+/**
+ * Écran de chargement de marque — même idée que le "ta-dum" Netflix, mais
+ * avec notre lettre H qui s'anime au centre d'un fond sombre : un flash de
+ * lumière chaude derrière la lettre, un léger zoom, puis un fondu vers le
+ * contenu. Utilisé (a) au tout premier chargement de la home et (b) comme
+ * fallback de <Suspense> lors des changements de page (voir App.jsx) — dans
+ * les deux cas il reste visible un minimum de temps pour que l'animation se
+ * joue vraiment, plutôt qu'un flash technique à peine perceptible.
+ */
 export default function BrandLoader({ visible = true }) {
   return (
     <AnimatePresence>

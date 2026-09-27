@@ -6,7 +6,7 @@ import { api } from "../../lib/api.js";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
-import { presentationFor } from "../../data/hServices.js";
+import ServiceLogo from "./ServiceLogo.jsx";
 
 /** Formulaire d'abonnement à un service H-Company — ouvert depuis
  * "Explore our services". Le nom du service est déjà renseigné (l'utilisateur
@@ -22,7 +22,6 @@ export default function SubscribeServiceModal({ service, onClose, onSubscribed }
   const toast = useToast();
 
   if (!service) return null;
-  const { Icon } = presentationFor(service.key);
   const catalogTr = t(`exploreServices.catalog.${service.key}`);
   const serviceLabel = (typeof catalogTr === "object" && catalogTr?.label) || service.label;
   const serviceDescription = (typeof catalogTr === "object" && catalogTr?.description) || service.description;
@@ -61,8 +60,8 @@ export default function SubscribeServiceModal({ service, onClose, onSubscribed }
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0">
-              <Icon size={18} />
+            <span className="w-10 h-10 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0 overflow-hidden">
+              <ServiceLogo logoUrl={service.logo_url} serviceKey={service.key} size={18} />
             </span>
             <h3 className="font-display text-lg text-ink">{serviceLabel}</h3>
           </div>
