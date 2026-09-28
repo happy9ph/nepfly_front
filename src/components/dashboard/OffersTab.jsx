@@ -75,7 +75,7 @@ export default function OffersTab({ offers, onAccept }) {
             )}
             {isAccepted && (
               <Link
-                to={`/paiement/${offer.id}`}
+                to={`/paiement/${offer.public_id}`}
                 className="mt-auto flex items-center justify-center gap-1.5 rounded-full bg-ink text-cream text-sm font-medium px-5 py-2.5 hover:bg-coffee-dark transition-colors"
               >
                 <CreditCard size={14} />

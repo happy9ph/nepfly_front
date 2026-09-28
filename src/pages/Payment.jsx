@@ -235,7 +235,7 @@ export default function Payment() {
     }
     withAuth((token) => api.partners.myOffers(token))
       .then((offers) => {
-        const found = offers.find((o) => String(o.id) === String(offerId));
+        const found = offers.find((o) => String(o.public_id) === String(offerId));
         setOffer(found || null);
       })
       .catch(() => setOffer(null));
@@ -245,7 +245,7 @@ export default function Payment() {
     setError(null);
     setLoading(true);
     try {
-      const payment = await withAuth((token) => api.partners.createPayment(token, Number(offerId), method.key, phoneNumber));
+      const payment = await withAuth((token) => api.partners.createPayment(token, offerId, method.key, phoneNumber));
       setSuccess(payment);
     } catch (err) {
       setError(err?.data?.detail || "Le paiement n'a pas pu être traité, réessayez.");

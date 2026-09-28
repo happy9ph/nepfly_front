@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Chatbot from "./components/chatbot/Chatbot.jsx";
 import ScrollToTop from "./components/ui/ScrollToTop.jsx";
 import BrandLoader from "./components/ui/BrandLoader.jsx";
+import { HeadManager } from "./components/ui/HeadManager.jsx";
 
 // Découpage du code par page : chaque page n'est téléchargée que lorsque
 // l'utilisateur y accède, au lieu de tout charger d'un bloc au premier
@@ -68,7 +69,7 @@ function RouteTransitionLoader() {
 
 export default function App() {
   return (
-    <>
+    <HeadManager>
       <RouteTransitionLoader />
       <ScrollToTop />
       <a
@@ -112,6 +113,6 @@ export default function App() {
         </div>
       </Suspense>
       <Chatbot />
-    </>
+    </HeadManager>
   );
 }

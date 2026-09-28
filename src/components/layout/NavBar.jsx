@@ -5,6 +5,7 @@ import { LayoutDashboard, Settings as SettingsIcon, LogOut } from "lucide-react"
 import { useUser } from "../../context/Usercontext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import NotificationBell from "./NotificationBell.jsx";
+import Logo from "../ui/Logo.jsx";
 
 export default function NavBar() {
   const { t } = useLanguage();
@@ -40,7 +41,8 @@ export default function NavBar() {
         }`}
       >
         <div className="max-w-content mx-auto flex items-center justify-between px-6 py-5">
-          <a href="#top" className="font-display text-xl tracking-tight text-ink">
+          <a href="#top" className="flex items-center gap-2 font-display text-xl tracking-tight text-ink">
+            <Logo size={26} />
             H-Company
           </a>
 

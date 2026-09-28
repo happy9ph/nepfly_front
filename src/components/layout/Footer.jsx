@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { Sun, Moon, Monitor } from "lucide-react";
+import Logo from "../ui/Logo.jsx";
 
 function NetworkGlyph() {
   return (
@@ -178,6 +179,7 @@ export default function Footer() {
           gap: 3rem; padding-bottom: 3.5rem;
         }
         .hc-footer-brand { display: flex; flex-direction: column; gap: 1.1rem; }
+        .hc-footer-brandmark { display: inline-flex; align-items: center; gap: 0.6rem; }
         .hc-footer-name { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.35rem; }
         .hc-footer-tag { font-size: 0.9rem; color: #5C6357; max-width: 22ch; line-height: 1.65; }
 
@@ -222,7 +224,10 @@ export default function Footer() {
       <div className="hc-footer-inner">
         <div className="hc-footer-top">
           <div className="hc-footer-brand">
-            <span className="hc-footer-name">H-Company</span>
+            <span className="hc-footer-brandmark">
+              <Logo size={28} />
+              <span className="hc-footer-name">H-Company</span>
+            </span>
             <p className="hc-footer-tag">
               {t("footer.tagline")}
             </p>

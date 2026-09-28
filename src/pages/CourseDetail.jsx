@@ -7,6 +7,7 @@ import DetailHero from "../components/detail/DetailHero.jsx";
 import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
 import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { usePageMeta } from "../components/ui/HeadManager.jsx";
 import { useCourses, LEVEL_TONE } from "../data/courses.js";
 
 const LEVEL_HOURS = { "initiation": 6, "intermédiaire": 12, "tous niveaux": 8 };
@@ -41,12 +42,12 @@ export default function CourseDetail() {
   const { id } = useParams();
   const { t } = useLanguage();
   const { status, courses } = useCourses();
+  const course = courses.find((c) => String(c.id) === String(id));
+  usePageMeta(course ? { title: course.title, description: course.text || course.description } : null);
 
   if (status === "loading") {
     return <div className="min-h-screen bg-cream" />;
   }
-
-  const course = courses.find((c) => String(c.id) === String(id));
   if (!course) return <Navigate to="/#learning" replace />;
 
   const tone = LEVEL_TONE[course.level] || "coffee";

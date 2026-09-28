@@ -7,6 +7,7 @@ import DetailHero from "../components/detail/DetailHero.jsx";
 import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
 import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { usePageMeta } from "../components/ui/HeadManager.jsx";
 import { SERVICES_META, UNIT_LABEL, findServiceBySlug } from "../data/services.js";
 
 export default function ServiceDetail() {
@@ -14,10 +15,12 @@ export default function ServiceDetail() {
   const { t, lang } = useLanguage();
   const meta = findServiceBySlug(slug);
 
+  const name = meta ? t(`services.${meta.key}n`) : null;
+  const text = meta ? t(`services.${meta.key}t`) : null;
+  usePageMeta(meta ? { title: name, description: text } : null);
+
   if (!meta) return <Navigate to="/#services" replace />;
 
-  const name = t(`services.${meta.key}n`);
-  const text = t(`services.${meta.key}t`);
   const category = t(`services.categories.${meta.categoryKey}`);
   const unit = UNIT_LABEL[lang][meta.unitKey];
   const features = t(`services.${meta.key}features`);

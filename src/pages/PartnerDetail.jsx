@@ -11,6 +11,7 @@ import DetailHero from "../components/detail/DetailHero.jsx";
 import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
 import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { usePageMeta } from "../components/ui/HeadManager.jsx";
 import { PARTNER_META, getPartnerContent, findPartnerBySlug } from "../data/partners.js";
 
 // Lukondo et Confismila exploitent déjà un service H-Company que les
@@ -26,10 +27,12 @@ export default function PartnerDetail() {
   const { t } = useLanguage();
   const [contactOpen, setContactOpen] = useState(false);
   const meta = findPartnerBySlug(slug);
+  const previewContent = meta ? getPartnerContent(t, meta) : null;
+  usePageMeta(meta ? { title: meta.name, description: previewContent?.text } : null);
 
   if (!meta) return <Navigate to="/#partenaires" replace />;
 
-  const content = getPartnerContent(t, meta);
+  const content = previewContent;
   const others = PARTNER_META.filter((p) => p.slug !== slug).slice(0, 3);
   const gradientHex = meta.gradient.match(/#[0-9A-Fa-f]{6}/)[0];
 
