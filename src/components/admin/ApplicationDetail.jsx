@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   Check, X, Send, Loader2, Mail, Calendar, Tag, FileText, CheckCircle2,
-  AlertCircle, Package, MousePointerClick, Gavel, BadgePercent,
+  AlertCircle, Package, MousePointerClick, Gavel, BadgePercent, ShieldCheck,
+  Phone, MapPin, Eye, ExternalLink,
 } from "lucide-react";
 import OffersPanel from "./OffersPanel.jsx";
 import PartnerAppsPanel from "./PartnerAppsPanel.jsx";
@@ -10,6 +11,18 @@ const STATUS = {
   pending: { label: "En attente", badge: "bg-latte-soft text-coffee-dark border-latte-light", dot: "bg-latte" },
   approved: { label: "Approuvée", badge: "bg-latte-soft text-coffee-dark border-coffee-light", dot: "bg-coffee" },
   rejected: { label: "Rejetée", badge: "bg-line/60 text-ink-soft border-line", dot: "bg-ink-faint" },
+};
+
+const AGENT_REVIEW = {
+  pending: { label: "Pas encore examinée par un agent", badge: "bg-latte-soft text-coffee-dark border-latte-light" },
+  forwarded: { label: "Transmise par un agent", badge: "bg-latte-soft text-coffee-dark border-coffee-light" },
+  rejected: { label: "Rejetée par un agent", badge: "bg-line/60 text-ink-soft border-line" },
+};
+
+const ID_TYPE_LABELS = {
+  national_id: "Carte d'identité nationale",
+  voter_card: "Carte d'électeur",
+  passport: "Passeport",
 };
 
 function Section({ icon: Icon, title, aside, children }) {
@@ -45,6 +58,7 @@ export default function ApplicationDetail({ application, contract, offers, onApp
   const [saving, setSaving] = useState(false);
   const [deciding, setDeciding] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [docState, setDocState] = useState({ status: "idle", url: null, contentType: null });
 
   useEffect(() => {
     setDraft(contract?.content || "");
@@ -66,8 +80,20 @@ export default function ApplicationDetail({ application, contract, offers, onApp
   }
 
   const status = STATUS[application.status] || STATUS.pending;
+  const agentReview = AGENT_REVIEW[application.agent_review_status] || AGENT_REVIEW.pending;
+  const canApprove = application.agent_review_status === "forwarded";
   const signed = contract?.status === "signed";
   const dirty = draft !== (contract?.content || "");
+
+  async function viewDocument() {
+    setDocState({ status: "loading", url: null, contentType: null });
+    try {
+      const { url, contentType } = await withAuth((token) => api.agent.documentBlobUrl(token, application.id));
+      setDocState({ status: "ready", url, contentType });
+    } catch {
+      setDocState({ status: "error", url: null, contentType: null });
+    }
+  }
 
   async function handleDecision(next) {
     setDeciding(next);
@@ -106,10 +132,15 @@ export default function ApplicationDetail({ application, contract, offers, onApp
           <div className="flex-1 min-w-0 pt-0.5">
             <div className="flex items-start justify-between gap-3">
               <h2 className="font-display text-2xl text-ink leading-tight break-words">{application.company}</h2>
-              <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 ${status.badge}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-                {status.label}
-              </span>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap ${status.badge}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                  {status.label}
+                </span>
+                <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${agentReview.badge}`}>
+                  <ShieldCheck size={11} /> {agentReview.label}
+                </span>
+              </div>
             </div>
             <p className="text-sm text-ink-soft mt-1">{application.contact_name}</p>
           </div>
@@ -127,6 +158,13 @@ export default function ApplicationDetail({ application, contract, offers, onApp
               </a>
             </InfoTile>
           </div>
+          {application.phone && <InfoTile icon={Phone} label="Téléphone">{application.phone}</InfoTile>}
+          {application.address && <InfoTile icon={MapPin} label="Adresse">{application.address}</InfoTile>}
+          {application.id_document_type && (
+            <InfoTile icon={ShieldCheck} label="Pièce d'identité">
+              {ID_TYPE_LABELS[application.id_document_type] || application.id_document_type} — {application.id_document_number}
+            </InfoTile>
+          )}
         </div>
 
         {application.message && (
@@ -136,17 +174,51 @@ export default function ApplicationDetail({ application, contract, offers, onApp
         )}
       </div>
 
+      {/* Dossier KYC — pièce d'identité (lecture seule, même accès que l'agent) */}
+      {application.id_document_type && (
+        <Section icon={ShieldCheck} title="Pièce d'identité jointe">
+          {docState.status === "idle" ? (
+            <button
+              onClick={viewDocument}
+              className="flex items-center gap-2 text-sm font-medium rounded-lg border border-line px-3.5 py-2 hover:border-coffee-light hover:bg-cream/50 transition-colors"
+            >
+              <Eye size={14} /> Visualiser le document
+            </button>
+          ) : docState.status === "loading" ? (
+            <p className="flex items-center gap-2 text-sm text-ink-soft"><Loader2 size={14} className="animate-spin" /> Chargement…</p>
+          ) : docState.status === "error" ? (
+            <p className="text-sm text-red-600">Impossible de charger le document.</p>
+          ) : docState.contentType?.startsWith("image/") ? (
+            <a href={docState.url} target="_blank" rel="noreferrer" className="block">
+              <img src={docState.url} alt="Pièce d'identité" className="max-h-64 rounded-lg border border-line object-contain" />
+            </a>
+          ) : (
+            <a href={docState.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-medium text-coffee-dark hover:underline">
+              <FileText size={14} /> Ouvrir le PDF <ExternalLink size={12} />
+            </a>
+          )}
+        </Section>
+      )}
+
       {/* Décision */}
       {application.status === "pending" && (
         <Section icon={Gavel} title="Décision">
+          {!canApprove && (
+            <p className="flex items-start gap-2 text-xs text-coffee-dark bg-latte-soft/60 border border-latte-light rounded-lg px-3.5 py-2.5 mb-4">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+              Un agent doit d'abord examiner ce dossier et le transmettre avant que l'approbation finale ne soit possible.
+              {application.agent_review_note ? ` Note de l'agent : « ${application.agent_review_note} »` : ""}
+            </p>
+          )}
           <p className="text-xs text-ink-soft mb-4">
             Approuver la candidature crée automatiquement un contrat modifiable pour ce partenaire.
           </p>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => handleDecision("approved")}
-              disabled={!!deciding}
-              className="flex items-center justify-center gap-2 rounded-xl bg-coffee text-white text-sm font-medium px-4 py-3 disabled:opacity-60 hover:bg-coffee-dark transition-colors shadow-sm"
+              disabled={!!deciding || !canApprove}
+              title={!canApprove ? "En attente de transmission par un agent" : undefined}
+              className="flex items-center justify-center gap-2 rounded-xl bg-coffee text-white text-sm font-medium px-4 py-3 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-coffee-dark transition-colors shadow-sm"
             >
               {deciding === "approved" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               Approuver

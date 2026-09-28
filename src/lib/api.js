@@ -145,8 +145,18 @@ export const api = {
 
   // Candidatures / espace partenaires
   partners: {
-    apply: (token, payload) =>
-      request("/api/v1/partners/apply", { method: "POST", token, body: payload }),
+    // Formulaire unique de candidature (KYC inclus) — multipart/form-data
+    // car il embarque la pièce d'identité. `fields` = { company,
+    // contactName, category, message, phone, address, id_document_type,
+    // id_document_number }, `idDocumentFile` = objet File natif du <input type="file">.
+    apply: (token, fields, idDocumentFile) => {
+      const form = new FormData();
+      Object.entries(fields).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) form.append(key, value);
+      });
+      form.append("id_document", idDocumentFile);
+      return request("/api/v1/partners/apply", { method: "POST", token, body: form });
+    },
     // Ma candidature (utilisateur connecté)
     me: (token) => request("/api/v1/partners/me", { token }),
     contract: (token) => request("/api/v1/partners/me/contract", { token }),
@@ -237,6 +247,26 @@ export const api = {
         token,
         body: { status: statusValue },
       }),
+  },
+
+  // Espace agent — revue KYC des candidatures partenaires avant confirmation admin
+  agent: {
+    queue: (token) => request("/api/v1/partners/agent/queue", { token }),
+    history: (token) => request("/api/v1/partners/agent/history", { token }),
+    getApplication: (token, id) => request(`/api/v1/partners/agent/${id}`, { token }),
+    review: (token, id, decision, note) =>
+      request(`/api/v1/partners/agent/${id}/review`, { method: "PATCH", token, body: { decision, note: note || null } }),
+    // Le document ne peut pas être chargé via une simple balise <img src="">
+    // (il exige un en-tête Authorization) — on le récupère en blob puis on
+    // construit une URL objet locale pour l'afficher/télécharger.
+    documentBlobUrl: async (token, id) => {
+      const res = await fetch(`${BASE_URL}/api/v1/partners/agent/${id}/document`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new ApiError("Document introuvable.", res.status, null);
+      const blob = await res.blob();
+      return { url: URL.createObjectURL(blob), contentType: blob.type };
+    },
   },
 
   // Notifications de l'utilisateur connecté (cloche navbar)

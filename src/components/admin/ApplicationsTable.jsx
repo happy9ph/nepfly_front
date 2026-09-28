@@ -438,9 +438,14 @@ export default function ApplicationsTable({
                         </div>
                       </div>
 
-                      {app.status === "pending" && (
+                      {app.status === "pending" && app.agent_review_status === "forwarded" && (
                         <span className="hidden md:flex items-center gap-1.5 text-xs font-medium text-cream bg-ink rounded-full px-3 py-1.5 shrink-0">
                           <Eye size={13} /> À traiter
+                        </span>
+                      )}
+                      {app.status === "pending" && app.agent_review_status === "pending" && (
+                        <span className="hidden md:flex items-center gap-1.5 text-xs font-medium text-coffee-dark bg-latte-soft border border-latte-light rounded-full px-3 py-1.5 shrink-0">
+                          En attente d'un agent
                         </span>
                       )}
 

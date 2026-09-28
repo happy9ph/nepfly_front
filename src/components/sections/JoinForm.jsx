@@ -1,18 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, ShieldCheck, Paperclip } from "lucide-react";
 import { api } from "../../lib/api.js";
 import Reveal from "../ui/Reveal.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { useProgressAction } from "../../context/ProgressContext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useUser } from "../../context/Usercontext.jsx";
+import FormLoadingOverlay from "../ui/FormLoadingOverlay.jsx";
 
 const FIELDS_INITIAL = {
   company: "",
   contactName: "",
   category: "Développement web & mobile",
   message: "",
+  phone: "",
+  address: "",
+  id_document_type: "national_id",
+  id_document_number: "",
 };
 
 const CATEGORIES = [
@@ -24,6 +29,9 @@ const CATEGORIES = [
   "Formation (H-learning)",
   "Autre",
 ];
+
+const MAX_ID_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_ID_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 
 /** Invite à se connecter avant de candidater — affiché à la place du
  * formulaire tant que l'utilisateur n'a pas de session active. */
@@ -59,6 +67,7 @@ export default function JoinForm() {
   const { t } = useLanguage();
   const { isAuthenticated, withAuth, user } = useUser();
   const [fields, setFields] = useState(FIELDS_INITIAL);
+  const [idFile, setIdFile] = useState(null);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
   const toast = useToast();
@@ -68,20 +77,42 @@ export default function JoinForm() {
     setFields((f) => ({ ...f, [key]: value }));
   }
 
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return setIdFile(null);
+    if (!ACCEPTED_ID_TYPES.includes(file.type)) {
+      toast.error("Format non accepté — utilisez un JPG, PNG ou PDF.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_ID_FILE_SIZE) {
+      toast.error("Le fichier ne doit pas dépasser 5 Mo.");
+      e.target.value = "";
+      return;
+    }
+    setIdFile(file);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!idFile) {
+      const msg = t("joinForm.idDocumentFile");
+      setStatus("error");
+      setErrorMsg(msg);
+      toast.error(msg);
+      return;
+    }
     setStatus("loading");
     setErrorMsg("");
     try {
-      await withProgress(() => withAuth((token) => api.partners.apply(token, fields)));
+      await withProgress(() => withAuth((token) => api.partners.apply(token, fields, idFile)));
       setStatus("success");
       setFields(FIELDS_INITIAL);
-      toast.success("Candidature envoyée — vous la retrouverez depuis votre tableau de bord.");
+      setIdFile(null);
+      toast.success(t("joinForm.success"));
     } catch (err) {
       setStatus("error");
-      const msg =
-        err?.data?.detail ||
-        "Impossible d'envoyer votre candidature pour le moment. Réessayez un peu plus tard.";
+      const msg = err?.data?.detail || t("joinForm.formError");
       setErrorMsg(msg);
       toast.error(msg);
     }
@@ -104,7 +135,8 @@ export default function JoinForm() {
           {!isAuthenticated ? (
             <SignInPrompt t={t} />
           ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="relative space-y-5">
+          <FormLoadingOverlay show={status === "loading"} label={t("joinForm.submitting")} rounded="rounded-2xl" />
           <p className="text-sm text-ink-soft">
             {t("joinForm.connectedAs")} <span className="font-medium text-ink">{user?.email}</span>
           </p>
@@ -155,6 +187,89 @@ export default function JoinForm() {
               className="w-full rounded-lg border border-line bg-surface px-4 py-2.5 text-ink placeholder:text-stone/60 focus:border-coffee outline-none transition-colors resize-none"
               placeholder={t("joinForm.messagePlaceholder")}
             />
+          </div>
+
+          {/* --- Dossier KYC --- */}
+          <div className="rounded-2xl border border-line/70 bg-cream/60 p-5 space-y-5">
+            <div className="flex items-start gap-2.5">
+              <ShieldCheck size={17} className="text-coffee-dark shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-ink">{t("joinForm.kycHeading")}</p>
+                <p className="text-xs text-ink-faint mt-0.5 leading-relaxed">{t("joinForm.kycNote")}</p>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field
+                id="phone"
+                label={t("joinForm.phone")}
+                type="tel"
+                value={fields.phone}
+                onChange={(v) => update("phone", v)}
+                required
+              />
+              <Field
+                id="address"
+                label={t("joinForm.address")}
+                value={fields.address}
+                onChange={(v) => update("address", v)}
+                required
+              />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label htmlFor="id_document_type" className="block text-sm text-stone mb-1.5">
+                  {t("joinForm.idDocumentType")}
+                </label>
+                <select
+                  id="id_document_type"
+                  value={fields.id_document_type}
+                  onChange={(e) => update("id_document_type", e.target.value)}
+                  className="w-full rounded-lg border border-line bg-surface px-4 py-2.5 text-ink focus:border-coffee outline-none transition-colors"
+                >
+                  <option value="national_id">{t("joinForm.idTypeNationalId")}</option>
+                  <option value="voter_card">{t("joinForm.idTypeVoterCard")}</option>
+                  <option value="passport">{t("joinForm.idTypePassport")}</option>
+                </select>
+              </div>
+              <Field
+                id="id_document_number"
+                label={t("joinForm.idDocumentNumber")}
+                value={fields.id_document_number}
+                onChange={(v) => update("id_document_number", v)}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="id_document" className="block text-sm text-stone mb-1.5">
+                {t("joinForm.idDocumentFile")}
+              </label>
+              <label
+                htmlFor="id_document"
+                className="flex items-center gap-2.5 w-full rounded-lg border border-dashed border-line bg-surface px-4 py-3 text-sm text-ink-soft cursor-pointer hover:border-coffee-light transition-colors"
+              >
+                <Paperclip size={15} className="shrink-0 text-coffee-dark" />
+                <span className="truncate">
+                  {idFile ? (
+                    <>
+                      <span className="text-ink-faint">{t("joinForm.idDocumentFileChosen")}</span>{" "}
+                      <span className="text-ink font-medium">{idFile.name}</span>
+                    </>
+                  ) : (
+                    t("joinForm.idDocumentFile")
+                  )}
+                </span>
+              </label>
+              <input
+                id="id_document"
+                type="file"
+                accept="image/png,image/jpeg,application/pdf"
+                onChange={handleFileChange}
+                className="sr-only"
+              />
+            </div>
           </div>
 
           {status === "success" && (

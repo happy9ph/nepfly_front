@@ -11,6 +11,7 @@ const Home = lazy(() => import("./pages/Home.jsx"));
 const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard.jsx"));
 const Settings = lazy(() => import("./pages/Settings.jsx"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard.jsx"));
+const AgentDashboard = lazy(() => import("./pages/AgentDashboard.jsx"));
 const Onboarding = lazy(() => import("./pages/Onboarding.jsx"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail.jsx"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail.jsx"));
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/dashboard" element={<PartnerDashboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/agent" element={<AgentDashboard />} />
           <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/cours/:id" element={<CourseDetail />} />
           <Route path="/partenaires/:slug" element={<PartnerDetail />} />

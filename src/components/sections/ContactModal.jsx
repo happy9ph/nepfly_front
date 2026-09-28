@@ -4,6 +4,7 @@ import { X, Send, Loader2, CheckCircle2 } from "lucide-react";
 import { api } from "../../lib/api.js";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useUser } from "../../context/Usercontext.jsx";
+import FormLoadingOverlay from "../ui/FormLoadingOverlay.jsx";
 
 /** Formulaire de contact général — jusqu'ici le backend (api.contact.send)
  * n'avait aucun appelant côté frontend : aucun moyen concret pour un
@@ -49,6 +50,7 @@ export default function ContactModal({ onClose, context }) {
         exit={{ opacity: 0, scale: 0.96 }}
         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[190] bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
       >
+        <FormLoadingOverlay show={status === "loading"} label={t("contactModal.sending")} rounded="rounded-2xl" />
         {status === "success" ? (
           <div className="flex flex-col items-center text-center py-6">
             <CheckCircle2 size={40} className="text-emerald-600 mb-3" />

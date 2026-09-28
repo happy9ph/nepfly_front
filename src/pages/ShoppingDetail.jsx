@@ -10,6 +10,7 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import { useUser } from "../context/Usercontext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { useProgressAction } from "../context/ProgressContext.jsx";
+import FormLoadingOverlay from "../components/ui/FormLoadingOverlay.jsx";
 
 const CATEGORY_KEYS = ["catFurniture", "catClothing", "catCraft", "catElectronics", "catOther"];
 
@@ -141,7 +142,8 @@ export default function ShoppingDetail() {
           {!isAuthenticated ? (
             <SignInPrompt t={t} />
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="relative space-y-5">
+              <FormLoadingOverlay show={status === "loading"} label={t("shopping.formSubmitting")} rounded="rounded-2xl" />
               <p className="text-sm text-ink-soft">
                 {t("shopping.connectedAs")} <span className="font-medium text-ink">{user?.email}</span>
               </p>

@@ -7,6 +7,7 @@ import { useUser } from "../../context/Usercontext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import ServiceLogo from "./ServiceLogo.jsx";
+import FormLoadingOverlay from "../ui/FormLoadingOverlay.jsx";
 
 /** Formulaire d'abonnement à un service H-Company — ouvert depuis
  * "Explore our services". Le nom du service est déjà renseigné (l'utilisateur

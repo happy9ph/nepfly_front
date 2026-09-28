@@ -83,13 +83,13 @@ export default function NavBar() {
 
                     <div className="py-1.5">
                       <Link
-                        to="/dashboard"
+                        to={user?.role === "admin" ? "/admin" : user?.role === "agent" ? "/agent" : "/dashboard"}
                         role="menuitem"
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 w-full text-left text-sm text-ink px-4 py-2.5 hover:bg-ink/[0.04] transition-colors"
                       >
                         <LayoutDashboard size={15} className="text-ink-soft" />
-                        {t("nav.dashboard")}
+                        {user?.role === "admin" ? t("nav.adminSpace") : user?.role === "agent" ? t("nav.agentSpace") : t("nav.dashboard")}
                       </Link>
                       <Link
                         to="/settings"

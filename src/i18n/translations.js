@@ -2,7 +2,7 @@
 // lisible — chaque composant appelle t("section.cle") via useLanguage().
 export const translations = {
   fr: {
-    nav: { product: "Produits", company: "Entreprise", signin: "Se connecter", about: "À propos", careers: "Carrières", contact: "Contact", dashboard: "Espace partenaire", manageAccount: "Gérer mon compte", logout: "Se déconnecter", notifications: "Notifications", noNotifications: "Aucune notification pour l'instant", markAllRead: "Tout marquer comme lu" },
+    nav: { product: "Produits", company: "Entreprise", signin: "Se connecter", about: "À propos", careers: "Carrières", contact: "Contact", dashboard: "Espace partenaire", adminSpace: "Espace admin", agentSpace: "Espace agent", manageAccount: "Gérer mon compte", logout: "Se déconnecter", notifications: "Notifications", noNotifications: "Aucune notification pour l'instant", markAllRead: "Tout marquer comme lu" },
     hero: {
       badge: "Le réseau tech de l'Afrique centrale",
       titleStart: "Faites grandir votre business avec",
@@ -85,9 +85,21 @@ export const translations = {
       lead: "Décrivez votre activité, on revient vers vous rapidement avec les prochaines étapes du réseau et des conditions de partenariat.",
       company: "Nom de l'entreprise", contactName: "Votre nom", email: "Adresse e-mail", category: "Domaine d'activité", message: "Parlez-nous de votre entreprise",
       messagePlaceholder: "Vos produits ou services, votre zone d'activité, ce que vous cherchez dans ce réseau…",
-      submit: "Envoyer ma candidature", submitting: "Envoi…", success: "Candidature envoyée. Nous revenons vers vous très vite.",
+      submit: "Envoyer ma candidature", submitting: "Envoi…", success: "Candidature envoyée. Un agent va l'examiner avant confirmation finale — vous serez notifié à chaque étape.",
       authRequired: "Connectez-vous d'abord pour déposer une candidature de partenariat : on vous retrouve directement sur votre futur tableau de bord.",
       signIn: "Se connecter", createAccount: "Créer un compte", connectedAs: "Connecté en tant que",
+      // --- Dossier KYC (identité) ---
+      kycHeading: "Vérification d'identité",
+      kycNote: "Requis pour valider votre dossier — examiné uniquement par un agent H-Company habilité, jamais rendu public.",
+      phone: "Téléphone", address: "Adresse complète",
+      idDocumentType: "Type de pièce d'identité",
+      idTypeNationalId: "Carte d'identité nationale",
+      idTypeVoterCard: "Carte d'électeur",
+      idTypePassport: "Passeport",
+      idDocumentNumber: "Numéro du document",
+      idDocumentFile: "Photo ou scan de la pièce (JPG, PNG ou PDF, 5 Mo max)",
+      idDocumentFileChosen: "Fichier sélectionné :",
+      formError: "Impossible d'envoyer votre candidature pour le moment. Réessayez un peu plus tard.",
     },
     footer: {
       tagline: "Le réseau qui relie entreprises, partenaires et talents autour de la technologie.",
@@ -377,6 +389,7 @@ export const translations = {
       fieldEmail: "E-mail",
       fieldMessage: "Message",
       send: "Envoyer",
+      sending: "Envoi en cours…",
       successTitle: "Message envoyé",
       successBody: "Merci, notre équipe vous répondra rapidement.",
       close: "Fermer",
@@ -438,7 +451,7 @@ export const translations = {
   },
 
   en: {
-    nav: { product: "Products", company: "Company", signin: "Sign in", about: "About", careers: "Careers", contact: "Contact", dashboard: "Partner space", manageAccount: "Manage account", logout: "Sign out", notifications: "Notifications", noNotifications: "No notifications yet", markAllRead: "Mark all as read" },
+    nav: { product: "Products", company: "Company", signin: "Sign in", about: "About", careers: "Careers", contact: "Contact", dashboard: "Partner space", adminSpace: "Admin space", agentSpace: "Agent space", manageAccount: "Manage account", logout: "Sign out", notifications: "Notifications", noNotifications: "No notifications yet", markAllRead: "Mark all as read" },
     hero: {
       badge: "Central Africa's tech network",
       titleStart: "Grow your business with",
@@ -521,9 +534,20 @@ export const translations = {
       lead: "Describe your business, and we'll get back to you quickly with next steps and partnership terms.",
       company: "Company name", contactName: "Your name", email: "Email address", category: "Field of activity", message: "Tell us about your company",
       messagePlaceholder: "Your products or services, your area of activity, what you're looking for in this network…",
-      submit: "Send my application", submitting: "Sending…", success: "Application sent. We'll get back to you very soon.",
+      submit: "Send my application", submitting: "Sending…", success: "Application sent. An agent will review it before final confirmation — you'll be notified at every step.",
       authRequired: "Sign in first to submit a partnership application: you'll land right on your future dashboard.",
       signIn: "Sign in", createAccount: "Create an account", connectedAs: "Connected as",
+      kycHeading: "Identity verification",
+      kycNote: "Required to validate your application — reviewed only by an authorized H-Company agent, never made public.",
+      phone: "Phone", address: "Full address",
+      idDocumentType: "ID document type",
+      idTypeNationalId: "National ID card",
+      idTypeVoterCard: "Voter card",
+      idTypePassport: "Passport",
+      idDocumentNumber: "Document number",
+      idDocumentFile: "Photo or scan of the document (JPG, PNG or PDF, max 5 MB)",
+      idDocumentFileChosen: "File selected:",
+      formError: "Couldn't send your application right now. Please try again later.",
     },
     footer: {
       tagline: "The network connecting companies, partners and talent around technology.",
@@ -813,6 +837,7 @@ export const translations = {
       fieldEmail: "Email",
       fieldMessage: "Message",
       send: "Send",
+      sending: "Sending…",
       successTitle: "Message sent",
       successBody: "Thanks — our team will get back to you shortly.",
       close: "Close",

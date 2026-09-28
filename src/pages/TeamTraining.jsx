@@ -8,6 +8,7 @@ import FAQ from "../components/sections/FAQ.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { api } from "../lib/api.js";
+import FormLoadingOverlay from "../components/ui/FormLoadingOverlay.jsx";
 
 const DOMAINS = ["Design", "Bureautique", "Cybersécurité", "IT & support", "Développement"];
 
@@ -235,7 +236,8 @@ export default function TeamTraining() {
             </h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="relative space-y-5">
+            <FormLoadingOverlay show={status === "loading"} label={t("teamTraining.formSubmitting")} rounded="rounded-2xl" />
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm text-stone mb-1.5">{t("teamTraining.formCompany")}</label>
