@@ -14,6 +14,7 @@ import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
 import ServiceSubscriptionsPanel from "../components/admin/ServiceSubscriptionsPanel.jsx";
 import ServiceCatalogPanel from "../components/admin/ServiceCatalogPanel.jsx";
 import CompanyTrainingPanel from "../components/admin/CompanyTrainingPanel.jsx";
+import AgentsPanel from "../components/admin/AgentsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
 
@@ -320,6 +321,7 @@ export default function AdminDashboard() {
   const paletteActions = [
     { id: "go-apps", label: "Aller aux candidatures", icon: Users, run: () => { setView("applications"); closeDetail(); } },
     { id: "go-requests", label: "Aller à toutes les demandes", icon: ClipboardList, run: () => { setView("requests"); closeDetail(); } },
+    { id: "go-agents", label: "Gérer les agents", icon: Users, run: () => { setView("agents"); closeDetail(); } },
     { id: "f-pending", label: "Filtrer : en attente", icon: Filter, run: () => { setView("applications"); setFilter("pending"); } },
     { id: "f-all", label: "Afficher toutes les candidatures", icon: Filter, run: () => { setView("applications"); setFilter("all"); } },
     { id: "refresh", label: "Actualiser les données", icon: RefreshCw, hint: "auto toutes les 60 s", run: handleRefresh },
@@ -491,6 +493,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <CompanyTrainingPanel withAuth={withAuth} api={api} />
+            </>
+          ) : view === "agents" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> Agents</p>
+                <Title className="text-3xl">Gérer les agents</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Promouvoir un compte au rôle agent (revue des candidatures partenaires) ou le retirer.
+                </p>
+              </div>
+              <AgentsPanel withAuth={withAuth} api={api} />
             </>
           ) : (
             <div className="grid xl:grid-cols-[minmax(0,1fr)_310px] gap-6 lg:gap-8 items-start">
