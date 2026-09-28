@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, X, Loader2, Compass, Inbox, AlertCircle, Users, Clock } from "lucide-react";
+import { Check, X, Loader2, Compass, Inbox, AlertCircle, Users, Clock, Bell, Ban, RotateCcw } from "lucide-react";
 import ServiceLogo from "../services/ServiceLogo.jsx";
+import NotifyUserModal from "./NotifyUserModal.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const STATUS_STYLE = {
@@ -53,6 +54,7 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [noteDraft, setNoteDraft] = useState({});
+  const [notifyTarget, setNotifyTarget] = useState(null); // sub en cours de notification
 
   function localizedLabel(serviceKey) {
     const tr = t(`exploreServices.catalog.${serviceKey}`);
@@ -227,10 +229,12 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
                     <th className="px-5 py-3 font-medium">{t("adminServices.colStatus")}</th>
                     <th className="px-5 py-3 font-medium">{t("adminServices.colRequestedOn")}</th>
                     <th className="px-5 py-3 font-medium">{t("adminServices.colAdminNote")}</th>
+                    <th className="px-5 py-3 font-medium text-right">{t("adminServices.colActions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {all.map((sub) => {
+                    const rowBusy = busyId === sub.id;
                     return (
                       <tr key={sub.id} className="border-b border-line/60 last:border-0 hover:bg-cream/40 transition-colors">
                         <td className="px-5 py-3.5">
@@ -247,6 +251,37 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
                         <td className="px-5 py-3.5"><StatusBadge status={sub.status} t={t} /></td>
                         <td className="px-5 py-3.5 text-ink-soft text-xs whitespace-nowrap">{formatDate(sub.created_at, lang)}</td>
                         <td className="px-5 py-3.5 text-ink-faint text-xs">{sub.admin_note || "—"}</td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setNotifyTarget(sub)}
+                              title={t("adminServices.notify")}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-ink-soft hover:bg-line/50 hover:text-ink transition-colors"
+                            >
+                              <Bell size={14} />
+                            </button>
+                            {sub.status === "active" && (
+                              <button
+                                onClick={() => updateStatus(sub.id, "suspended")}
+                                disabled={rowBusy}
+                                title={t("adminServices.suspend")}
+                                className="w-7 h-7 rounded-lg flex items-center justify-center text-ink-soft hover:bg-red-50 hover:text-red-600 disabled:opacity-50 transition-colors"
+                              >
+                                {rowBusy ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
+                              </button>
+                            )}
+                            {sub.status === "suspended" && (
+                              <button
+                                onClick={() => updateStatus(sub.id, "active")}
+                                disabled={rowBusy}
+                                title={t("adminServices.reactivate")}
+                                className="w-7 h-7 rounded-lg flex items-center justify-center text-ink-soft hover:bg-line/50 hover:text-ink disabled:opacity-50 transition-colors"
+                              >
+                                {rowBusy ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -270,6 +305,32 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
                         {sub.user_full_name || sub.user_email || `#${sub.user_id}`} · {formatDate(sub.created_at, lang)}
                       </p>
                       {sub.admin_note && <p className="text-xs text-ink-soft mt-1">{sub.admin_note}</p>}
+                      <div className="flex items-center gap-1 mt-2">
+                        <button
+                          onClick={() => setNotifyTarget(sub)}
+                          className="flex items-center gap-1 text-[11px] font-medium text-ink-soft hover:text-ink transition-colors"
+                        >
+                          <Bell size={12} /> {t("adminServices.notify")}
+                        </button>
+                        {sub.status === "active" && (
+                          <button
+                            onClick={() => updateStatus(sub.id, "suspended")}
+                            disabled={busyId === sub.id}
+                            className="flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700 transition-colors ml-3"
+                          >
+                            <Ban size={12} /> {t("adminServices.suspend")}
+                          </button>
+                        )}
+                        {sub.status === "suspended" && (
+                          <button
+                            onClick={() => updateStatus(sub.id, "active")}
+                            disabled={busyId === sub.id}
+                            className="flex items-center gap-1 text-[11px] font-medium text-ink-soft hover:text-ink transition-colors ml-3"
+                          >
+                            <RotateCcw size={12} /> {t("adminServices.reactivate")}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -278,6 +339,15 @@ export default function ServiceSubscriptionsPanel({ withAuth, api }) {
           </>
         )}
       </section>
+
+      {notifyTarget && (
+        <NotifyUserModal
+          user={{ id: notifyTarget.user_id, email: notifyTarget.user_email, full_name: notifyTarget.user_full_name }}
+          defaultTitle={`${localizedLabel(notifyTarget.service_key)}`}
+          onClose={() => setNotifyTarget(null)}
+          onSend={(payload) => withAuth((token) => api.admin.sendNotification(token, payload))}
+        />
+      )}
     </div>
   );
 }

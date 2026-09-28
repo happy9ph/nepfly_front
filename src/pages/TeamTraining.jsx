@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Users2, ArrowLeft } from "lucide-react";
@@ -7,8 +7,14 @@ import Footer from "../components/layout/Footer.jsx";
 import FAQ from "../components/sections/FAQ.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
+import { api } from "../lib/api.js";
 
 const DOMAINS = ["Design", "Bureautique", "Cybersécurité", "IT & support", "Développement"];
+
+// Doit rester identique à TRAINING_PLAN_PRICES côté backend
+// (app/schemas.py) — utilisé uniquement pour l'estimation affichée ici ;
+// le vrai montant facturé est toujours recalculé côté serveur.
+const PLAN_PRICES = { "1": 300, "6": 250, "12": 200 };
 
 function PlanCard({ name, price, unit, desc, badge, highlighted, selected, onSelect, features }) {
   return (
@@ -72,8 +78,22 @@ export default function TeamTraining() {
   ];
 
   const [plan, setPlan] = useState("6");
-  const [fields, setFields] = useState({ company: "", contactName: "", employees: "", domains: [], message: "" });
+  const [fields, setFields] = useState({
+    company: "",
+    contactName: "",
+    contactEmail: "",
+    employees: "",
+    domains: [],
+    message: "",
+  });
   const [status, setStatus] = useState("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const estimatedTotal = useMemo(() => {
+    const count = parseInt(fields.employees, 10);
+    if (!count || count <= 0) return null;
+    return count * PLAN_PRICES[plan];
+  }, [fields.employees, plan]);
 
   function toggleDomain(d) {
     setFields((f) => ({
@@ -85,11 +105,25 @@ export default function TeamTraining() {
   async function handleSubmit(e) {
     e.preventDefault();
     setStatus("loading");
-    // Pas de vrai endpoint dédié pour l'instant — cette demande arrive comme
-    // un message de contact classique, visible côté admin.
-    await new Promise((r) => setTimeout(r, 600));
-    setStatus("success");
-    toast.success(t("teamTraining.formSuccess"));
+    setErrorMsg("");
+    try {
+      await api.learning.enrollCompany({
+        company: fields.company,
+        contact_name: fields.contactName,
+        contact_email: fields.contactEmail,
+        employee_count: parseInt(fields.employees, 10) || 1,
+        domains: fields.domains,
+        plan,
+        message: fields.message || null,
+      });
+      setStatus("success");
+      toast.success(t("teamTraining.formSuccess"));
+    } catch (err) {
+      const msg = err?.data?.detail || t("teamTraining.formError");
+      setStatus("error");
+      setErrorMsg(msg);
+      toast.error(msg);
+    }
   }
 
   return (
@@ -223,16 +257,37 @@ export default function TeamTraining() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-stone mb-1.5">{t("teamTraining.formEmployees")}</label>
-              <input
-                type="number"
-                min="1"
-                value={fields.employees}
-                onChange={(e) => setFields((f) => ({ ...f, employees: e.target.value }))}
-                className="w-full rounded-lg border border-line bg-cream px-4 py-2.5 text-ink focus:border-coffee outline-none transition-colors"
-              />
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm text-stone mb-1.5">{t("teamTraining.formEmail")}</label>
+                <input
+                  type="email"
+                  required
+                  value={fields.contactEmail}
+                  onChange={(e) => setFields((f) => ({ ...f, contactEmail: e.target.value }))}
+                  className="w-full rounded-lg border border-line bg-cream px-4 py-2.5 text-ink focus:border-coffee outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-stone mb-1.5">{t("teamTraining.formEmployees")}</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={fields.employees}
+                  onChange={(e) => setFields((f) => ({ ...f, employees: e.target.value }))}
+                  className="w-full rounded-lg border border-line bg-cream px-4 py-2.5 text-ink focus:border-coffee outline-none transition-colors"
+                />
+              </div>
             </div>
+
+            {estimatedTotal !== null && (
+              <div className="rounded-lg border border-coffee-light/40 bg-coffee-light/10 px-4 py-3 text-sm text-coffee-dark">
+                {t("teamTraining.estimatedTotal")}{" "}
+                <span className="font-semibold">{estimatedTotal.toLocaleString()} $/mois</span>
+                <span className="text-ink-faint"> · {t("teamTraining.estimatedNote")}</span>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm text-stone mb-2">{t("teamTraining.formDomains")}</label>
@@ -268,6 +323,9 @@ export default function TeamTraining() {
               <p className="text-sm text-coffee-dark bg-coffee-light/15 border border-coffee-light/40 rounded-lg px-4 py-3">
                 {t("teamTraining.formSuccess")}
               </p>
+            )}
+            {status === "error" && errorMsg && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{errorMsg}</p>
             )}
 
             <button

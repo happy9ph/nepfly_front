@@ -226,11 +226,36 @@ export const api = {
       form.append("file", file);
       return request(`/api/v1/services/admin/catalog/${id}/logo`, { method: "POST", token, body: form });
     },
+    searchUsers: (token, q) =>
+      request(`/api/v1/notifications/admin/users/search?q=${encodeURIComponent(q || "")}`, { token }),
+    sendNotification: (token, payload) =>
+      request("/api/v1/notifications/admin/send", { method: "POST", token, body: payload }),
+    listCompanyEnrollments: (token) => request("/api/v1/learning/admin/company-enrollments", { token }),
+    updateCompanyEnrollmentStatus: (token, id, statusValue) =>
+      request(`/api/v1/learning/admin/company-enrollments/${id}/status`, {
+        method: "PATCH",
+        token,
+        body: { status: statusValue },
+      }),
+  },
+
+  // Notifications de l'utilisateur connecté (cloche navbar)
+  notifications: {
+    mine: (token) => request("/api/v1/notifications/me", { token }),
+    markRead: (token, id) => request(`/api/v1/notifications/me/${id}/read`, { method: "POST", token }),
+    markAllRead: (token) => request("/api/v1/notifications/me/read-all", { method: "POST", token }),
   },
 
   // Mes demandes (contact) — utilisateur connecté
   contactMessages: {
     mine: (token) => request("/api/v1/contact/me", { token }),
+  },
+
+  // H-Learning — formations et inscription d'équipe (entreprise)
+  learning: {
+    courses: () => request("/api/v1/learning/courses"),
+    enrollCompany: (payload) =>
+      request("/api/v1/learning/company-enrollment", { method: "POST", body: payload }),
   },
 
   // Onboarding après première connexion

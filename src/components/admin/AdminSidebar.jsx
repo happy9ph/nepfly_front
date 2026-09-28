@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers, GraduationCap } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "applications", label: "Candidatures", icon: Users },
   { key: "requests", label: "Toutes les demandes", icon: ClipboardList },
   { key: "serviceRequests", label: "Abonnements clients", icon: Compass },
   { key: "serviceCatalog", label: "Catalogue services", icon: Layers },
+  { key: "trainingRequests", label: "Formations d'équipe", icon: GraduationCap },
 ];
 
 const GOLD = "var(--color-latte)"; // café au lait — suit le thème clair/sombre

@@ -311,7 +311,7 @@ export default function PartnerDashboard() {
           {activeTab === "apps" && <AppsTab apps={apps} billing={billing} onRequestApp={handleRequestApp} />}
           {activeTab === "services" && <MyServicesPanel summary={services} catalog={serviceCatalog} />}
           {activeTab === "offers" && <OffersTab offers={offers} onAccept={handleAcceptOffer} />}
-          {activeTab === "contract" && <ContractTab contract={contract} onSign={handleSign} />}
+          {activeTab === "contract" && <ContractTab contract={contract} onSign={handleSign} partner={user} />}
           {activeTab === "activity" && <ActivityTab activities={activities} />}
         </main>
       </div>

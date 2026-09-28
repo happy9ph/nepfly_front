@@ -28,6 +28,9 @@ const SOCIALS = [
   { label: "X", initial: "X", href: "https://x.com" },
   { label: "Instagram", initial: "IG", href: "https://instagram.com" },
   { label: "Facebook", initial: "f", href: "https://facebook.com" },
+  // TODO: remplacer par le vrai @ H-Company une fois le compte créé.
+  { label: "TikTok", initial: "TT", href: "https://tiktok.com/@hcompany" },
+  { label: "WhatsApp", initial: "WA", href: "https://wa.me/260770381780" },
 ];
 
 function SocialMark({ initial }) {

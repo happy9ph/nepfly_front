@@ -1,19 +1,30 @@
+import { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Handshake } from "lucide-react";
+import { ArrowRight, Handshake, Mail } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
 import Footer from "../components/layout/Footer.jsx";
 import StoreBadges from "../components/ui/StoreBadges.jsx";
 import FAQ from "../components/sections/FAQ.jsx";
+import ContactModal from "../components/sections/ContactModal.jsx";
 import DetailHero from "../components/detail/DetailHero.jsx";
 import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
 import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { PARTNER_META, getPartnerContent, findPartnerBySlug } from "../data/partners.js";
 
+// Lukondo et Confismila exploitent déjà un service H-Company que les
+// utilisateurs peuvent utiliser directement (transport/colis/logement pour
+// Lukondo, restauration pour Confismila) — contrairement à H-Learning/
+// U-Study, qui sont des produits internes. Pour ceux-là seulement, on
+// propose un vrai bouton "Contacter ce partenaire" en plus du CTA
+// "Devenir partenaire" (qui s'adresse à de futures agences candidates).
+const CONTACTABLE_SLUGS = ["lukondo", "confismila"];
+
 export default function PartnerDetail() {
   const { slug } = useParams();
   const { t } = useLanguage();
+  const [contactOpen, setContactOpen] = useState(false);
   const meta = findPartnerBySlug(slug);
 
   if (!meta) return <Navigate to="/#partenaires" replace />;
@@ -109,10 +120,24 @@ export default function PartnerDetail() {
               <StoreBadges to="#" />
             </div>
           )}
-          <DetailSidebarCard className="!p-5">
+          <DetailSidebarCard className="!p-5 space-y-2.5">
+            {CONTACTABLE_SLUGS.includes(meta.slug) && (
+              <button
+                type="button"
+                onClick={() => setContactOpen(true)}
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
+              >
+                <Mail size={15} />
+                {t("partners.contactThis")} {meta.name}
+              </button>
+            )}
             <a
               href="/#rejoindre"
-              className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
+              className={`w-full flex items-center justify-center gap-2 rounded-full text-sm font-medium py-4 transition-all ${
+                CONTACTABLE_SLUGS.includes(meta.slug)
+                  ? "border border-line text-ink hover:bg-line/50"
+                  : "bg-ink text-cream hover:bg-coffee-dark hover:scale-[1.02]"
+              }`}
             >
               {t("partners.workWith")} {meta.name}
               <ArrowRight size={15} />
@@ -120,6 +145,10 @@ export default function PartnerDetail() {
           </DetailSidebarCard>
         </div>
       </section>
+
+      {contactOpen && (
+        <ContactModal onClose={() => setContactOpen(false)} context={`${t("partners.contactThis")} ${meta.name}`} />
+      )}
 
       {/* --- FAQ spécifique à ce partenaire --- */}
       {t(`faq.partner.${meta.key}`) && Array.isArray(t(`faq.partner.${meta.key}`)) && (

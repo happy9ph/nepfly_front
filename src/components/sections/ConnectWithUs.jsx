@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Handshake, LayoutDashboard, Compass, GraduationCap } from "lucide-react";
+import { ArrowRight, Handshake, LayoutDashboard, Compass, GraduationCap, Mail } from "lucide-react";
 import Reveal from "../ui/Reveal.jsx";
+import ContactModal from "./ContactModal.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const LINKS = [
@@ -8,6 +10,7 @@ const LINKS = [
   { key: "dashboard", to: "/connexion", Icon: LayoutDashboard },
   { key: "explore", to: "/#explorer", Icon: Compass },
   { key: "training", to: "/formation-equipe", Icon: GraduationCap },
+  { key: "contact", modal: true, Icon: Mail },
 ];
 
 /** Section façon "Connect with us" — un gros titre à gauche, une petite
@@ -16,6 +19,8 @@ const LINKS = [
  * connexion, catalogue de services, formation d'équipe). */
 export default function ConnectWithUs() {
   const { t } = useLanguage();
+  const [contactOpen, setContactOpen] = useState(false);
+
   return (
     <section className="px-6 py-24 bg-surface border-t border-line">
       <div className="max-w-content mx-auto grid md:grid-cols-[0.8fr_1.2fr] gap-10 md:gap-16 items-start">
@@ -25,15 +30,11 @@ export default function ConnectWithUs() {
 
         <Reveal delay={0.1}>
           <div className="grid sm:grid-cols-2 gap-3.5">
-            {LINKS.map(({ key, to, Icon }) => {
+            {LINKS.map(({ key, to, modal, Icon }) => {
               const label = t(`connectWithUs.${key}.label`);
               const description = t(`connectWithUs.${key}.description`);
-              return (
-                <Link
-                  key={key}
-                  to={to}
-                  className="group rounded-2xl border border-line bg-cream p-5 hover:border-coffee-light hover:-translate-y-0.5 transition-all"
-                >
+              const cardInner = (
+                <>
                   <div className="flex items-start justify-between mb-3">
                     <span className="w-9 h-9 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0">
                       <Icon size={17} />
@@ -45,12 +46,29 @@ export default function ConnectWithUs() {
                   </div>
                   <p className="font-medium text-ink">{label}</p>
                   <p className="text-sm text-ink-soft mt-1 leading-snug">{description}</p>
+                </>
+              );
+              const cardCls =
+                "group rounded-2xl border border-line bg-cream p-5 hover:border-coffee-light hover:-translate-y-0.5 transition-all text-left w-full";
+
+              if (modal) {
+                return (
+                  <button key={key} type="button" onClick={() => setContactOpen(true)} className={cardCls}>
+                    {cardInner}
+                  </button>
+                );
+              }
+              return (
+                <Link key={key} to={to} className={cardCls}>
+                  {cardInner}
                 </Link>
               );
             })}
           </div>
         </Reveal>
       </div>
+
+      {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
     </section>
   );
 }
