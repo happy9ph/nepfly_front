@@ -119,7 +119,7 @@ export default function JoinForm() {
   }
 
   return (
-    <section id="rejoindre" className="px-6 py-28 border-t border-line bg-surface">
+    <section id="rejoindre" className="px-6 py-28 border-t border-line bg-cream/70">
       <div className="max-w-content mx-auto grid md:grid-cols-[0.9fr_1.1fr] gap-16">
         <Reveal>
           <p className="text-sm font-medium text-coffee mb-4">{t("joinForm.eyebrow")}</p>
