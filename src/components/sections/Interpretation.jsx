@@ -36,13 +36,13 @@ export default function Interpretation() {
           </ul>
 
           <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="#rejoindre"
+            <RouterLink
+              to="/#rejoindre"
               className="inline-flex items-center gap-1.5 rounded-full bg-ink text-cream text-sm font-medium px-6 py-3 hover:bg-coffee-dark transition-colors"
             >
               {t("interpretation.cta")}
               <ArrowRight size={15} />
-            </a>
+            </RouterLink>
             <RouterLink
               to="/interpretation"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-ink underline underline-offset-4 decoration-line hover:decoration-coffee hover:text-coffee transition-colors"

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import LockoutNotice from "../../components/auth/LockoutNotice.jsx";
 import GoogleButton from "../../components/auth/GoogleButton.jsx";
+import SlowHint from "../../components/auth/SlowHint.jsx";
+import { startOtp } from "../../lib/otpTracker.js";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api, ApiError } from "../../lib/api.js";
@@ -23,19 +25,19 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [locked, setLocked] = useState(false);
 
-  async function handleOtpSubmit(e) {
+  // Réveille le serveur dès l'arrivée sur la page, pendant la saisie.
+  useEffect(() => {
+    api.auth.warmup();
+  }, []);
+
+  // On passe tout de suite à l'écran de saisie du code : l'envoi de l'e-mail
+  // continue en arrière-plan (état visible sur l'écran suivant, avec un
+  // bouton pour le relancer), au lieu de bloquer ici pendant le réveil du serveur.
+  function handleOtpSubmit(e) {
     e.preventDefault();
     setError(null);
-    setLoading(true);
-    try {
-      await api.auth.requestOtp(email, "email", "login");
-      navigate("/verifier", { state: { email, purpose: "login", redirectTo } });
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 429) setLocked(true);
-      else setError(err?.data?.detail || "Une erreur est survenue.");
-    } finally {
-      setLoading(false);
-    }
+    startOtp(email.trim(), "login");
+    navigate("/verifier", { state: { email: email.trim(), purpose: "login", redirectTo } });
   }
 
   async function handlePasswordSubmit(e) {
@@ -110,11 +112,10 @@ export default function SignIn() {
                 {error && <p className="text-sm text-red-600">{error}</p>}
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors"
                 >
-                  {loading ? t("auth.sending") : t("auth.receiveCode")}
-                  {!loading && <ArrowRight size={15} />}
+                  {t("auth.receiveCode")}
+                  <ArrowRight size={15} />
                 </button>
                 <button
                   type="button"
@@ -162,6 +163,7 @@ export default function SignIn() {
                   </Link>
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
+                <SlowHint active={loading} />
                 <button
                   type="submit"
                   disabled={loading}

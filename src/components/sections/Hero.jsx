@@ -1,4 +1,7 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+
+const MotionLink = motion.create(Link);
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 function Mark({ size = 26 }) {
@@ -163,17 +166,17 @@ export default function Hero() {
               {t("hero.lead")}
             </p>
             <div className="mt-8 flex flex-col items-center gap-4">
-              <motion.a
-                href="#rejoindre"
+              <MotionLink
+                to="/#rejoindre"
                 className="bg-coffee text-cream rounded-full px-7 py-3.5 font-medium hover:bg-coffee-dark transition-colors shadow-[0_16px_32px_-14px_rgba(74,48,32,0.6)]"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {t("hero.cta")}
-              </motion.a>
-              <a href="#about" className="text-sm font-medium text-ink underline underline-offset-4 decoration-line hover:decoration-coffee hover:text-coffee transition-colors">
+              </MotionLink>
+              <Link to="/#about" className="text-sm font-medium text-ink underline underline-offset-4 decoration-line hover:decoration-coffee hover:text-coffee transition-colors">
                 {t("hero.more")}<ArrowRight />
-              </a>
+              </Link>
             </div>
           </motion.div>
 

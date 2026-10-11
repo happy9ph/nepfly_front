@@ -93,6 +93,19 @@ export const api = {
     signUp: (name, email, password) =>
       request("/api/v1/auth/register", { method: "POST", body: { full_name: name, email, password } }),
     me: (token) => request("/api/v1/auth/me", { token }),
+    // Réveille l'API et le service d'authentification (hébergeur gratuit en
+    // veille) avant que la personne n'ait fini de remplir le formulaire.
+    // Sans effet de bord ; au plus un appel toutes les 4 minutes.
+    warmup: () => {
+      try {
+        const last = Number(sessionStorage.getItem("hc_warm_at") || 0);
+        if (Date.now() - last < 4 * 60 * 1000) return Promise.resolve();
+        sessionStorage.setItem("hc_warm_at", String(Date.now()));
+      } catch {
+        // stockage indisponible : on réveille quand même
+      }
+      return request("/api/v1/auth/warmup").catch(() => {});
+    },
     // Renouvelle l'access_token à partir du jeton de rafraîchissement
     // stocké localement — le cookie httpOnly est envoyé aussi (au cas où),
     // mais ce corps JSON est la source réellement fiable désormais (voir

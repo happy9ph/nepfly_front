@@ -1,4 +1,4 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Clock, GraduationCap, CheckCircle2, BookOpen } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
@@ -124,13 +124,13 @@ export default function CourseDetail() {
             <p className="text-sm text-ink-soft mb-6">
               Certificat de complétion inclus, animé par un formateur H-learning.
             </p>
-            <a
-              href="/#rejoindre"
+            <Link
+              to="/#rejoindre"
               className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
             >
               {t("learning.discover")}
               <ArrowRight size={15} />
-            </a>
+            </Link>
           </DetailSidebarCard>
         </div>
       </section>

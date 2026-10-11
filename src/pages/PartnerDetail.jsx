@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Handshake, Mail } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
@@ -134,8 +134,8 @@ export default function PartnerDetail() {
                 {t("partners.contactThis")} {meta.name}
               </button>
             )}
-            <a
-              href="/#rejoindre"
+            <Link
+              to="/#rejoindre"
               className={`w-full flex items-center justify-center gap-2 rounded-full text-sm font-medium py-4 transition-all ${
                 CONTACTABLE_SLUGS.includes(meta.slug)
                   ? "border border-line text-ink hover:bg-line/50"
@@ -144,7 +144,7 @@ export default function PartnerDetail() {
             >
               {t("partners.workWith")} {meta.name}
               <ArrowRight size={15} />
-            </a>
+            </Link>
           </DetailSidebarCard>
         </div>
       </section>

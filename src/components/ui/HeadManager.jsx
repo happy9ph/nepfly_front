@@ -13,6 +13,7 @@ const ROUTE_META = [
   { pattern: "/admin", key: "admin" },
   { pattern: "/agent", key: "agent" },
   { pattern: "/services/:slug", key: "services" },
+  { pattern: "/h/:slug", key: "services" },
   { pattern: "/cours/:id", key: "cours" },
   { pattern: "/partenaires/:slug", key: "partenaires" },
   { pattern: "/connexion", key: "connexion" },

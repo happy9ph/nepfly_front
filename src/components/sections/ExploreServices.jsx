@@ -1,105 +1,120 @@
-import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
-import { api } from "../../lib/api.js";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import Reveal from "../ui/Reveal.jsx";
 import ServiceLogo from "../services/ServiceLogo.jsx";
-import SubscribeServiceModal from "../services/SubscribeServiceModal.jsx";
+import ServiceRequestPanel from "../services/ServiceRequestPanel.jsx";
+import { HServiceArt, H_SERVICE_THEME } from "../art/ServiceArt.jsx";
+import { servicePath, SERVICE_PAGES } from "../../data/hServicePages.js";
+import { useServiceCatalog, resolveServices } from "../../hooks/useServiceCatalog.js";
+import { SERVICE_UI } from "../../i18n/servicePageUi.js";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
-/** Grille de services façon "Explore our services" — un service par carte,
- * flèche en haut à droite, description sous le titre. Cliquer ouvre le
- * formulaire d'abonnement (SubscribeServiceModal) ; le service marqué
- * indisponible (H-Money, pour l'instant) est affiché mais désactivé. */
+/**
+ * "Explorez nos services" — une carte illustrée par service. Un clic ouvre la
+ * page dédiée du service (/h/:slug) : plus de pop-up. La liste s'affiche tout
+ * de suite (ordre et états par défaut) puis s'ajuste quand le catalogue du
+ * backend répond ; un service créé depuis l'admin et inconnu du site ouvre le
+ * panneau de demande à la place.
+ */
 export default function ExploreServices() {
-  const { t } = useLanguage();
-  const [catalog, setCatalog] = useState([]);
-  const [loadStatus, setLoadStatus] = useState("loading"); // loading | ready | error
-  const [openService, setOpenService] = useState(null);
+  const { lang, t } = useLanguage();
+  const ui = SERVICE_UI[lang] || SERVICE_UI.fr;
+  const catalog = useServiceCatalog();
+  const { list } = resolveServices(catalog);
+  const [panel, setPanel] = useState(null);
 
-  // Le backend fournit la clé et la disponibilité (source de vérité pour
-  // l'activation de H-Money, etc.) ; le libellé/la description affichés
-  // viennent du dictionnaire de traduction pour rester bilingues FR/EN.
-  function localize(service) {
-    const tr = t(`exploreServices.catalog.${service.key}`);
-    if (typeof tr === "object" && tr) {
-      return { ...service, label: tr.label, description: tr.description };
-    }
-    return service;
+  function labelsFor(item) {
+    const tr = t(`exploreServices.catalog.${item.key}`);
+    if (tr && typeof tr === "object") return { label: tr.label, description: tr.description };
+    const c = item.catalog || {};
+    return {
+      label: (lang === "fr" ? c.label_fr : c.label_en) || c.label_fr || item.key,
+      description: (lang === "fr" ? c.description_fr : c.description_en) || c.description_fr || "",
+    };
   }
-
-  useEffect(() => {
-    api.services
-      .catalog()
-      .then((data) => {
-        setCatalog(Array.isArray(data) ? data : []);
-        setLoadStatus("ready");
-      })
-      .catch(() => setLoadStatus("error"));
-  }, []);
 
   return (
     <section id="explorer" className="px-6 py-24 bg-cream">
       <div className="max-w-content mx-auto">
         <Reveal>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink mb-10">{t("exploreServices.heading")}</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-coffee mb-3">{t("exploreServices.eyebrow")}</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink mb-3">{t("exploreServices.heading")}</h2>
+          <p className="text-ink-soft max-w-xl mb-12 leading-relaxed">{t("exploreServices.lead")}</p>
         </Reveal>
 
-        {loadStatus === "loading" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-28 rounded-2xl bg-surface border border-line animate-pulse" />
-            ))}
-          </div>
-        )}
-
-        {loadStatus === "error" && (
-          <p className="text-sm text-ink-soft">{t("exploreServices.loadError")}</p>
-        )}
-
-        {loadStatus === "ready" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {catalog.map((raw, i) => {
-              const service = localize(raw);
-              return (
-                <Reveal key={service.key} delay={i * 0.05}>
-                  <button
-                    type="button"
-                    disabled={service.disabled}
-                    onClick={() => setOpenService(service)}
-                    className={`group w-full h-full text-left rounded-2xl border p-5 transition-colors ${
-                      service.disabled
-                        ? "border-line bg-surface/60 opacity-60 cursor-not-allowed"
-                        : "border-line bg-surface hover:border-coffee-light hover:-translate-y-0.5 transition-transform"
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {list.map((item, i) => {
+            const { label, description } = labelsFor(item);
+            const hasPage = Boolean(SERVICE_PAGES[item.key]);
+            const hasArt = Boolean(H_SERVICE_THEME[item.key]);
+            const body = (
+              <>
+                <div className="relative h-36 overflow-hidden bg-ink-fixed">
+                  {hasArt ? (
+                    <HServiceArt
+                      name={item.key}
+                      className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-cream-fixed/80">
+                      <Sparkles size={34} />
+                    </div>
+                  )}
+                  <span className="absolute top-3 left-3 w-10 h-10 rounded-xl bg-cream/90 backdrop-blur flex items-center justify-center text-coffee-dark overflow-hidden">
+                    <ServiceLogo logoUrl={item.logo_url} serviceKey={item.key} size={19} />
+                  </span>
+                  <span
+                    className={`absolute top-3 right-3 text-[0.62rem] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                      item.disabled ? "bg-ink-fixed/70 text-cream-fixed" : "bg-[#E4B968] text-ink-fixed"
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="w-10 h-10 rounded-xl bg-coffee/10 flex items-center justify-center text-coffee shrink-0 overflow-hidden">
-                        <ServiceLogo logoUrl={service.logo_url} serviceKey={service.key} size={19} />
-                      </span>
-                      {service.disabled ? (
-                        <span className="text-[0.6rem] font-medium uppercase tracking-wide bg-line text-ink-faint px-2 py-0.5 rounded-full h-fit">
-                          {t("exploreServices.comingSoon")}
-                        </span>
-                      ) : (
-                        <ArrowRight
-                          size={18}
-                          className="text-ink-faint group-hover:text-coffee-dark group-hover:translate-x-0.5 transition-all"
-                        />
-                      )}
-                    </div>
-                    <p className="font-display text-lg text-ink mb-1">{service.label}</p>
-                    <p className="text-sm text-ink-soft leading-snug">{service.description}</p>
+                    {item.disabled ? ui.soon : ui.available}
+                  </span>
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-start justify-between gap-3 mb-1.5">
+                    <p className="font-display text-xl text-ink leading-tight">{label}</p>
+                    <ArrowUpRight
+                      size={18}
+                      className="text-ink-faint shrink-0 mt-1 transition-all group-hover:text-coffee-dark group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </div>
+                  <p className="text-sm text-ink-soft leading-snug">{description}</p>
+                </div>
+              </>
+            );
+            const cls =
+              "group flex flex-col h-full overflow-hidden rounded-2xl border border-line bg-surface text-left transition-all hover:border-coffee-light hover:-translate-y-1 hover:shadow-lg";
+            return (
+              <Reveal key={item.key} delay={Math.min(i, 5) * 0.05}>
+                {hasPage ? (
+                  <Link to={servicePath(item.key)} className={cls} aria-label={label}>
+                    {body}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setPanel({ key: item.key, name: label, description, soon: item.disabled })}
+                    className={cls}
+                  >
+                    {body}
                   </button>
-                </Reveal>
-              );
-            })}
-          </div>
-        )}
+                )}
+              </Reveal>
+            );
+          })}
+        </div>
       </div>
 
-      {openService && (
-        <SubscribeServiceModal service={openService} onClose={() => setOpenService(null)} />
-      )}
+      <ServiceRequestPanel
+        open={Boolean(panel)}
+        onClose={() => setPanel(null)}
+        serviceKey={panel?.key}
+        name={panel?.name}
+        description={panel?.description}
+        soon={panel?.soon}
+      />
     </section>
   );
 }

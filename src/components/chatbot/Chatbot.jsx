@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageCircle, X, Send, ArrowRight, ChevronLeft, Menu, Sparkles } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useUser } from "../../context/Usercontext.jsx";
-import { CHATBOT, matchKeyword, askAvila } from "../../i18n/chatbot.js";
+import { CHATBOT } from "../../i18n/chatbot.js";
+import { answer } from "../../i18n/chatbotEngine.js";
 
 let msgId = 0;
 const nextId = () => ++msgId;
@@ -19,11 +21,13 @@ export default function Chatbot() {
   const [input, setInput] = useState("");
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
-  const abortRef = useRef(null);
+  const timerRef = useRef(null);
+  const topicRef = useRef(null); // dernier sujet, pour « et ensuite ? »
 
   useEffect(() => {
     // Réinitialise la conversation si la langue change pendant l'usage.
-    abortRef.current?.abort();
+    clearTimeout(timerRef.current);
+    topicRef.current = null;
     setTyping(false);
     setMessages([{ id: nextId(), from: "bot", text: dict.greeting }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,64 +41,41 @@ export default function Chatbot() {
     if (open) setTimeout(() => inputRef.current?.focus(), 250);
   }, [open]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
-  const addBot = (text, withCta = false) =>
-    setMessages((m) => [...m, { id: nextId(), from: "bot", text, withCta }]);
-
-  // Réponse locale instantanée (menu), avec un petit délai « en train d'écrire ».
-  function pushLocalAnswer(key) {
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      addBot(dict.answers[key], dict.ctaKeys.includes(key));
-    }, 450);
-  }
-
-  function handleMenuClick(key) {
-    if (typing) return;
-    setMessages((m) => [...m, { id: nextId(), from: "user", text: dict.menu.find((i) => i.key === key)?.label }]);
-    pushLocalAnswer(key);
-    setMenuOpen(false);
-  }
-
-  async function handleSend(e) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || typing) return;
-
-    const userMsg = { id: nextId(), from: "user", text };
-    const history = [...messages, userMsg];
-    setMessages(history);
+  // Pose la question au moteur local (aucun appel réseau) avec un court délai
+  // « en train d'écrire », proportionnel à la longueur de la réponse.
+  function ask(text) {
+    const clean = text.trim();
+    if (!clean || typing) return;
+    setMessages((m) => [...m, { id: nextId(), from: "user", text: clean }]);
     setInput("");
+    setMenuOpen(false);
     setTyping(true);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-    try {
-      const { reply, showForm } = await askAvila(history, lang, { signal: controller.signal });
-      addBot(reply, showForm);
-    } catch (err) {
-      if (err.name === "AbortError") return;
-      if (err.status === 429) {
-        addBot(dict.rateLimited);
-      } else {
-        // IA indisponible → secours par mots-clés, sinon message générique.
-        const key = matchKeyword(text, lang);
-        if (key) addBot(`${dict.error}\n\n${dict.answers[key]}`, dict.ctaKeys.includes(key));
-        else addBot(dict.fallback, true);
-      }
-    } finally {
-      if (abortRef.current === controller) {
-        setTyping(false);
-        abortRef.current = null;
-      }
+    const r = answer(clean, lang, { topic: topicRef.current });
+    timerRef.current = setTimeout(() => {
+      topicRef.current = r.topic;
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        { id: nextId(), from: "bot", text: r.text, links: r.links, suggestions: r.suggestions, cta: r.cta },
+      ]);
       inputRef.current?.focus();
-    }
+    }, Math.min(900, 350 + r.text.length * 1.2));
+  }
+
+  function handleMenuClick(item) {
+    ask(item.q || item.label);
+  }
+
+  function handleSend(e) {
+    e.preventDefault();
+    ask(input);
   }
 
   function restart() {
-    abortRef.current?.abort();
+    clearTimeout(timerRef.current);
+    topicRef.current = null;
     setTyping(false);
     setMessages([{ id: nextId(), from: "bot", text: dict.greeting }]);
     setMenuOpen(false);
@@ -156,7 +137,7 @@ export default function Chatbot() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-tight truncate">Avila</p>
                 <p className="text-[0.7rem] text-cream-fixed/60 truncate">
-                  {typing ? dict.typing : lang === "fr" ? "Assistante H-Company · répond à tout" : "H-Company assistant · ask anything"}
+                  {typing ? dict.typing : lang === "fr" ? "Assistante H-Company · posez vos questions" : "H-Company assistant · ask away"}
                 </p>
               </div>
               <button
@@ -180,7 +161,7 @@ export default function Chatbot() {
                     {dict.menu.map((item) => (
                       <button
                         key={item.key}
-                        onClick={() => handleMenuClick(item.key)}
+                        onClick={() => handleMenuClick(item)}
                         className="w-full text-left text-sm text-ink px-4 py-2.5 hover:bg-cream transition-colors"
                       >
                         {item.label}
@@ -238,14 +219,32 @@ export default function Chatbot() {
                     >
                       {m.text}
                     </div>
-                    {m.withCta && (
-                      <a
-                        href="#rejoindre"
-                        onClick={() => setOpen(false)}
-                        className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-coffee-dark hover:underline"
-                      >
-                        {dict.goToForm} <ArrowRight size={12} />
-                      </a>
+                    {(m.links?.length > 0 || m.cta) && (
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+                        {(m.links || []).map((l) => (
+                          <Link
+                            key={l.to}
+                            to={l.to}
+                            onClick={() => setOpen(false)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-coffee-dark hover:underline"
+                          >
+                            {l.label} <ArrowRight size={12} />
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {m.suggestions?.length > 0 && m.id === messages[messages.length - 1].id && !typing && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {m.suggestions.map((sg) => (
+                          <button
+                            key={sg}
+                            onClick={() => ask(sg)}
+                            className="text-xs text-coffee-dark bg-surface border border-line hover:border-coffee-light hover:bg-latte-soft rounded-full px-3 py-1.5 transition-colors text-left"
+                          >
+                            {sg}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -254,10 +253,10 @@ export default function Chatbot() {
               {/* Suggestions rapides tant que la conversation n'a pas commencé */}
               {onlyGreeting && !typing && (
                 <div className="flex flex-wrap gap-1.5 pl-9">
-                  {dict.menu.slice(0, 4).map((item) => (
+                  {dict.menu.slice(0, 6).map((item) => (
                     <button
                       key={item.key}
-                      onClick={() => handleMenuClick(item.key)}
+                      onClick={() => handleMenuClick(item)}
                       className="text-xs text-coffee-dark bg-surface border border-line hover:border-coffee-light hover:bg-latte-soft rounded-full px-3 py-1.5 transition-colors"
                     >
                       {item.label}
@@ -301,7 +300,7 @@ export default function Chatbot() {
             </form>
             <p className="flex items-center justify-center gap-1 text-[10px] text-ink-faint pb-2 -mt-1">
               <Sparkles size={10} />
-              {lang === "fr" ? "Réponses générées par IA, vérifiez les infos importantes." : "AI-generated answers, double-check anything important."}
+              {lang === "fr" ? "Assistante automatique H-Company, sans IA externe." : "Automated H-Company assistant, no external AI."}
             </p>
           </motion.div>
         )}

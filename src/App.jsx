@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import Chatbot from "./components/chatbot/Chatbot.jsx";
 import ScrollToTop from "./components/ui/ScrollToTop.jsx";
 import BrandLoader from "./components/ui/BrandLoader.jsx";
@@ -15,6 +15,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard.jsx"));
 const AgentDashboard = lazy(() => import("./pages/AgentDashboard.jsx"));
 const Onboarding = lazy(() => import("./pages/Onboarding.jsx"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail.jsx"));
+const HServicePage = lazy(() => import("./pages/HServicePage.jsx"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail.jsx"));
 const PartnerDetail = lazy(() => import("./pages/PartnerDetail.jsx"));
 const SignIn = lazy(() => import("./pages/auth/SignIn.jsx"));
@@ -48,6 +49,7 @@ function RouteFallback() {
 // son propre écran (voir Home.jsx), donc on l'ignore ici.
 function RouteTransitionLoader() {
   const location = useLocation();
+  const navType = useNavigationType();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -58,8 +60,11 @@ function RouteTransitionLoader() {
       window.__hcRouteSeen = true;
       return;
     }
+    // Retour / avance dans l'historique : pas d'animation. La personne veut
+    // retrouver sa page tout de suite, exactement là où elle l'a laissée.
+    if (navType === "POP") return;
     setShow(true);
-    const timer = setTimeout(() => setShow(false), 900);
+    const timer = setTimeout(() => setShow(false), 700);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -87,6 +92,9 @@ export default function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/agent" element={<AgentDashboard />} />
           <Route path="/services/:slug" element={<ServiceDetail />} />
+          {/* Pages des services H- (Transport, Logement, Restaurant, Learning,
+              Money, Translate, Shopping/Commerce...) */}
+          <Route path="/h/:slug" element={<HServicePage />} />
           <Route path="/cours/:id" element={<CourseDetail />} />
           <Route path="/partenaires/:slug" element={<PartnerDetail />} />
 

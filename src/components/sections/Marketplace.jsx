@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { TradeArt } from "../art/ServiceArt.jsx";
+import { SERVICES_META } from "../../data/services.js";
 import Reveal from "../ui/Reveal.jsx";
 import StepVideo from "./StepVideo.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
@@ -161,6 +164,29 @@ export default function Marketplace() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Les cinq métiers en images : chaque tuile ouvre la page du métier */}
+        <Reveal className="mt-20">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+            {SERVICES_META.map((m, i) => (
+              <Link
+                key={m.slug}
+                to={`/services/${m.slug}`}
+                className={`group relative block rounded-2xl overflow-hidden bg-ink-fixed aspect-[4/5] ${i === 4 ? "col-span-2 md:col-span-1 aspect-[16/9] md:aspect-[4/5]" : ""}`}
+              >
+                <TradeArt
+                  name={m.categoryKey}
+                  className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-3.5 text-cream-fixed">
+                  <p className="font-mono text-[0.65rem] text-[#E4B968] mb-0.5">{String(i + 1).padStart(2, "0")}</p>
+                  <p className="font-display italic text-base leading-tight">{t(`services.${m.key}n`)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );

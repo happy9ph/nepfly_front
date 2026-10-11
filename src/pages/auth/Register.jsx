@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, ArrowRight, Users } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import LockoutNotice from "../../components/auth/LockoutNotice.jsx";
 import GoogleButton from "../../components/auth/GoogleButton.jsx";
+import SlowHint from "../../components/auth/SlowHint.jsx";
+import { startOtp } from "../../lib/otpTracker.js";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api, ApiError } from "../../lib/api.js";
@@ -35,18 +37,17 @@ export default function Register() {
       return;
     }
 
-    // Le compte existe déjà à ce stade, même si la demande de code qui
-    // suit échoue — on avance donc toujours vers l'écran de vérification
-    // plutôt que de laisser croire que la création a échoué. Cet écran
-    // propose son propre bouton pour redemander un code si besoin.
-    try {
-      await api.auth.requestOtp(email, "email", "register");
-    } catch {
-      // Volontairement silencieux ici — l'écran de vérification gère
-      // lui-même l'absence de code reçu (bouton "Renvoyer le code").
-    }
-    navigate("/verifier", { state: { email, purpose: "register" } });
+    // Le compte existe : on part tout de suite sur l'écran du code. L'envoi
+    // de l'e-mail continue en arrière-plan (état et bouton « Réessayer »
+    // sur l'écran suivant) au lieu de rallonger l'attente ici.
+    startOtp(email.trim(), "register");
+    navigate("/verifier", { state: { email: email.trim(), purpose: "register" } });
   }
+
+  // Réveille le serveur pendant que la personne remplit le formulaire.
+  useEffect(() => {
+    api.auth.warmup();
+  }, []);
 
   return (
     <AuthLayout
@@ -115,6 +116,7 @@ export default function Register() {
               />
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
+            <SlowHint active={loading} />
             <button
               type="submit"
               disabled={loading}

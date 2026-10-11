@@ -8,7 +8,6 @@ import ExploreServices from "../components/sections/ExploreServices.jsx";
 import ConnectWithUs from "../components/sections/ConnectWithUs.jsx";
 import Services from "../components/sections/Services.jsx";
 import Interpretation from "../components/sections/Interpretation.jsx";
-import Shopping from "../components/sections/Shopping.jsx";
 import Learning from "../components/sections/Learning.jsx";
 import Impact from "../components/sections/Impact.jsx";
 import Partners from "../components/sections/Partners.jsx";
@@ -119,9 +118,6 @@ export default function Home() {
         </SectionReveal>
         <SectionReveal variant="center">
           <Interpretation />
-        </SectionReveal>
-        <SectionReveal variant="grid">
-          <Shopping />
         </SectionReveal>
         <SectionReveal variant="grid">
           <Learning />

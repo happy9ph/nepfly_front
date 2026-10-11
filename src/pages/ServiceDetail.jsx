@@ -1,4 +1,4 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import NavBar from "../components/layout/NavBar.jsx";
@@ -8,6 +8,7 @@ import DetailSidebarCard from "../components/detail/DetailSidebarCard.jsx";
 import RelatedGrid from "../components/detail/RelatedGrid.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { usePageMeta } from "../components/ui/HeadManager.jsx";
+import { TradeArt } from "../components/art/ServiceArt.jsx";
 import { SERVICES_META, UNIT_LABEL, findServiceBySlug } from "../data/services.js";
 
 export default function ServiceDetail() {
@@ -33,7 +34,7 @@ export default function ServiceDetail() {
       <NavBar />
 
       <DetailHero
-        image={`https://loremflickr.com/1600/1000/${encodeURIComponent(meta.image)}`}
+        art={<TradeArt name={meta.categoryKey} className="w-full h-full" />}
         overlay="linear-gradient(0deg, rgba(30,26,23,0.92) 5%, rgba(30,26,23,0.55) 55%, rgba(30,26,23,0.15) 100%)"
         backTo="/#services"
         backLabel={t("services.heading")}
@@ -86,13 +87,13 @@ export default function ServiceDetail() {
             <p className="text-sm text-ink-soft mb-7">
               {lang === "fr" ? "Devis ajusté à votre besoin exact." : "Quote adjusted to your exact needs."}
             </p>
-            <a
-              href="/#rejoindre"
+            <Link
+              to="/#rejoindre"
               className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-4 hover:bg-coffee-dark hover:scale-[1.02] transition-all"
             >
               {t("services.request")}
               <ArrowRight size={15} />
-            </a>
+            </Link>
           </DetailSidebarCard>
         </div>
       </section>
@@ -103,7 +104,7 @@ export default function ServiceDetail() {
         items={otherServices.map((s) => ({
           key: s.slug,
           to: `/services/${s.slug}`,
-          image: `https://loremflickr.com/500/360/${encodeURIComponent(s.image)}`,
+          art: <TradeArt name={s.categoryKey} className="w-full h-full" />,
           title: t(`services.${s.key}n`),
           subtitle: t(`services.categories.${s.categoryKey}`),
         }))}

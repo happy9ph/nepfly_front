@@ -75,13 +75,13 @@ export default function InterpretationDetail() {
                 </span>
               ))}
             </div>
-            <a
-              href="/#rejoindre"
+            <Link
+              to="/#rejoindre"
               className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors"
             >
               {t("interpretation.cta")}
               <ArrowRight size={15} />
-            </a>
+            </Link>
           </div>
         </div>
       </section>

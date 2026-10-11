@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MailCheck, ArrowRight } from "lucide-react";
+import { MailCheck, ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import LockoutNotice from "../../components/auth/LockoutNotice.jsx";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
-import { api, ApiError } from "../../lib/api.js";
+import SlowHint from "../../components/auth/SlowHint.jsx";
+import { ApiError } from "../../lib/api.js";
+import { startOtp, useOtpStatus } from "../../lib/otpTracker.js";
 
 const CODE_LENGTH = 6;
 const RESEND_SECONDS = 45;
@@ -33,6 +35,8 @@ export default function VerifyOtp() {
   const [locked, setLocked] = useState(false);
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
   const inputsRef = useRef([]);
+  const otp = useOtpStatus();
+  const forThisEmail = otp.email === email && otp.purpose === purpose;
 
   useEffect(() => {
     if (!email) navigate(purpose === "register" ? "/creer-un-compte" : "/connexion");
@@ -91,14 +95,16 @@ export default function VerifyOtp() {
     }
   }
 
-  async function handleResend() {
-    if (resendIn > 0) return;
-    try {
-      await api.auth.requestOtp(email, "email", purpose);
-      setResendIn(RESEND_SECONDS);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 429) setLocked(true);
-    }
+  // Arrivée directe sur cette page (actualisation, lien) sans envoi en cours :
+  // le code a pu être envoyé juste avant, on n'en renvoie pas un de nous-mêmes.
+  useEffect(() => {
+    if (forThisEmail && otp.status === "error" && otp.rateLimited) setLocked(true);
+  }, [forThisEmail, otp.status, otp.rateLimited]);
+
+  function handleResend() {
+    if (resendIn > 0 || (forThisEmail && otp.status === "sending")) return;
+    startOtp(email, purpose);
+    setResendIn(RESEND_SECONDS);
   }
 
   if (!email) return null;
@@ -126,7 +132,32 @@ export default function VerifyOtp() {
             {t(LEAD_KEY[purpose])} <strong className="text-ink">{email}</strong>
           </p>
 
-          <div className="flex gap-2 mb-6" onPaste={handlePaste}>
+          {forThisEmail && otp.status === "sending" && (
+            <p role="status" className="flex items-center gap-2 text-xs text-ink-soft bg-latte-soft border border-line rounded-xl px-3.5 py-2.5 mb-4">
+              <Loader2 size={14} className="animate-spin text-coffee shrink-0" />
+              {t("auth.otpSendingCode")}
+            </p>
+          )}
+          {forThisEmail && otp.status === "sent" && (
+            <p role="status" className="flex items-center gap-2 text-xs text-ink-soft bg-latte-soft border border-line rounded-xl px-3.5 py-2.5 mb-4">
+              <CheckCircle2 size={14} className="text-coffee shrink-0" />
+              {t("auth.otpSentOk")}
+            </p>
+          )}
+          {forThisEmail && otp.status === "error" && !otp.rateLimited && (
+            <div role="alert" className="flex items-start gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 mb-4">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+              <span className="flex-1">
+                {t("auth.otpSendError")}{" "}
+                <button type="button" onClick={() => startOtp(email, purpose)} className="underline font-medium">
+                  {t("auth.otpRetry")}
+                </button>
+              </span>
+            </div>
+          )}
+          <SlowHint active={forThisEmail && otp.status === "sending"} delayMs={6000} />
+
+          <div className="flex gap-2 mb-6 mt-4" onPaste={handlePaste}>
             {digits.map((d, i) => (
               <input
                 key={i}
