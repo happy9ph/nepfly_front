@@ -59,9 +59,9 @@ export function getPartnerContent(t, meta) {
     text: t(`companies.${key}.text`),
     longText: t(`companies.${key}.longText`),
     stats: [
-      { value: key === "lukondo" ? "4" : key === "hlearning" ? "12+" : key === "ustudy" ? "2" : "1", label: t(`companies.${key}.stat1`) },
+      { value: key === "lukondo" ? "4" : key === "hlearning" ? "100 %" : key === "ustudy" ? "2" : "1", label: t(`companies.${key}.stat1`) },
       { value: key === "lukondo" ? "24/7" : key === "hlearning" ? "3" : key === "ustudy" ? "24/7" : "0", label: t(`companies.${key}.stat2`) },
-      { value: key === "lukondo" ? "2" : key === "hlearning" ? "100%" : key === "ustudy" ? "iOS/Android" : "24/7", label: t(`companies.${key}.stat3`) },
+      { value: key === "lukondo" ? "2" : key === "hlearning" ? "✓" : key === "ustudy" ? "iOS/Android" : "24/7", label: t(`companies.${key}.stat3`) },
     ],
     highlights: [t(`companies.${key}.h1`), t(`companies.${key}.h2`), t(`companies.${key}.h3`)],
   };

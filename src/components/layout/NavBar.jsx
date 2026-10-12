@@ -7,7 +7,9 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import NotificationBell from "./NotificationBell.jsx";
 import Logo from "../ui/Logo.jsx";
 
-export default function NavBar() {
+// onDark : la page commence par un bandeau sombre — texte clair tant que la
+// barre est transparente (avant le défilement).
+export default function NavBar({ onDark = false }) {
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,6 +32,7 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [menuOpen]);
 
+  const light = onDark && !scrolled;
   const displayName = user?.full_name || user?.email || "";
   const initial = displayName ? displayName[0].toUpperCase() : "";
 
@@ -41,7 +44,7 @@ export default function NavBar() {
         }`}
       >
         <div className="max-w-content mx-auto flex items-center justify-between px-6 py-5">
-          <a href="#top" className="flex items-center gap-2 font-display text-xl tracking-tight text-ink">
+          <a href="#top" className={`flex items-center gap-2 font-display text-xl tracking-tight transition-colors ${light ? "text-cream-fixed" : "text-ink"}`}>
             H-Company
           </a>
 
@@ -55,7 +58,7 @@ export default function NavBar() {
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  className="flex items-center pl-1.5 pr-1.5 py-1.5 rounded-full border border-ink/20 transition-colors duration-300 hover:bg-ink/[0.04]"
+                  className={`flex items-center pl-1.5 pr-1.5 py-1.5 rounded-full border transition-colors duration-300 ${light ? "border-white/30 hover:bg-white/10" : "border-ink/20 hover:bg-ink/[0.04]"}`}
                 >
                   <span className="w-8 h-8 rounded-full bg-[#C89A3D] text-ink flex items-center justify-center text-xs font-semibold">
                     {initial}
@@ -121,7 +124,7 @@ export default function NavBar() {
           ) : (
             <Link
               to="/connexion"
-              className="text-sm font-medium text-ink border border-ink/20 rounded-full px-5 py-2 transition-colors duration-300 hover:bg-ink hover:text-cream"
+              className={`text-sm font-medium border rounded-full px-5 py-2 transition-colors duration-300 ${light ? "text-cream-fixed border-white/30 hover:bg-white/15" : "text-ink border-ink/20 hover:bg-ink hover:text-cream"}`}
             >
               {t("nav.signin")}
             </Link>

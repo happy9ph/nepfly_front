@@ -106,7 +106,9 @@ const L = {
   terms: { fr: "Conditions", en: "Terms", to: "/conditions" },
   lukondo: { fr: "Voir Lukondo", en: "See Lukondo", to: "/partenaires/lukondo" },
   confismila: { fr: "Voir Confismila", en: "See Confismila", to: "/partenaires/confismila" },
-  hlearning: { fr: "Voir H-learning", en: "See H-learning", to: "/partenaires/h-learning" },
+  hlearning: { fr: "Voir H-learning", en: "See H-learning", to: "/formations" },
+  courses: { fr: "Voir les cours gratuits", en: "See the free courses", to: "/formations#catalogue" },
+  inperson: { fr: "S'inscrire au présentiel", en: "Register for in-person", to: "/formations/inscription" },
   ustudy: { fr: "Voir U-Study", en: "See U-Study", to: "/partenaires/u-study" },
 };
 
@@ -255,6 +257,20 @@ const KB = [
   { id: "countries", kw: ["pays", "zone", "ou opere", "ou travaillez", "country", "countries", "where do you operate", "congo", "rdc", "zambie", "zambia", "lubumbashi", "lusaka", "diaspora", "drc"], fr: "H-Company opère principalement entre la RDC et la Zambie, et sert aussi la diaspora. Les villes desservies dépendent des agences partenaires de chaque service.", en: "H-Company mainly operates between the DRC and Zambia, and also serves the diaspora. The cities served depend on each service's partner agencies.", to: ["explore"] },
 
   /* ── Formation, interprétation, marketplace ── */
+  {
+    id: "learning_free",
+    kw: ["gratuit", "gratuitement", "youtube", "video", "videos", "playlist", "free course", "free courses", "free videos", "watch", "regarder", "suivre les cours"],
+    fr: "Toutes les vidéos H-Learning viennent de notre chaîne YouTube et se suivent gratuitement, sans compte obligatoire. Votre progression est gardée sur votre appareil (et sur votre compte H-Company si vous êtes connecté).",
+    en: "Every H-Learning video comes from our YouTube channel and is free to watch, no account required. Your progress is kept on your device (and on your H-Company account if you are signed in).",
+    to: ["courses"], follow: ["learning_inperson"],
+  },
+  {
+    id: "learning_inperson",
+    kw: ["presentiel", "en presentiel", "in person", "in-person", "formateur", "trainer", "s inscrire a une formation", "inscription formation", "se former", "session", "certificat", "certificate"],
+    fr: "Pour vous former avec un formateur, inscrivez-vous à la formation en présentiel : vous laissez vos coordonnées et le cours souhaité, puis notre équipe vous contacte pour fixer le lieu, les dates et les modalités. Il n'y a pas de paiement en ligne.",
+    en: "To train with a trainer, register for the in-person training: leave your details and the course you want, then our team contacts you to set the place, dates and terms. There is no online payment.",
+    to: ["inperson", "team"],
+  },
   {
     id: "learning_team",
     kw: ["formation d equipe", "former mes employes", "former mon equipe", "team training", "train my team", "employes", "entreprise formation", "plusieurs employes", "company training"],

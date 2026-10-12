@@ -6,7 +6,7 @@ import {
   FileText, Globe, HandCoins, Hash, Headset, Home, Hotel, Landmark, Laptop, ListChecks, Lock,
   MapPin, MapPinned, MessageCircle, Mic, PartyPopper, Route, Send, ShieldCheck, ShoppingBag,
   Sparkles, Store, Ticket, Truck, Users, Wallet, Bus, Package, UtensilsCrossed, GraduationCap,
-  Banknote, Languages,
+  Banknote, Languages, PlayCircle,
 } from "lucide-react";
 
 export const ICONS = {
@@ -14,7 +14,7 @@ export const ICONS = {
   FileText, Globe, HandCoins, Hash, Headset, Home, Hotel, Landmark, Laptop, ListChecks, Lock,
   MapPin, MapPinned, MessageCircle, Mic, PartyPopper, Route, Send, ShieldCheck, ShoppingBag,
   Sparkles, Store, Ticket, Truck, Users, Wallet, Bus, Package, UtensilsCrossed, GraduationCap,
-  Banknote, Languages,
+  Banknote, Languages, PlayCircle,
 };
 
 export function iconFor(name) {

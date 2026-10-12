@@ -7,50 +7,39 @@ export const LEVEL_TONE = {
   "tous niveaux": "coffee",
 };
 
-// Identifiants négatifs pour ne jamais entrer en conflit avec de vrais
-// identifiants venant du backend (autoincrement positif).
-export const STATIC_FALLBACK_COURSES = [
-  { id: -1, title: "Cybersécurité pour débutants", level: "initiation", description: "Reconnaître les menaces courantes et adopter les bons réflexes pour protéger un poste de travail." },
-  { id: -2, title: "Développement mobile avec Flutter", level: "intermédiaire", description: "Construire une application mobile complète, de la première interface jusqu'à la mise en ligne." },
-  { id: -3, title: "Design d'interfaces", level: "initiation", description: "Concevoir des écrans clairs et agréables à utiliser, sans expérience préalable requise." },
-  { id: -4, title: "Gestion de projet IT", level: "intermédiaire", description: "Cadrer, planifier et livrer un projet informatique dans les délais annoncés." },
-  { id: -5, title: "Entrepreneuriat numérique", level: "tous niveaux", description: "Structurer une idée d'entreprise digitale, du modèle économique jusqu'au lancement." },
-];
-
-// Association par MOTS-CLÉS détectés dans le titre — plutôt que par
-// position — pour que la photo corresponde au vrai contenu du cours, même
-// si le backend renvoie des cours dans un ordre ou avec un contenu
-// différent des exemples de repli ci-dessus.
-const KEYWORD_PHOTOS = [
-  { keywords: ["cyber", "sécurité", "securite"], photo: "cybersecurity,code", alt: "Écran affichant du code, illustrant un poste de travail en cybersécurité" },
-  { keywords: ["mobile", "flutter", "app"], photo: "mobileapp,coding", alt: "Développement d'une application mobile sur un écran d'ordinateur" },
-  { keywords: ["design", "interface", "ui", "ux"], photo: "uidesign,workspace", alt: "Poste de travail de design d'interface avec maquettes à l'écran" },
-  { keywords: ["gestion", "projet", "management"], photo: "teammeeting,office", alt: "Équipe en réunion de planification de projet" },
-  { keywords: ["entrepreneur", "startup", "business"], photo: "startup,laptop", alt: "Personne travaillant sur un projet entrepreneurial depuis un ordinateur portable" },
-  { keywords: ["bureautique", "office", "excel", "word"], photo: "office,computer,work", alt: "Poste de travail bureautique avec ordinateur" },
-  { keywords: ["développement", "developpement", "web", "code", "program"], photo: "webdeveloper,code", alt: "Écran de développement web avec du code" },
-  { keywords: ["marketing", "communication", "vente"], photo: "marketing,meeting", alt: "Équipe travaillant sur une stratégie marketing" },
-  { keywords: ["formation", "formateur", "enseign"], photo: "teacher,classroom,training", alt: "Formateur animant une session de formation" },
-];
-
-const GENERIC_FALLBACK = { photo: "training,professional,africa", alt: "Séance de formation professionnelle" };
-
-/** Choisit une photo dont les mots-clés apparaissent dans le titre du
- * cours — un vrai rapprochement par contenu, pas par position dans la
- * liste. */
-function photoForCourse(title) {
-  const normalized = (title || "").toLowerCase();
-  const match = KEYWORD_PHOTOS.find((entry) => entry.keywords.some((k) => normalized.includes(k)));
-  const chosen = match || GENERIC_FALLBACK;
-  return { photo: `https://loremflickr.com/640/480/${chosen.photo}`, alt: chosen.alt };
+export function levelTone(level) {
+  return LEVEL_TONE[(level || "").toLowerCase()] || "coffee";
 }
 
-/** Charge le catalogue de cours (avec repli local si l'API échoue), et
- * enrichit chaque cours avec une photo choisie selon son titre — utilisé
- * à la fois par la section catalogue (Learning.jsx) et par la page de
- * détail d'un cours. */
+// Identifiants négatifs pour ne jamais entrer en conflit avec de vrais
+// identifiants venant du backend (autoincrement positif). Utilisés
+// uniquement quand l'API est injoignable : ils s'affichent sans vidéos.
+export const STATIC_FALLBACK_COURSES = [
+  { id: -1, title: "Cybersécurité pour débutants", level: "Initiation", category: "Cybersécurité", description: "Reconnaître les menaces courantes et adopter les bons réflexes pour protéger un poste de travail." },
+  { id: -2, title: "Développement mobile avec Flutter", level: "Intermédiaire", category: "Développement", description: "Construire une application mobile complète, de la première interface jusqu'à la mise en ligne." },
+  { id: -3, title: "Design d'interfaces", level: "Initiation", category: "Design", description: "Concevoir des écrans clairs et agréables à utiliser, sans expérience préalable requise." },
+  { id: -4, title: "Gestion de projet IT", level: "Intermédiaire", category: "Gestion", description: "Cadrer, planifier et livrer un projet informatique dans les délais annoncés." },
+  { id: -5, title: "Entrepreneuriat numérique", level: "Tous niveaux", category: "Business", description: "Structurer une idée d'entreprise digitale, du modèle économique jusqu'au lancement." },
+];
+
+function normalize(c) {
+  return { lesson_count: 0, total_seconds: 0, ...c, text: c.description || c.text };
+}
+
+/** "1 h 05", "12 min" — pour les durées de cours/leçons. */
+export function formatDuration(seconds) {
+  const s = Math.max(0, Math.round(seconds || 0));
+  if (!s) return "";
+  const h = Math.floor(s / 3600);
+  const m = Math.round((s % 3600) / 60);
+  if (h) return `${h} h ${String(m).padStart(2, "0")}`;
+  return m ? `${m} min` : `${s} s`;
+}
+
+/** Catalogue de cours (avec repli local si l'API échoue). Utilisé par le
+ * hub H-Learning, la section d'accueil, U-Study et la page de service. */
 export function useCourses() {
-  const [state, setState] = useState({ status: "loading", courses: [] });
+  const [state, setState] = useState({ status: "loading", courses: [], offline: false });
 
   useEffect(() => {
     let cancelled = false;
@@ -59,22 +48,41 @@ export function useCourses() {
       .then((data) => {
         if (cancelled) return;
         const source = data?.length ? data : STATIC_FALLBACK_COURSES;
-        const courses = source.map((c) => ({
-          ...c,
-          text: c.description || c.text,
-          ...photoForCourse(c.title),
-        }));
-        setState({ status: "ready", courses });
+        setState({ status: "ready", courses: source.map(normalize), offline: !data?.length });
       })
       .catch(() => {
         if (cancelled) return;
-        const courses = STATIC_FALLBACK_COURSES.map((c) => ({ ...c, ...photoForCourse(c.title) }));
-        setState({ status: "ready", courses });
+        setState({ status: "ready", courses: STATIC_FALLBACK_COURSES.map(normalize), offline: true });
       });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  return state;
+}
+
+/** Détail d'un cours + ses leçons (YouTube). status : loading | ready | missing | error */
+export function useCourse(id) {
+  const [state, setState] = useState({ status: "loading", course: null });
+
+  useEffect(() => {
+    let cancelled = false;
+    setState({ status: "loading", course: null });
+    const numeric = Number(id);
+    if (!Number.isInteger(numeric) || numeric <= 0) {
+      const fb = STATIC_FALLBACK_COURSES.find((c) => String(c.id) === String(id));
+      setState(fb ? { status: "ready", course: { ...normalize(fb), outcomes: [], requirements: [], lessons: [] } } : { status: "missing", course: null });
+      return undefined;
+    }
+    api.learning
+      .course(numeric)
+      .then((c) => !cancelled && setState({ status: "ready", course: { ...normalize(c), lessons: c.lessons || [] } }))
+      .catch((e) => !cancelled && setState({ status: e?.status === 404 ? "missing" : "error", course: null }));
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   return state;
 }

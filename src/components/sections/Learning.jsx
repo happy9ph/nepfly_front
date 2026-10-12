@@ -6,7 +6,8 @@ import StoreBadges from "../ui/StoreBadges.jsx";
 import Carousel from "./Carousel.jsx";
 import { SkeletonCard } from "../ui/Skeleton.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
-import { useCourses, LEVEL_TONE } from "../../data/courses.js";
+import { useCourses, levelTone } from "../../data/courses.js";
+import CourseCover from "../learning/CourseCover.jsx";
 
 export default function Learning() {
   const { status, courses } = useCourses();
@@ -74,7 +75,7 @@ export default function Learning() {
         .hc-course-photo { position: relative; width: 100%; height: 165px; overflow: hidden; }
         .hc-course-photo img {
           width: 100%; height: 100%; object-fit: cover; display: block;
-          filter: grayscale(0.55) contrast(1.05) brightness(0.94) sepia(0.15);
+          filter: none;
         }
         .hc-course-photo[data-tone="gold"]::after,
         .hc-course-photo[data-tone="clay"]::after,
@@ -152,12 +153,12 @@ export default function Learning() {
               <StoreBadges to="/partenaires/u-study" size="small" />
             </div>
           </div>
-          <a
-            href="/partenaires/u-study"
+          <Link
+            to="/partenaires/u-study"
             className="shrink-0 text-sm font-medium rounded-full border border-white/20 text-[#F3EEDF] px-5 py-2.5 hover:bg-white/10 transition-colors whitespace-nowrap"
           >
             {t("learning.discoverUstudy")}
-          </a>
+          </Link>
         </motion.div>
       </div>
 
@@ -172,7 +173,7 @@ export default function Learning() {
           ) : (
           <Carousel>
             {courses.map((c, i) => {
-              const tone = LEVEL_TONE[c.level] || "coffee";
+              const tone = levelTone(c.level);
               return (
                 <motion.article
                   key={c.title}
@@ -183,16 +184,16 @@ export default function Learning() {
                   transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ y: -6 }}
                 >
-                  <Link to={`/cours/${c.id}`} className="hc-course-photo" data-tone={tone}>
-                    <img src={c.photo} alt={c.alt} loading="lazy" />
+                  <Link to={`/formations/${c.id}`} className="hc-course-photo" data-tone={tone}>
+                    <CourseCover course={c} className="absolute inset-0" showPlay />
                   </Link>
                   <div className="hc-course-content">
                     <span className="hc-course-level" data-tone={tone}>{c.level}</span>
-                    <Link to={`/cours/${c.id}`} className="hc-course-title block" style={{ textDecoration: "none" }}>
+                    <Link to={`/formations/${c.id}`} className="hc-course-title block" style={{ textDecoration: "none" }}>
                       {c.title}
                     </Link>
                     <p className="hc-course-text">{c.text}</p>
-                    <Link to={`/cours/${c.id}`} className="hc-course-link">
+                    <Link to={`/formations/${c.id}`} className="hc-course-link">
                       {t("learning.discover")}
                       <svg width="13" height="11" viewBox="0 0 13 11" aria-hidden="true">
                         <path d="M1 5.5H12M7.5 1L12 5.5L7.5 10" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -204,6 +205,15 @@ export default function Learning() {
             })}
           </Carousel>
           )}
+
+          <div className="flex flex-wrap items-center gap-3 mt-8">
+            <Link to="/formations" className="inline-flex items-center gap-2 rounded-full bg-ink text-cream text-sm font-medium px-6 py-3 hover:bg-coffee-dark transition-colors">
+              {t("learning.seeAll")}
+            </Link>
+            <Link to="/formations/inscription" className="inline-flex items-center gap-2 rounded-full border border-line text-ink text-sm font-medium px-6 py-3 hover:bg-line/50 transition-colors">
+              {t("learning.register")}
+            </Link>
+          </div>
 
           {/* Formation d'équipe / entreprise — distincte des cours individuels */}
           <motion.div

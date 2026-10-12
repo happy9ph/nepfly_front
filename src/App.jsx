@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { Routes, Route, Navigate, useParams, useLocation, useNavigationType } from "react-router-dom";
 import Chatbot from "./components/chatbot/Chatbot.jsx";
 import ScrollToTop from "./components/ui/ScrollToTop.jsx";
 import BrandLoader from "./components/ui/BrandLoader.jsx";
@@ -16,7 +16,11 @@ const AgentDashboard = lazy(() => import("./pages/AgentDashboard.jsx"));
 const Onboarding = lazy(() => import("./pages/Onboarding.jsx"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail.jsx"));
 const HServicePage = lazy(() => import("./pages/HServicePage.jsx"));
-const CourseDetail = lazy(() => import("./pages/CourseDetail.jsx"));
+const LearningHub = lazy(() => import("./pages/learning/LearningHub.jsx"));
+const LearningCourse = lazy(() => import("./pages/learning/CourseDetail.jsx"));
+const CoursePlayer = lazy(() => import("./pages/learning/CoursePlayer.jsx"));
+const InPersonRegistration = lazy(() => import("./pages/learning/InPersonRegistration.jsx"));
+const UstudyPage = lazy(() => import("./pages/learning/UstudyPage.jsx"));
 const PartnerDetail = lazy(() => import("./pages/PartnerDetail.jsx"));
 const SignIn = lazy(() => import("./pages/auth/SignIn.jsx"));
 const Register = lazy(() => import("./pages/auth/Register.jsx"));
@@ -72,6 +76,12 @@ function RouteTransitionLoader() {
   return <BrandLoader visible={show} />;
 }
 
+// Anciens liens /cours/:id (e-mails, favoris) → nouvelle fiche cours.
+function OldCourseRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/formations/${id}`} replace />;
+}
+
 export default function App() {
   return (
     <HeadManager>
@@ -95,7 +105,15 @@ export default function App() {
           {/* Pages des services H- (Transport, Logement, Restaurant, Learning,
               Money, Translate, Shopping/Commerce...) */}
           <Route path="/h/:slug" element={<HServicePage />} />
-          <Route path="/cours/:id" element={<CourseDetail />} />
+          {/* H-Learning : vidéos YouTube gratuites + inscription au présentiel.
+              Remplace les anciennes pages détail H-Learning et U-Study. */}
+          <Route path="/formations" element={<LearningHub />} />
+          <Route path="/formations/inscription" element={<InPersonRegistration />} />
+          <Route path="/formations/:id" element={<LearningCourse />} />
+          <Route path="/formations/:id/regarder/:lessonId" element={<CoursePlayer />} />
+          <Route path="/cours/:id" element={<OldCourseRedirect />} />
+          <Route path="/partenaires/h-learning" element={<LearningHub />} />
+          <Route path="/partenaires/u-study" element={<UstudyPage />} />
           <Route path="/partenaires/:slug" element={<PartnerDetail />} />
 
           {/* Authentification : pages dédiées, plus de modals */}

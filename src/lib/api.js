@@ -256,6 +256,17 @@ export const api = {
       request(`/api/v1/partners/admin/users/${userId}/role`, { method: "PATCH", token, body: { role } }),
     sendNotification: (token, payload) =>
       request("/api/v1/notifications/admin/send", { method: "POST", token, body: payload }),
+    listCourses: (token) => request("/api/v1/learning/admin/courses", { token }),
+    createCourse: (token, body) => request("/api/v1/learning/admin/courses", { method: "POST", token, body }),
+    updateCourse: (token, id, body) => request(`/api/v1/learning/admin/courses/${id}`, { method: "PUT", token, body }),
+    deleteCourse: (token, id) => request(`/api/v1/learning/admin/courses/${id}`, { method: "DELETE", token }),
+    syncCourse: (token, id) => request(`/api/v1/learning/admin/courses/${id}/sync`, { method: "POST", token }),
+    listLessons: (token, id) => request(`/api/v1/learning/admin/courses/${id}/lessons`, { token }),
+    addLesson: (token, id, body) => request(`/api/v1/learning/admin/courses/${id}/lessons`, { method: "POST", token, body }),
+    deleteLesson: (token, id) => request(`/api/v1/learning/admin/lessons/${id}`, { method: "DELETE", token }),
+    listRegistrations: (token) => request("/api/v1/learning/admin/registrations", { token }),
+    updateRegistrationStatus: (token, id, statusValue) =>
+      request(`/api/v1/learning/admin/registrations/${id}/status`, { method: "PATCH", token, body: { status: statusValue } }),
     listCompanyEnrollments: (token) => request("/api/v1/learning/admin/company-enrollments", { token }),
     updateCompanyEnrollmentStatus: (token, id, statusValue) =>
       request(`/api/v1/learning/admin/company-enrollments/${id}/status`, {
@@ -297,9 +308,18 @@ export const api = {
     mine: (token) => request("/api/v1/contact/me", { token }),
   },
 
-  // H-Learning — formations et inscription d'équipe (entreprise)
+  // H-Learning — cours (vidéos YouTube gratuites), progression, inscription
+  // au présentiel et formation d'équipe (entreprise)
   learning: {
     courses: () => request("/api/v1/learning/courses"),
+    course: (id) => request(`/api/v1/learning/courses/${id}`),
+    myProgress: (token, courseId) =>
+      request(`/api/v1/learning/me/progress${courseId ? `?course_id=${courseId}` : ""}`, { token }),
+    saveProgress: (token, lessonId, body) =>
+      request(`/api/v1/learning/lessons/${lessonId}/progress`, { method: "PUT", token, body }),
+    register: (payload, token) =>
+      request("/api/v1/learning/registrations", { method: "POST", body: payload, token }),
+    myRegistrations: (token) => request("/api/v1/learning/me/registrations", { token }),
     enrollCompany: (payload) =>
       request("/api/v1/learning/company-enrollment", { method: "POST", body: payload }),
   },

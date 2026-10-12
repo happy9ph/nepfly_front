@@ -14,6 +14,7 @@ import AllRequestsPanel from "../components/admin/AllRequestsPanel.jsx";
 import ServiceSubscriptionsPanel from "../components/admin/ServiceSubscriptionsPanel.jsx";
 import ServiceCatalogPanel from "../components/admin/ServiceCatalogPanel.jsx";
 import CompanyTrainingPanel from "../components/admin/CompanyTrainingPanel.jsx";
+import LearningAdminPanel from "../components/admin/LearningAdminPanel.jsx";
 import AgentsPanel from "../components/admin/AgentsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
@@ -99,6 +100,7 @@ export default function AdminDashboard() {
   const [pendingAppsCount, setPendingAppsCount] = useState(0);
   const [pendingServiceSubsCount, setPendingServiceSubsCount] = useState(0);
   const [pendingTrainingCount, setPendingTrainingCount] = useState(0);
+  const [pendingRegistrationsCount, setPendingRegistrationsCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -157,6 +159,10 @@ export default function AdminDashboard() {
       // Compteur des demandes de formation d'équipe H-Learning non traitées
       withAuth((token) => api.admin.listCompanyEnrollments(token))
         .then((list) => setPendingTrainingCount(Array.isArray(list) ? list.filter((r) => r.status === "new").length : 0))
+        .catch(() => {});
+      // Inscriptions au présentiel (H-Learning) non traitées
+      withAuth((token) => api.admin.listRegistrations(token))
+        .then((list) => setPendingRegistrationsCount(Array.isArray(list) ? list.filter((r) => r.status === "new").length : 0))
         .catch(() => {});
     },
     [withAuth, pushToast]
@@ -430,7 +436,7 @@ export default function AdminDashboard() {
         onSignOut={signOut}
         view={view}
         onViewChange={(v) => { setView(v); closeDetail(); }}
-        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount }}
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
@@ -482,6 +488,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <ServiceCatalogPanel withAuth={withAuth} api={api} />
+            </>
+          ) : view === "learning" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> H-Learning</p>
+                <Title className="text-3xl">H-Learning</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Cours alimentés par vos playlists YouTube (gratuits) et inscriptions aux formations en présentiel.
+                </p>
+              </div>
+              <LearningAdminPanel withAuth={withAuth} api={api} onCount={setPendingRegistrationsCount} />
             </>
           ) : view === "trainingRequests" ? (
             <>

@@ -225,7 +225,7 @@ export function CoursesShowcase({ page }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {courses.slice(0, 6).map((c, i) => (
             <Reveal key={c.id} delay={i * 0.05}>
-              <Link to={`/cours/${c.id}`} className="group block h-full rounded-3xl border border-line bg-cream/60 overflow-hidden hover:-translate-y-1 hover:border-coffee-light transition-all duration-300">
+              <Link to={`/formations/${c.id}`} className="group block h-full rounded-3xl border border-line bg-cream/60 overflow-hidden hover:-translate-y-1 hover:border-coffee-light transition-all duration-300">
                 <div className="relative h-40 overflow-hidden">
                   <TradeArt name={tradeFor(c.title)} className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-700" />
                   {c.level && (

@@ -57,6 +57,26 @@ function Showcase({ page, theme, onNotify }) {
   }
 }
 
+// Bouton d'action principal : ouvre le panneau de demande, ou — pour un
+// service qui a sa propre page d'accueil (H-Learning) — mène directement à
+// cette page.
+function PrimaryCta({ page, onOpen, className }) {
+  if (page.ctaTo) {
+    return (
+      <Link to={page.ctaTo} className={className}>
+        {page.cta}
+        <ArrowRight size={15} />
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onOpen} className={className}>
+      {page.cta}
+      <ArrowRight size={15} />
+    </button>
+  );
+}
+
 export default function HServicePage() {
   const { slug } = useParams();
   const { lang } = useLanguage();
@@ -120,14 +140,11 @@ export default function HServicePage() {
               </p>
               <p className="text-cream-fixed/80 leading-relaxed mb-8">{page.lead}</p>
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPanelOpen(true)}
+                <PrimaryCta
+                  page={page}
+                  onOpen={() => setPanelOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full bg-cream-fixed text-ink-fixed text-sm font-semibold px-6 py-3.5 hover:bg-white transition-colors"
-                >
-                  {page.cta}
-                  <ArrowRight size={15} />
-                </button>
+                />
                 <button
                   type="button"
                   onClick={scrollToPreview}
@@ -250,14 +267,11 @@ export default function HServicePage() {
           <div className="max-w-2xl mx-auto">
             <h2 className="font-display italic text-3xl sm:text-5xl leading-tight mb-4">{page.closingTitle}</h2>
             <p className="text-cream-fixed/80 mb-8">{page.closingText}</p>
-            <button
-              type="button"
-              onClick={() => setPanelOpen(true)}
+            <PrimaryCta
+              page={page}
+              onOpen={() => setPanelOpen(true)}
               className="inline-flex items-center gap-2 rounded-full bg-cream-fixed text-ink-fixed text-sm font-semibold px-7 py-4 hover:bg-white transition-colors"
-            >
-              {page.cta}
-              <ArrowRight size={15} />
-            </button>
+            />
           </div>
         </section>
 
