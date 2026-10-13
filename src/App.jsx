@@ -20,6 +20,9 @@ const LearningHub = lazy(() => import("./pages/learning/LearningHub.jsx"));
 const LearningCourse = lazy(() => import("./pages/learning/CourseDetail.jsx"));
 const CoursePlayer = lazy(() => import("./pages/learning/CoursePlayer.jsx"));
 const InPersonRegistration = lazy(() => import("./pages/learning/InPersonRegistration.jsx"));
+const PlansPage = lazy(() => import("./pages/learning/PlansPage.jsx"));
+const Checkout = lazy(() => import("./pages/learning/Checkout.jsx"));
+const MySubscription = lazy(() => import("./pages/learning/MySubscription.jsx"));
 const UstudyPage = lazy(() => import("./pages/learning/UstudyPage.jsx"));
 const PartnerDetail = lazy(() => import("./pages/PartnerDetail.jsx"));
 const SignIn = lazy(() => import("./pages/auth/SignIn.jsx"));
@@ -29,7 +32,6 @@ const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword.jsx"));
 const NewPassword = lazy(() => import("./pages/auth/NewPassword.jsx"));
 const OAuthCallback = lazy(() => import("./pages/auth/OAuthCallback.jsx"));
 const Payment = lazy(() => import("./pages/Payment.jsx"));
-const TeamTraining = lazy(() => import("./pages/TeamTraining.jsx"));
 const InterpretationDetail = lazy(() => import("./pages/InterpretationDetail.jsx"));
 const ShoppingDetail = lazy(() => import("./pages/ShoppingDetail.jsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.jsx"));
@@ -109,6 +111,9 @@ export default function App() {
               Remplace les anciennes pages détail H-Learning et U-Study. */}
           <Route path="/formations" element={<LearningHub />} />
           <Route path="/formations/inscription" element={<InPersonRegistration />} />
+          <Route path="/formations/bouquets" element={<PlansPage />} />
+          <Route path="/formations/bouquets/:code/paiement" element={<Checkout />} />
+          <Route path="/formations/mon-bouquet" element={<MySubscription />} />
           <Route path="/formations/:id" element={<LearningCourse />} />
           <Route path="/formations/:id/regarder/:lessonId" element={<CoursePlayer />} />
           <Route path="/cours/:id" element={<OldCourseRedirect />} />
@@ -124,7 +129,8 @@ export default function App() {
           <Route path="/nouveau-mot-de-passe" element={<NewPassword />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/paiement/:offerId" element={<Payment />} />
-          <Route path="/formation-equipe" element={<TeamTraining />} />
+          {/* La formation d'équipe est désormais le bouquet « Équipe » de H-Learning. */}
+          <Route path="/formation-equipe" element={<Navigate to="/formations/bouquets?plan=equipe#equipe" replace />} />
           <Route path="/interpretation" element={<InterpretationDetail />} />
           <Route path="/shopping" element={<ShoppingDetail />} />
           <Route path="/bienvenue" element={<Onboarding />} />

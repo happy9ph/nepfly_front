@@ -27,7 +27,7 @@ export default function CourseCard({ course, index = 0, progress }) {
         <div className="relative h-44">
           <CourseCover course={course} className="absolute inset-0" showPlay />
           <span className="absolute left-3 top-3 text-[0.65rem] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cream-fixed/90 text-ink-fixed">
-            {ui.free}
+            {course.members_only ? ui.locked.badge : ui.free}
           </span>
         </div>
         <div className="flex flex-1 flex-col p-5">

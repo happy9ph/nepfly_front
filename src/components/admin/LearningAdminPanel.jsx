@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import PlansAdminPanel from "./PlansAdminPanel.jsx";
 import {
-  Loader2, RefreshCw, Plus, Trash2, Video, Mail, Phone, MapPin, Inbox, AlertCircle, PlayCircle, Save, X, Eye, EyeOff,
+  Loader2, RefreshCw, Plus, Trash2, Video, Mail, Phone, MapPin, Inbox, AlertCircle, PlayCircle, Save, X, Eye, EyeOff, Lock, Unlock,
 } from "lucide-react";
 
 const inputCls =
@@ -13,7 +14,7 @@ const STATUS = {
   closed: { label: "Clôturée", cls: "bg-line/60 text-ink-faint border-line" },
 };
 
-const EMPTY = { title: "", level: "Tous niveaux", category: "Numérique", description: "", youtube_playlist: "", outcomes: "", requirements: "", image_url: "", sort_order: 0, is_published: true };
+const EMPTY = { title: "", level: "Tous niveaux", category: "Numérique", description: "", youtube_playlist: "", outcomes: "", requirements: "", image_url: "", sort_order: 0, is_published: true, members_only: false };
 
 function fmtDate(v) {
   return new Date(v).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
@@ -64,6 +65,10 @@ function CourseForm({ initial, onCancel, onSave, saving, error }) {
             <input type="checkbox" checked={f.is_published} onChange={set("is_published")} />
             Publié sur le site
           </label>
+          <label className="flex items-center gap-2 text-sm text-ink md:col-span-2" title="Les vidéos de ce cours ne se regardent qu'avec un bouquet actif">
+            <input type="checkbox" checked={!!f.members_only} onChange={set("members_only")} />
+            Cours exclusif (réservé aux abonnés d'un bouquet)
+          </label>
         </div>
       </div>
       {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
@@ -95,6 +100,10 @@ function LessonsManager({ course, withAuth, api, onChanged }) {
       await load(); onChanged();
     } catch (x) { setErr(x.message || "Erreur."); } finally { setBusy(false); }
   }
+  async function toggleExclusive(l) {
+    await withAuth((t) => api.admin.updateLesson(t, l.id, { members_only: !l.members_only })).catch(() => {});
+    await load();
+  }
   async function del(id) {
     if (!window.confirm("Supprimer cette leçon ?")) return;
     await withAuth((t) => api.admin.deleteLesson(t, id)).catch(() => {});
@@ -108,6 +117,9 @@ function LessonsManager({ course, withAuth, api, onChanged }) {
           <li key={l.id} className="flex items-center gap-3 px-3 py-2 text-sm">
             <PlayCircle size={14} className={l.is_published ? "text-coffee" : "text-ink-faint"} />
             <span className={`flex-1 truncate ${l.is_published ? "text-ink" : "text-ink-faint line-through"}`}>{l.title}</span>
+            <button onClick={() => toggleExclusive(l)} title={l.members_only ? "Exclusive : cliquer pour la rendre gratuite" : "Gratuite : cliquer pour la réserver aux abonnés"} className={`inline-flex items-center gap-1 text-xs rounded-full px-2.5 py-1 border ${l.members_only ? "bg-latte-soft text-coffee-dark border-latte-light" : "border-line text-ink-faint"}`}>
+              {l.members_only ? <Lock size={11} /> : <Unlock size={11} />}{l.members_only ? "Exclusive" : "Gratuite"}
+            </button>
             <a href={`https://www.youtube.com/watch?v=${l.youtube_id}`} target="_blank" rel="noreferrer" className="text-xs text-coffee underline">YouTube</a>
             <button onClick={() => del(l.id)} aria-label="Supprimer" className="text-ink-faint hover:text-red-600"><Trash2 size={14} /></button>
           </li>
@@ -162,7 +174,7 @@ function CoursesTab({ withAuth, api }) {
     await withAuth((t) => api.admin.updateCourse(t, c.id, {
       title: c.title, level: c.level, description: c.description, category: c.category, image_url: c.image_url,
       youtube_playlist: c.youtube_playlist_id || "", outcomes: c.outcomes, requirements: c.requirements,
-      sort_order: c.sort_order, is_published: !c.is_published,
+      sort_order: c.sort_order, is_published: !c.is_published, members_only: !!c.members_only,
     })).catch(() => {});
     load();
   }
@@ -194,6 +206,7 @@ function CoursesTab({ withAuth, api }) {
                 <p className="font-display text-lg text-ink flex items-center gap-2">
                   {c.title}
                   {!c.is_published && <span className="text-[0.65rem] font-sans rounded-full bg-line/70 text-ink-faint px-2 py-0.5">Brouillon</span>}
+                  {c.members_only && <span className="text-[0.65rem] font-sans rounded-full bg-latte-soft text-coffee-dark px-2 py-0.5">Exclusif</span>}
                 </p>
                 <p className="text-xs text-ink-soft mt-1">
                   {c.category} · {c.level} · {c.lesson_count} leçon(s)
@@ -289,13 +302,15 @@ export default function LearningAdminPanel({ withAuth, api, onCount }) {
   const [tab, setTab] = useState("courses");
   return (
     <div>
-      <div className="flex gap-2 mb-6" role="tablist">
-        {[["courses", "Cours & YouTube"], ["registrations", "Inscriptions présentiel"]].map(([k, label]) => (
+      <div className="flex flex-wrap gap-2 mb-6" role="tablist">
+        {[["courses", "Cours & YouTube"], ["plans", "Bouquets"], ["subscriptions", "Abonnements"], ["currencies", "Devises"], ["registrations", "Inscriptions présentiel"]].map(([k, label]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
             className={`rounded-full text-sm px-4 py-2 border ${tab === k ? "bg-ink text-cream border-ink" : "border-line text-ink-soft"}`}>{label}</button>
         ))}
       </div>
-      {tab === "courses" ? <CoursesTab withAuth={withAuth} api={api} /> : <RegistrationsTab withAuth={withAuth} api={api} onCount={onCount} />}
+      {tab === "courses" ? <CoursesTab withAuth={withAuth} api={api} />
+        : tab === "registrations" ? <RegistrationsTab withAuth={withAuth} api={api} onCount={onCount} />
+        : <PlansAdminPanel withAuth={withAuth} api={api} tab={tab} />}
     </div>
   );
 }

@@ -264,6 +264,21 @@ export const api = {
     listLessons: (token, id) => request(`/api/v1/learning/admin/courses/${id}/lessons`, { token }),
     addLesson: (token, id, body) => request(`/api/v1/learning/admin/courses/${id}/lessons`, { method: "POST", token, body }),
     deleteLesson: (token, id) => request(`/api/v1/learning/admin/lessons/${id}`, { method: "DELETE", token }),
+    updateLesson: (token, id, body) =>
+      request(`/api/v1/learning/admin/lessons/${id}`, { method: "PATCH", token, body }),
+    listPlans: (token) => request("/api/v1/learning/admin/plans", { token }),
+    createPlan: (token, body) => request("/api/v1/learning/admin/plans", { method: "POST", token, body }),
+    updatePlan: (token, id, body) => request(`/api/v1/learning/admin/plans/${id}`, { method: "PUT", token, body }),
+    deletePlan: (token, id) => request(`/api/v1/learning/admin/plans/${id}`, { method: "DELETE", token }),
+    listCurrencies: (token) => request("/api/v1/learning/admin/currencies", { token }),
+    saveCurrencies: (token, currencies) =>
+      request("/api/v1/learning/admin/currencies", { method: "PUT", token, body: { currencies } }),
+    listSubscriptions: (token, status) =>
+      request(`/api/v1/learning/admin/subscriptions${status ? `?status=${status}` : ""}`, { token }),
+    createSubscription: (token, body) =>
+      request("/api/v1/learning/admin/subscriptions", { method: "POST", token, body }),
+    updateSubscriptionStatus: (token, id, status) =>
+      request(`/api/v1/learning/admin/subscriptions/${id}/status`, { method: "PATCH", token, body: { status } }),
     listRegistrations: (token) => request("/api/v1/learning/admin/registrations", { token }),
     updateRegistrationStatus: (token, id, statusValue) =>
       request(`/api/v1/learning/admin/registrations/${id}/status`, { method: "PATCH", token, body: { status: statusValue } }),
@@ -312,7 +327,16 @@ export const api = {
   // au présentiel et formation d'équipe (entreprise)
   learning: {
     courses: () => request("/api/v1/learning/courses"),
-    course: (id) => request(`/api/v1/learning/courses/${id}`),
+    // Avec un jeton, le serveur sait si le compte a un bouquet actif et
+    // débloque les leçons exclusives.
+    course: (id, token) => request(`/api/v1/learning/courses/${id}`, { token }),
+    plans: () => request("/api/v1/learning/plans"),
+    checkout: (token, payload) => request("/api/v1/learning/checkout", { method: "POST", token, body: payload }),
+    mySubscription: (token) => request("/api/v1/learning/me/subscription", { token }),
+    addMember: (token, subId, email) =>
+      request(`/api/v1/learning/me/subscription/${subId}/members`, { method: "POST", token, body: { email } }),
+    removeMember: (token, subId, memberId) =>
+      request(`/api/v1/learning/me/subscription/${subId}/members/${memberId}`, { method: "DELETE", token }),
     myProgress: (token, courseId) =>
       request(`/api/v1/learning/me/progress${courseId ? `?course_id=${courseId}` : ""}`, { token }),
     saveProgress: (token, lessonId, body) =>

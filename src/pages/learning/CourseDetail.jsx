@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock, GraduationCap, Play, PlayCircle, Users2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock, GraduationCap, Lock, Play, PlayCircle, Sparkles, Users2 } from "lucide-react";
 import NavBar from "../../components/layout/NavBar.jsx";
 import Footer from "../../components/layout/Footer.jsx";
 import BackLink from "../../components/ui/BackLink.jsx";
@@ -44,7 +44,8 @@ export default function CourseDetail() {
   const lessons = course?.lessons || [];
   const groups = useMemo(() => groupBySection(lessons), [lessons]);
   const done = countDone(lessons, progress);
-  const next = nextLesson(lessons, progress);
+  const hasLocked = lessons.some((l) => l.locked);
+  const next = nextLesson(lessons.filter((l) => !l.locked), progress);
   const others = courses.filter((c) => c.id !== course?.id).slice(0, 3);
 
   if (status === "loading") return <div className="min-h-screen bg-cream"><NavBar /></div>;
@@ -63,7 +64,7 @@ export default function CourseDetail() {
   }
 
   const started = done > 0;
-  const watchTo = next ? `/formations/${course.id}/regarder/${next.id}` : null;
+  const watchTo = next ? `/formations/${course.id}/regarder/${next.id}` : hasLocked ? "/formations/bouquets" : null;
   const dur = formatDuration(course.total_seconds);
 
   return (
@@ -84,6 +85,7 @@ export default function CourseDetail() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-latte mb-4">
                 {course.category} · {course.level}
+                {course.members_only && <span className="ml-3 rounded-full bg-latte/25 text-latte px-2.5 py-0.5 text-[0.65rem]">{ui.locked.badge}</span>}
               </p>
               <h1 className="font-display text-4xl sm:text-5xl leading-[1.08] mb-5">{course.title}</h1>
               <p className="text-cream-fixed/75 text-lg leading-relaxed max-w-2xl mb-8">{course.text}</p>
@@ -95,8 +97,8 @@ export default function CourseDetail() {
               <div className="flex flex-wrap gap-3">
                 {watchTo && (
                   <Link to={watchTo} className="inline-flex items-center gap-2 rounded-full bg-cream-fixed text-ink-fixed text-sm font-medium px-6 py-3.5 hover:scale-[1.03] transition-transform">
-                    <Play size={14} fill="currentColor" />
-                    {started ? ui.course.resume : ui.course.start}
+                    {next ? <Play size={14} fill="currentColor" /> : <Lock size={14} />}
+                    {next ? (started ? ui.course.resume : ui.course.start) : ui.locked.cta}
                   </Link>
                 )}
                 <Link
@@ -149,6 +151,19 @@ export default function CourseDetail() {
                       {g.items.map((l) => {
                         const idx = lessons.indexOf(l) + 1;
                         const isDone = progress[l.id]?.done;
+                        if (l.locked) {
+                          return (
+                            <li key={l.id}>
+                              <Link to="/formations/bouquets" className="group flex items-center gap-4 px-4 py-3.5 bg-cream/60 hover:bg-latte-soft transition-colors">
+                                <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-line text-ink-soft">
+                                  <Lock size={14} />
+                                </span>
+                                <span className="flex-1 text-sm text-ink-soft leading-snug">{l.title}</span>
+                                <span className="text-[0.7rem] font-medium uppercase tracking-wider text-coffee">{ui.locked.lesson}</span>
+                              </Link>
+                            </li>
+                          );
+                        }
                         return (
                           <li key={l.id}>
                             <Link to={`/formations/${course.id}/regarder/${l.id}`} className="group flex items-center gap-4 px-4 py-3.5 hover:bg-latte-soft transition-colors">
@@ -156,6 +171,7 @@ export default function CourseDetail() {
                                 {isDone ? <CheckCircle2 size={16} /> : idx}
                               </span>
                               <span className="flex-1 text-sm text-ink leading-snug">{l.title}</span>
+                              {l.members_only && <span className="text-[0.65rem] font-medium uppercase tracking-wider text-coffee">{ui.locked.badge}</span>}
                               {l.duration_seconds ? <span className="text-xs text-ink-faint">{formatDuration(l.duration_seconds)}</span> : null}
                               <Play size={14} className="text-coffee opacity-0 group-hover:opacity-100 transition-opacity" />
                             </Link>
@@ -192,11 +208,21 @@ export default function CourseDetail() {
             <p className="text-sm text-ink-soft mb-5">{ui.course.freeText}</p>
             {watchTo && (
               <Link to={watchTo} className="w-full flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium py-3.5 hover:bg-coffee-dark transition-colors">
-                <Play size={14} fill="currentColor" />
-                {started ? ui.course.resume : ui.course.start}
+                {next ? <Play size={14} fill="currentColor" /> : <Lock size={14} />}
+                {next ? (started ? ui.course.resume : ui.course.start) : ui.locked.cta}
               </Link>
             )}
           </div>
+          {hasLocked && (
+            <div className="rounded-3xl border border-coffee-light/50 bg-latte-soft p-6">
+              <p className="flex items-center gap-2 font-medium text-ink mb-1"><Sparkles size={16} className="text-coffee" />{ui.locked.course}</p>
+              <p className="text-sm text-ink-soft mb-4">{ui.locked.courseText}</p>
+              <Link to="/formations/bouquets" className="text-sm text-coffee font-medium hover:underline">{ui.locked.cta} →</Link>
+            </div>
+          )}
+          {!hasLocked && course.has_exclusive_access && lessons.some((l) => l.members_only) && (
+            <p className="rounded-2xl bg-emerald-50 text-emerald-800 text-sm px-5 py-3.5">{ui.locked.yours}</p>
+          )}
           <div className="rounded-3xl bg-[#2E1D12] text-cream-fixed p-6">
             <p className="font-display text-xl mb-1">{ui.course.presTitle}</p>
             <p className="text-sm text-cream-fixed/70 mb-5">{ui.course.presText}</p>
@@ -207,7 +233,7 @@ export default function CourseDetail() {
               {ui.course.presCta}
               <ArrowRight size={15} />
             </Link>
-            <Link to="/formation-equipe" className="mt-3 flex items-center justify-center gap-2 text-sm text-cream-fixed/70 hover:text-cream-fixed">
+            <Link to="/formations/bouquets?plan=equipe#equipe" className="mt-3 flex items-center justify-center gap-2 text-sm text-cream-fixed/70 hover:text-cream-fixed">
               <Users2 size={14} />
               {ui.inPerson.team}
             </Link>

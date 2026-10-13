@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useLocation, matchPath } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
@@ -17,6 +17,9 @@ const ROUTE_META = [
   { pattern: "/cours/:id", key: "cours" },
   { pattern: "/formations", key: "formations" },
   { pattern: "/formations/inscription", key: "inscriptionFormation" },
+  { pattern: "/formations/bouquets", key: "bouquetsFormation" },
+  { pattern: "/formations/bouquets/:code/paiement", key: "paiementBouquet" },
+  { pattern: "/formations/mon-bouquet", key: "monBouquet" },
   { pattern: "/formations/:id", key: "cours" },
   { pattern: "/formations/:id/regarder/:lessonId", key: "cours" },
   { pattern: "/partenaires/:slug", key: "partenaires" },
@@ -112,7 +115,11 @@ export function HeadManager({ children }) {
     canonical.setAttribute("href", window.location.href);
   }, [location.pathname, lang, override, t]);
 
-  return <MetaOverrideContext.Provider value={{ setOverride, clearOverride }}>{children}</MetaOverrideContext.Provider>;
+  // Valeur mémorisée : un objet recréé à chaque rendu relançait l'effet de
+  // usePageMeta en boucle (cleanup → setOverride → rendu → nouvel objet…),
+  // ce qui empêchait React de terminer les changements de page.
+  const ctxValue = useMemo(() => ({ setOverride, clearOverride }), [setOverride, clearOverride]);
+  return <MetaOverrideContext.Provider value={ctxValue}>{children}</MetaOverrideContext.Provider>;
 }
 
 /**

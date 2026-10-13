@@ -99,7 +99,7 @@ const L = {
   register: { fr: "Créer un compte", en: "Create an account", to: "/creer-un-compte" },
   forgot: { fr: "Mot de passe oublié", en: "Forgot password", to: "/mot-de-passe-oublie" },
   dashboard: { fr: "Mon espace", en: "My space", to: "/dashboard" },
-  team: { fr: "Formation d'équipe", en: "Team training", to: "/formation-equipe" },
+  team: { fr: "Formation d'équipe", en: "Team training", to: "/formations/bouquets?plan=equipe#equipe" },
   interp: { fr: "Interprétation", en: "Interpretation", to: "/interpretation" },
   seller: { fr: "Devenir vendeur", en: "Become a seller", to: "/shopping" },
   privacy: { fr: "Confidentialité", en: "Privacy", to: "/confidentialite" },
@@ -109,6 +109,7 @@ const L = {
   hlearning: { fr: "Voir H-learning", en: "See H-learning", to: "/formations" },
   courses: { fr: "Voir les cours gratuits", en: "See the free courses", to: "/formations#catalogue" },
   inperson: { fr: "S'inscrire au présentiel", en: "Register for in-person", to: "/formations/inscription" },
+  plans: { fr: "Voir les bouquets", en: "See the plans", to: "/formations/bouquets" },
   ustudy: { fr: "Voir U-Study", en: "See U-Study", to: "/partenaires/u-study" },
 };
 
@@ -267,16 +268,23 @@ const KB = [
   {
     id: "learning_inperson",
     kw: ["presentiel", "en presentiel", "in person", "in-person", "formateur", "trainer", "s inscrire a une formation", "inscription formation", "se former", "session", "certificat", "certificate"],
-    fr: "Pour vous former avec un formateur, inscrivez-vous à la formation en présentiel : vous laissez vos coordonnées et le cours souhaité, puis notre équipe vous contacte pour fixer le lieu, les dates et les modalités. Il n'y a pas de paiement en ligne.",
-    en: "To train with a trainer, register for the in-person training: leave your details and the course you want, then our team contacts you to set the place, dates and terms. There is no online payment.",
-    to: ["inperson", "team"],
+    fr: "Pour vous former avec un formateur, inscrivez-vous à la formation en présentiel : vous laissez vos coordonnées et le cours souhaité, puis notre équipe vous contacte pour fixer le lieu, les dates et les modalités. Vous pouvez aussi prendre un bouquet H-Learning pour un accompagnement complet.",
+    en: "To train with a trainer, register for the in-person training: leave your details and the course you want, then our team contacts you to set the place, dates and terms. You can also take an H-Learning plan for full support.",
+    to: ["inperson", "plans", "team"],
   },
   {
     id: "learning_team",
-    kw: ["formation d equipe", "former mes employes", "former mon equipe", "team training", "train my team", "employes", "entreprise formation", "plusieurs employes", "company training"],
-    fr: "Pour former plusieurs employés, utilisez « Formation d'équipe » : vous choisissez le nombre d'agents, les domaines et la durée (1, 6 ou 12 mois) et le coût mensuel estimé s'affiche. Notre équipe confirme ensuite le montant définitif avec vous.",
-    en: "To train several employees, use “Team training”: pick the number of agents, the domains and the duration (1, 6 or 12 months) and the estimated monthly cost appears. Our team then confirms the final amount with you.",
-    to: ["team"],
+    kw: ["formation d equipe", "former mes employes", "former mon equipe", "team training", "train my team", "employes", "entreprise formation", "plusieurs employes", "company training", "bouquet equipe", "team plan"],
+    fr: "La formation d'équipe est le bouquet « Équipe » de H-Learning : un prix par personne (à partir de 5 personnes), la formation en présentiel et les cours exclusifs pour chaque membre. Vous payez par mobile money et vous ajoutez vos collaborateurs par e-mail.",
+    en: "Team training is the H-Learning “Team” plan: one price per person (from 5 people), in-person training and exclusive courses for every member. You pay by mobile money and add your colleagues by e-mail.",
+    to: ["team", "plans"],
+  },
+  {
+    id: "learning_plans",
+    kw: ["bouquet", "bouquets", "abonnement", "tarif", "tarifs", "prix formation", "combien coute la formation", "plan", "plans", "pricing", "price", "subscription", "payer la formation", "mobile money", "zamtel", "mtn", "airtel"],
+    fr: "H-Learning propose trois bouquets : Individuel, Pro et Équipe. Ils ajoutent la formation en présentiel et les cours exclusifs aux vidéos gratuites. Les prix sont fixés en kwacha (ZMW), affichables en USD ou en CDF, et se paient par Zamtel, MTN ou Airtel Money, sans prélèvement automatique.",
+    en: "H-Learning offers three plans: Individual, Pro and Team. They add in-person training and exclusive courses to the free videos. Prices are set in kwacha (ZMW), viewable in USD or CDF, and paid by Zamtel, MTN or Airtel Money, with no automatic charge.",
+    to: ["plans"],
   },
   {
     id: "interpretation",

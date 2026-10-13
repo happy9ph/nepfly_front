@@ -248,7 +248,7 @@ export default function Learning() {
               </div>
             </div>
             <Link
-              to="/formation-equipe"
+              to="/formations/bouquets?plan=equipe#equipe"
               className="shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-ink text-cream text-sm font-medium px-6 py-3.5 hover:bg-coffee-dark transition-colors whitespace-nowrap"
             >
               {t("learning.teamCta")}

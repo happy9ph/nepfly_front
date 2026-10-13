@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CheckCircle2, Circle, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Circle, ChevronLeft, ChevronRight, Lock, Play } from "lucide-react";
 import NavBar from "../../components/layout/NavBar.jsx";
 import Footer from "../../components/layout/Footer.jsx";
 import BackLink from "../../components/ui/BackLink.jsx";
@@ -48,7 +48,7 @@ export default function CoursePlayer() {
   const go = (l) => navigate(`/formations/${course.id}/regarder/${l.id}`);
   const next = lessons[index + 1];
   const prev = lessons[index - 1];
-  const allDone = lessons.length > 0 && lessons.every((l) => progress[l.id]?.done);
+  const allDone = lessons.length > 0 && lessons.filter((l) => !l.locked).every((l) => progress[l.id]?.done);
 
   const onEnded = () => {
     if (!lesson) return;
@@ -57,7 +57,7 @@ export default function CoursePlayer() {
   };
 
   const onProgress = (t, total) => {
-    if (!lesson || Date.now() - lastSent.current < 14000) return;
+    if (!lesson || lesson.locked || Date.now() - lastSent.current < 14000) return;
     lastSent.current = Date.now();
     // une vidéo vue à plus de 92 % compte comme terminée
     save(lesson, { done: total > 0 && t / total > 0.92, t });
@@ -83,14 +83,28 @@ export default function CoursePlayer() {
 
         <div className="grid lg:grid-cols-[1.8fr_1fr] gap-8 items-start">
           <div>
-            <YouTubePlayer
-              key={lesson.youtube_id}
-              videoId={lesson.youtube_id}
-              startAt={startAt}
-              onEnded={onEnded}
-              onProgress={onProgress}
-              labels={{ openYoutube: ui.player.openYoutube }}
-            />
+            {lesson.locked ? (
+              <div className="aspect-video rounded-3xl bg-[#2E1D12] text-cream-fixed flex flex-col items-center justify-center text-center px-6 gap-4">
+                <span className="w-14 h-14 rounded-full bg-white/10 text-latte flex items-center justify-center"><Lock size={24} /></span>
+                <p className="font-display text-xl sm:text-2xl max-w-md">{ui.locked.title}</p>
+                <p className="text-sm text-cream-fixed/70 max-w-md leading-relaxed">{ui.locked.text}</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Link to="/formations/bouquets" className="rounded-full bg-cream-fixed text-ink-fixed text-sm font-medium px-6 py-3 hover:scale-[1.03] transition-transform">{ui.locked.cta}</Link>
+                  {!isAuthenticated && (
+                    <Link to="/connexion" state={{ redirectTo: `/formations/${course.id}/regarder/${lesson.id}` }} className="rounded-full border border-cream-fixed/30 text-sm px-6 py-3 hover:bg-white/10 transition-colors">{ui.locked.signin}</Link>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <YouTubePlayer
+                key={lesson.youtube_id}
+                videoId={lesson.youtube_id}
+                startAt={startAt}
+                onEnded={onEnded}
+                onProgress={onProgress}
+                labels={{ openYoutube: ui.player.openYoutube }}
+              />
+            )}
             <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-widest text-coffee font-medium mb-2">
@@ -100,6 +114,7 @@ export default function CoursePlayer() {
               </div>
               <button
                 type="button"
+                disabled={lesson.locked}
                 onClick={() => save(lesson, { done: !done, t: 0 })}
                 className={`inline-flex items-center gap-2 rounded-full border text-sm px-4 py-2.5 transition-colors ${
                   done ? "bg-coffee text-cream border-coffee" : "border-line text-ink-soft hover:border-coffee-light"
@@ -139,7 +154,7 @@ export default function CoursePlayer() {
                       className={`flex items-center gap-3 px-5 py-3 text-sm transition-colors ${active ? "bg-latte-soft" : "hover:bg-cream"}`}
                     >
                       <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[0.7rem] shrink-0 ${isDone ? "bg-coffee text-cream" : "bg-latte-soft text-coffee"}`}>
-                        {isDone ? <CheckCircle2 size={14} /> : active ? <Play size={11} fill="currentColor" /> : i + 1}
+                        {l.locked ? <Lock size={12} /> : isDone ? <CheckCircle2 size={14} /> : active ? <Play size={11} fill="currentColor" /> : i + 1}
                       </span>
                       <span className={`flex-1 leading-snug ${active ? "text-ink font-medium" : "text-ink-soft"}`}>{l.title}</span>
                       {l.duration_seconds ? <span className="text-[0.7rem] text-ink-faint">{formatDuration(l.duration_seconds)}</span> : null}

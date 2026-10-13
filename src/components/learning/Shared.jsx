@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check, Users2, PlayCircle, LineChart, GraduationCap } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { LEARNING_UI } from "../../i18n/learningUi.js";
+import { usePlans } from "../../data/plans.js";
+import { CurrencySelect, useCurrencyChoice, useMoney } from "./Pricing.jsx";
 
 export function useLearningUi() {
   const { lang } = useLanguage();
@@ -72,7 +74,10 @@ export function InPersonBand({ courseId, className = "" }) {
               {ui.cta}
               <ArrowRight size={15} />
             </Link>
-            <Link to="/formation-equipe" className="inline-flex items-center gap-2 rounded-full border border-cream-fixed/30 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors">
+            <Link to="/formations/bouquets" className="inline-flex items-center gap-2 rounded-full border border-cream-fixed/30 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors">
+              {ui.plans}
+            </Link>
+            <Link to="/formations/bouquets?plan=equipe#equipe" className="inline-flex items-center gap-2 rounded-full border border-cream-fixed/30 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors">
               <Users2 size={15} />
               {ui.team}
             </Link>
@@ -88,6 +93,58 @@ export function InPersonBand({ courseId, className = "" }) {
             </li>
           ))}
         </ul>
+      </div>
+    </section>
+  );
+}
+
+/** Aperçu des bouquets (prix de départ) — sur le hub H-Learning. */
+export function PlansTeaser() {
+  const ui = useLearningUi();
+  const { status, plans, currencies, pivot } = usePlans();
+  const { currency, choose } = useCurrencyChoice(currencies, pivot);
+  const money = useMoney(currency);
+  if (status !== "ready" || plans.length === 0) return null;
+  return (
+    <section className="px-6 pb-20 max-w-content mx-auto">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <SectionHead eyebrow={ui.hero.plansEyebrow} title={ui.plans.title} lead={ui.plans.lead} />
+        <CurrencySelect currencies={currencies} value={currency?.code} onChange={choose} label={ui.plans.currency} />
+      </div>
+      <div className="grid md:grid-cols-3 gap-5">
+        {plans.map((p, i) => (
+          <motion.div
+            key={p.code}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, delay: i * 0.08 }}
+          >
+            <Link
+              to={p.per_seat ? "/formations/bouquets?plan=equipe#equipe" : `/formations/bouquets#${p.code}`}
+              className={`group block h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
+                p.highlight ? "bg-[#2E1D12] text-cream-fixed" : "bg-surface border border-line text-ink hover:border-coffee-light"
+              }`}
+            >
+              <p className="font-display text-xl mb-1">{p.name}</p>
+              <p className={`text-sm leading-relaxed mb-5 ${p.highlight ? "text-cream-fixed/70" : "text-ink-soft"}`}>{p.tagline}</p>
+              <p className="font-display text-2xl">{ui.hero.plansFrom(money(p.price_monthly))}</p>
+              <p className={`text-xs mt-1 ${p.highlight ? "text-cream-fixed/60" : "text-ink-faint"}`}>
+                {p.per_seat ? ui.plans.perSeatMonth : ui.plans.perMonth}
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium group-hover:gap-2 transition-all">
+                {ui.plans.choose}
+                <ArrowRight size={14} />
+              </span>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-6">
+        <Link to="/formations/bouquets" className="inline-flex items-center gap-2 text-sm font-medium text-coffee hover:underline">
+          {ui.hero.plansAll}
+          <ArrowRight size={14} />
+        </Link>
       </div>
     </section>
   );

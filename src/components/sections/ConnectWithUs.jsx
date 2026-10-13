@@ -9,7 +9,7 @@ const LINKS = [
   { key: "partner", to: "/#rejoindre", Icon: Handshake },
   { key: "dashboard", to: "/connexion", Icon: LayoutDashboard },
   { key: "explore", to: "/#explorer", Icon: Compass },
-  { key: "training", to: "/formation-equipe", Icon: GraduationCap },
+  { key: "training", to: "/formations/bouquets?plan=equipe#equipe", Icon: GraduationCap },
   { key: "contact", modal: true, Icon: Mail },
 ];
 

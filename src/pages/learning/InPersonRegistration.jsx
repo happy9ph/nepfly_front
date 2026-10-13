@@ -143,7 +143,7 @@ export default function InPersonRegistration() {
                 <div className="rounded-3xl border border-line bg-surface p-6">
                   <p className="flex items-center gap-2 font-medium text-ink mb-1"><Users2 size={16} className="text-coffee" />{r.aside.teamTitle}</p>
                   <p className="text-sm text-ink-soft mb-4">{r.aside.teamText}</p>
-                  <Link to="/formation-equipe" className="text-sm text-coffee font-medium hover:underline">{r.aside.teamCta} →</Link>
+                  <Link to="/formations/bouquets?plan=equipe#equipe" className="text-sm text-coffee font-medium hover:underline">{r.aside.teamCta} →</Link>
                 </div>
               </aside>
             </motion.div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.js";
+import { useUser } from "../context/Usercontext.jsx";
 
 export const LEVEL_TONE = {
   "initiation": "gold",
@@ -65,10 +66,14 @@ export function useCourses() {
 /** Détail d'un cours + ses leçons (YouTube). status : loading | ready | missing | error */
 export function useCourse(id) {
   const [state, setState] = useState({ status: "loading", course: null });
+  // Le jeton permet au serveur de débloquer les leçons exclusives d'un
+  // bouquet actif ; on attend la fin de la restauration de session.
+  const { token, isLoading } = useUser();
 
   useEffect(() => {
+    if (isLoading) return undefined;
     let cancelled = false;
-    setState({ status: "loading", course: null });
+    setState((prev) => (prev.course && String(prev.course.id) === String(id) ? prev : { status: "loading", course: null }));
     const numeric = Number(id);
     if (!Number.isInteger(numeric) || numeric <= 0) {
       const fb = STATIC_FALLBACK_COURSES.find((c) => String(c.id) === String(id));
@@ -76,13 +81,13 @@ export function useCourse(id) {
       return undefined;
     }
     api.learning
-      .course(numeric)
+      .course(numeric, token || undefined)
       .then((c) => !cancelled && setState({ status: "ready", course: { ...normalize(c), lessons: c.lessons || [] } }))
       .catch((e) => !cancelled && setState({ status: e?.status === 404 ? "missing" : "error", course: null }));
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, token, isLoading]);
 
   return state;
 }

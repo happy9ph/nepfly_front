@@ -8,7 +8,7 @@ import FAQ from "../../components/sections/FAQ.jsx";
 import BackLink from "../../components/ui/BackLink.jsx";
 import CourseCard from "../../components/learning/CourseCard.jsx";
 import CourseCover from "../../components/learning/CourseCover.jsx";
-import { HowItWorks, InPersonBand, SectionHead, useLearningUi } from "../../components/learning/Shared.jsx";
+import { HowItWorks, InPersonBand, PlansTeaser, SectionHead, useLearningUi } from "../../components/learning/Shared.jsx";
 import { SkeletonCard } from "../../components/ui/Skeleton.jsx";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 import { useCourses, formatDuration } from "../../data/courses.js";
@@ -154,6 +154,8 @@ export default function LearningHub() {
           <p className="text-xs text-ink-faint mt-6">Aperçu hors ligne : les vidéos s'affichent dès que le serveur répond.</p>
         )}
       </section>
+
+      <PlansTeaser />
 
       <InPersonBand />
 
