@@ -21,7 +21,7 @@ export function ShopImage({ path, alt = "", className = "", ratio = "aspect-squa
   return (
     <div className={`${ratio} bg-latte-soft overflow-hidden flex items-center justify-center ${className}`}>
       {src && !broken ? (
-        <img src={src} alt={alt} loading="lazy" onError={() => setBroken(true)} className="w-full h-full object-contain" />
+        <img src={src} alt={alt} loading="lazy" onError={() => setBroken(true)} className="w-full h-full object-cover" />
       ) : (
         <ImageIcon className="text-latte" size={28} aria-hidden="true" />
       )}
@@ -156,7 +156,7 @@ export function ProductCard({ product, index = 0 }) {
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
       <Link to={`/shopping/produit/${p.id}`} className="group block rounded-3xl border border-line bg-surface overflow-hidden hover:border-coffee-light hover:shadow-lg hover:shadow-coffee/5 transition">
         <div className="relative">
-          <ShopImage path={p.image} alt={p.title} ratio="aspect-[1/1]" className="group-hover:scale-[1.02] transition-transform duration-500" />
+          <ShopImage path={p.image} alt={p.title} ratio="aspect-[4/5]" className="group-hover:scale-[1.02] transition-transform duration-500" />
           {p.discount_pct > 0 && <span className="absolute top-3 left-3 rounded-full bg-coffee text-on-coffee text-xs font-semibold px-2.5 py-1">{ui.product.saving(p.discount_pct)}</span>}
           {!p.in_stock && <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 text-cream-fixed text-xs px-2.5 py-1">{ui.common.outOfStock}</span>}
           <FavoriteButton productId={p.id} initial={p.is_favorite} className="absolute top-3 right-3" />
