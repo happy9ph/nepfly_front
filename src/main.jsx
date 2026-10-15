@@ -7,6 +7,7 @@ import { UserProvider } from "./context/Usercontext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
 import { ProgressProvider } from "./context/ProgressContext.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
+import { CartProvider } from "./context/CartContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import ErrorBoundary from "./components/ui/ErrorBoundary.jsx";
 import NetworkStatusBanner from "./components/ui/NetworkStatusBanner.jsx";
@@ -37,8 +38,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <ToastProvider>
               <ProgressProvider>
                 <UserProvider>
-                  <NetworkStatusBanner />
-                  <App />
+                  <CartProvider>
+                    <NetworkStatusBanner />
+                    <App />
+                  </CartProvider>
                 </UserProvider>
               </ProgressProvider>
             </ToastProvider>

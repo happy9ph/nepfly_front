@@ -33,7 +33,20 @@ const NewPassword = lazy(() => import("./pages/auth/NewPassword.jsx"));
 const OAuthCallback = lazy(() => import("./pages/auth/OAuthCallback.jsx"));
 const Payment = lazy(() => import("./pages/Payment.jsx"));
 const InterpretationDetail = lazy(() => import("./pages/InterpretationDetail.jsx"));
-const ShoppingDetail = lazy(() => import("./pages/ShoppingDetail.jsx"));
+const ShopHome = lazy(() => import("./pages/shop/ShopHome.jsx"));
+const ShopCatalog = lazy(() => import("./pages/shop/ShopCatalog.jsx"));
+const ProductPage = lazy(() => import("./pages/shop/ProductPage.jsx"));
+const ShopStore = lazy(() => import("./pages/shop/ShopStore.jsx"));
+const CartPage = lazy(() => import("./pages/shop/CartPage.jsx"));
+const ShopCheckout = lazy(() => import("./pages/shop/ShopCheckout.jsx"));
+const MyOrders = lazy(() => import("./pages/shop/MyOrders.jsx"));
+const OrderDetail = lazy(() => import("./pages/shop/OrderDetail.jsx"));
+const TrackPage = lazy(() => import("./pages/shop/TrackPage.jsx"));
+const FavoritesPage = lazy(() => import("./pages/shop/FavoritesPage.jsx"));
+const SellerStart = lazy(() => import("./pages/shop/SellerStart.jsx"));
+const SellerDashboard = lazy(() => import("./pages/shop/SellerDashboard.jsx"));
+const ProductEditor = lazy(() => import("./pages/shop/ProductEditor.jsx"));
+const AgencyDesk = lazy(() => import("./pages/shop/AgencyDesk.jsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.jsx"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
@@ -132,7 +145,20 @@ export default function App() {
           {/* La formation d'équipe est désormais le bouquet « Équipe » de H-Learning. */}
           <Route path="/formation-equipe" element={<Navigate to="/formations/bouquets?plan=equipe#equipe" replace />} />
           <Route path="/interpretation" element={<InterpretationDetail />} />
-          <Route path="/shopping" element={<ShoppingDetail />} />
+          <Route path="/shopping" element={<ShopHome />} />
+          <Route path="/shopping/produits" element={<ShopCatalog />} />
+          <Route path="/shopping/produit/:id" element={<ProductPage />} />
+          <Route path="/shopping/boutique/:slug" element={<ShopStore />} />
+          <Route path="/shopping/panier" element={<CartPage />} />
+          <Route path="/shopping/commande" element={<ShopCheckout />} />
+          <Route path="/shopping/mes-commandes" element={<MyOrders />} />
+          <Route path="/shopping/mes-commandes/:code" element={<OrderDetail />} />
+          <Route path="/shopping/suivi" element={<TrackPage />} />
+          <Route path="/shopping/favoris" element={<FavoritesPage />} />
+          <Route path="/shopping/vendre" element={<SellerStart />} />
+          <Route path="/shopping/vendeur" element={<SellerDashboard />} />
+          <Route path="/shopping/vendeur/produit/:id" element={<ProductEditor />} />
+          <Route path="/shopping/agence" element={<AgencyDesk />} />
           <Route path="/bienvenue" element={<Onboarding />} />
 
           {/* Pages légales */}

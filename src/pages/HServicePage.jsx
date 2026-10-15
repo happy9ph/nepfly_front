@@ -93,7 +93,7 @@ export default function HServicePage() {
 
   const theme = H_SERVICE_THEME[key];
   const resolved = resolveServices(catalogState).list.find((s) => s.key === key);
-  const soon = resolved ? resolved.disabled : DEFAULT_SOON.includes(key);
+  const soon = page.live ? false : resolved ? resolved.disabled : DEFAULT_SOON.includes(key);
   const related = SERVICE_ORDER.filter((k) => k !== key).slice(0, 3);
   const partnerSlug = page.partner ? PARTNER_SLUG[page.partner] : null;
   const faqItems = (page.faq || []).map((f) => ({ question: f.q, answer: f.a }));
@@ -145,14 +145,24 @@ export default function HServicePage() {
                   onOpen={() => setPanelOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full bg-cream-fixed text-ink-fixed text-sm font-semibold px-6 py-3.5 hover:bg-white transition-colors"
                 />
-                <button
-                  type="button"
-                  onClick={scrollToPreview}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/35 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors"
-                >
-                  {page.secondaryCta}
-                  <ChevronDown size={15} />
-                </button>
+                {page.secondaryTo ? (
+                  <Link
+                    to={page.secondaryTo}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/35 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors"
+                  >
+                    {page.secondaryCta}
+                    <ArrowRight size={15} />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={scrollToPreview}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/35 text-cream-fixed text-sm font-medium px-6 py-3.5 hover:bg-white/10 transition-colors"
+                  >
+                    {page.secondaryCta}
+                    <ChevronDown size={15} />
+                  </button>
+                )}
               </div>
             </motion.div>
 

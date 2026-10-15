@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers, GraduationCap, ShieldCheck, PlayCircle } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers, GraduationCap, ShieldCheck, PlayCircle, ShoppingBag } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "applications", label: "Candidatures", icon: Users },
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { key: "serviceRequests", label: "Abonnements clients", icon: Compass },
   { key: "serviceCatalog", label: "Catalogue services", icon: Layers },
   { key: "learning", label: "H-Learning", icon: PlayCircle },
+  { key: "shopping", label: "H-Shopping", icon: ShoppingBag },
   { key: "trainingRequests", label: "Formations d'équipe", icon: GraduationCap },
   { key: "agents", label: "Agents", icon: ShieldCheck },
 ];

@@ -15,6 +15,7 @@ import ServiceSubscriptionsPanel from "../components/admin/ServiceSubscriptionsP
 import ServiceCatalogPanel from "../components/admin/ServiceCatalogPanel.jsx";
 import CompanyTrainingPanel from "../components/admin/CompanyTrainingPanel.jsx";
 import LearningAdminPanel from "../components/admin/LearningAdminPanel.jsx";
+import ShoppingAdminPanel from "../components/admin/ShoppingAdminPanel.jsx";
 import AgentsPanel from "../components/admin/AgentsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
@@ -101,6 +102,7 @@ export default function AdminDashboard() {
   const [pendingServiceSubsCount, setPendingServiceSubsCount] = useState(0);
   const [pendingTrainingCount, setPendingTrainingCount] = useState(0);
   const [pendingRegistrationsCount, setPendingRegistrationsCount] = useState(0);
+  const [shoppingCount, setShoppingCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -175,6 +177,11 @@ export default function AdminDashboard() {
   }, [isAdmin, loadApplications]);
 
   // Rafraîchissement automatique (onglet visible uniquement)
+  useEffect(() => {
+    if (!isAdmin) return;
+    withAuth((t) => api.shop.admin.overview(t)).then((o) => setShoppingCount(o.shops_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
+  }, [isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!isAdmin || pageStatus !== "ready") return undefined;
     const t = setInterval(() => {
@@ -327,6 +334,7 @@ export default function AdminDashboard() {
   const paletteActions = [
     { id: "go-apps", label: "Aller aux candidatures", icon: Users, run: () => { setView("applications"); closeDetail(); } },
     { id: "go-requests", label: "Aller à toutes les demandes", icon: ClipboardList, run: () => { setView("requests"); closeDetail(); } },
+    { id: "go-shopping", label: "Aller à H-Shopping", icon: Users, run: () => { setView("shopping"); closeDetail(); } },
     { id: "go-agents", label: "Gérer les agents", icon: Users, run: () => { setView("agents"); closeDetail(); } },
     { id: "f-pending", label: "Filtrer : en attente", icon: Filter, run: () => { setView("applications"); setFilter("pending"); } },
     { id: "f-all", label: "Afficher toutes les candidatures", icon: Filter, run: () => { setView("applications"); setFilter("all"); } },
@@ -436,7 +444,7 @@ export default function AdminDashboard() {
         onSignOut={signOut}
         view={view}
         onViewChange={(v) => { setView(v); closeDetail(); }}
-        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount, shopping: shoppingCount }}
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
@@ -499,6 +507,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <LearningAdminPanel withAuth={withAuth} api={api} onCount={setPendingRegistrationsCount} />
+            </>
+          ) : view === "shopping" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> H-Shopping</p>
+                <Title className="text-3xl">H-Shopping</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Boutiques à valider, commandes sous séquestre, litiges, retraits vendeurs, catégories, agences de livraison et commissions.
+                </p>
+              </div>
+              <ShoppingAdminPanel withAuth={withAuth} api={api} onCount={setShoppingCount} />
             </>
           ) : view === "trainingRequests" ? (
             <>

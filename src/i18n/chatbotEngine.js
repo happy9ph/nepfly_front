@@ -101,7 +101,9 @@ const L = {
   dashboard: { fr: "Mon espace", en: "My space", to: "/dashboard" },
   team: { fr: "Formation d'équipe", en: "Team training", to: "/formations/bouquets?plan=equipe#equipe" },
   interp: { fr: "Interprétation", en: "Interpretation", to: "/interpretation" },
-  seller: { fr: "Devenir vendeur", en: "Become a seller", to: "/shopping" },
+  shop: { fr: "Ouvrir H-Shopping", en: "Open H-Shopping", to: "/shopping" },
+  trackShop: { fr: "Suivre un colis", en: "Track a parcel", to: "/shopping/suivi" },
+  seller: { fr: "Devenir vendeur", en: "Become a seller", to: "/shopping/vendre" },
   privacy: { fr: "Confidentialité", en: "Privacy", to: "/confidentialite" },
   terms: { fr: "Conditions", en: "Terms", to: "/conditions" },
   lukondo: { fr: "Voir Lukondo", en: "See Lukondo", to: "/partenaires/lukondo" },
@@ -118,15 +120,15 @@ const KB = [
   {
     id: "about",
     kw: ["h-company", "hcompany", "qu est ce que h company", "c est quoi h company", "presentation", "presenter", "a propos", "about", "what is h company", "who are you company", "entreprise", "plateforme", "platform"],
-    fr: "H-Company est une plateforme multi-services qui relie des agences partenaires et leurs clients, principalement entre la RDC et la Zambie (diaspora comprise). Un seul compte vous donne accès à nos services : transport, colis, logement, restaurant, formation, et bientôt l'argent, la traduction et le shopping.",
-    en: "H-Company is a multi-service platform connecting partner agencies and their customers, mainly between the DRC and Zambia (diaspora included). One account gives you access to our services: transport, parcels, lodging, restaurants, learning, and soon money transfer, translation and shopping.",
+    fr: "H-Company est une plateforme multi-services qui relie des agences partenaires et leurs clients, principalement entre la RDC et la Zambie (diaspora comprise). Un seul compte vous donne accès à nos services : transport, colis, logement, restaurant, formation, shopping, et bientôt l'argent et la traduction.",
+    en: "H-Company is a multi-service platform connecting partner agencies and their customers, mainly between the DRC and Zambia (diaspora included). One account gives you access to our services: transport, parcels, lodging, restaurants, learning, shopping, and soon money transfer and translation.",
     to: ["explore", "services"], follow: ["services_list", "join"],
   },
   {
     id: "services_list",
     kw: ["services", "service", "que proposez", "proposez vous", "offrez", "what do you offer", "catalogue", "catalog", "liste des services", "tous vos services", "what services"],
-    fr: "Nos huit services :\n- H-Transport (Bus) et H-Transport (Colis)\n- H-Logement\n- H-Restaurant\n- H-Learning\n- Bientôt : H-Money, H-Translate, H-Shopping (H-Commerce)\nCliquez sur « Explorer les services » pour ouvrir la page de chacun.",
-    en: "Our eight services:\n- H-Transport (Bus) and H-Transport (Parcels)\n- H-Lodging\n- H-Restaurant\n- H-Learning\n- Coming soon: H-Money, H-Translate, H-Shopping (H-Commerce)\nTap “Explore the services” to open each page.",
+    fr: "Nos huit services :\n- H-Transport (Bus) et H-Transport (Colis)\n- H-Logement\n- H-Restaurant\n- H-Learning\n- H-Shopping (H-Commerce)\n- Bientôt : H-Money, H-Translate\nCliquez sur « Explorer les services » pour ouvrir la page de chacun.",
+    en: "Our eight services:\n- H-Transport (Bus) and H-Transport (Parcels)\n- H-Lodging\n- H-Restaurant\n- H-Learning\n- H-Shopping (H-Commerce)\n- Coming soon: H-Money, H-Translate\nTap “Explore the services” to open each page.",
     to: ["explore"], follow: ["trades", "pricing"],
   },
   {
@@ -296,9 +298,9 @@ const KB = [
   {
     id: "marketplace_sell",
     kw: ["marketplace", "boutique", "vendre mes produits", "ouvrir une vitrine", "vitrine", "commerce", "h-commerce", "shopping", "acheter", "shop", "store", "produits", "products", "sell my products", "artisanat", "vetements", "meubles"],
-    fr: "H-Shopping (H-Commerce) arrive bientôt : une marketplace où acheter auprès de boutiques partenaires. Côté vendeurs, vous pouvez ouvrir une vitrine sur le réseau sans monter votre boutique en ligne : une commission seulement sur les ventes réalisées grâce à la plateforme, sans frais fixes. Les produits montrés sur la page sont des exemples.",
-    en: "H-Shopping (H-Commerce) is coming soon: a marketplace to buy from partner shops. For sellers, you can open a storefront on the network without building your own online shop: commission only on sales made through the platform, no fixed fees. The products shown on the page are examples.",
-    to: ["seller", "explore"],
+    fr: "H-Shopping (H-Commerce) est ouvert : une marketplace où acheter auprès de boutiques vérifiées, payer par mobile money (Zamtel, MTN, Airtel) et récupérer son colis en agence ou à domicile. Votre argent est sécurisé jusqu'à la confirmation de réception. Côté vendeurs : créez votre boutique depuis la page « Vendre », elle est validée par notre équipe, puis ajoutez vos produits. Commission uniquement sur les ventes, sans frais fixes. Pour suivre un colis, utilisez « Suivre un colis » avec votre numéro de commande.",
+    en: "H-Shopping (H-Commerce) is open: a marketplace to buy from verified shops, pay with mobile money (Zamtel, MTN, Airtel) and collect your parcel at an agency or at home. Your money is held securely until you confirm receipt. For sellers: create your shop from the “Sell” page, our team approves it, then add your products. Commission only on sales, no fixed fees. To track a parcel, use “Track a parcel” with your order number.",
+    to: ["shop", "seller", "trackShop"],
   },
   {
     id: "mobile_apps",

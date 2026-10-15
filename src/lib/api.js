@@ -26,6 +26,23 @@ function clearRefreshToken() {
   localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
+// Construit une query string en ignorant les valeurs vides.
+function qs(params = {}) {
+  const sp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "" && v !== false) sp.set(k, String(v));
+  });
+  const s = sp.toString();
+  return s ? `?${s}` : "";
+}
+
+/** URL absolue d'une image téléversée (chemin relatif renvoyé par l'API). */
+export function uploadUrl(path) {
+  if (!path) return null;
+  if (/^https?:/.test(path)) return path;
+  return `${BASE_URL}/uploads/${path}`;
+}
+
 class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
@@ -196,6 +213,93 @@ export const api = {
     requestApp: (token, name, description) =>
       request("/api/v1/partners/me/apps", { method: "POST", token, body: { name, description } }),
     billing: (token) => request("/api/v1/partners/me/billing", { token }),
+  },
+
+  // H-Shopping : place de marché (catalogue, panier, commandes, vendeurs, agences, admin)
+  shop: {
+    home: (token) => request("/api/v1/shopping/home", { token }),
+    categories: () => request("/api/v1/shopping/categories"),
+    products: (params = {}, token) => request(`/api/v1/shopping/products${qs(params)}`, { token }),
+    product: (id, token) => request(`/api/v1/shopping/products/${id}`, { token }),
+    related: (id, token) => request(`/api/v1/shopping/products/${id}/related`, { token }),
+    productReviews: (id) => request(`/api/v1/shopping/products/${id}/reviews`),
+    shops: (q = "") => request(`/api/v1/shopping/shops${qs({ q })}`),
+    shopBySlug: (slug) => request(`/api/v1/shopping/shops/${slug}`),
+    shopReviews: (slug) => request(`/api/v1/shopping/shops/${slug}/reviews`),
+    agencies: () => request("/api/v1/shopping/agencies"),
+    quote: (body) => request("/api/v1/shopping/cart/quote", { method: "POST", body }),
+    track: (code, phone) => request(`/api/v1/shopping/track/${encodeURIComponent(code)}${qs({ phone })}`),
+    checkout: (token, body) => request("/api/v1/shopping/checkout", { method: "POST", token, body }),
+    myOrders: (token) => request("/api/v1/shopping/me/orders", { token }),
+    myOrder: (token, code) => request(`/api/v1/shopping/me/orders/${code}`, { token }),
+    confirmReceipt: (token, code) => request(`/api/v1/shopping/me/orders/${code}/confirm`, { method: "POST", token }),
+    cancelOrder: (token, code, reason) => request(`/api/v1/shopping/me/orders/${code}/cancel`, { method: "POST", token, body: { reason } }),
+    dispute: (token, code, reason, note) => request(`/api/v1/shopping/me/orders/${code}/dispute`, { method: "POST", token, body: { reason, note } }),
+    review: (token, body) => request("/api/v1/shopping/reviews", { method: "POST", token, body }),
+    favorites: (token) => request("/api/v1/shopping/me/favorites", { token }),
+    addFavorite: (token, id) => request(`/api/v1/shopping/me/favorites/${id}`, { method: "POST", token }),
+    removeFavorite: (token, id) => request(`/api/v1/shopping/me/favorites/${id}`, { method: "DELETE", token }),
+
+    seller: {
+      upload: (token, file) => {
+        const fd = new FormData();
+        fd.append("file", file);
+        return request("/api/v1/shopping/seller/uploads", { method: "POST", token, body: fd });
+      },
+      shops: (token) => request("/api/v1/shopping/seller/shops", { token }),
+      createShop: (token, body) => request("/api/v1/shopping/seller/shops", { method: "POST", token, body }),
+      updateShop: (token, id, body) => request(`/api/v1/shopping/seller/shops/${id}`, { method: "PATCH", token, body }),
+      products: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/products`, { token }),
+      product: (token, id) => request(`/api/v1/shopping/seller/products/${id}`, { token }),
+      createProduct: (token, shopId, body) => request(`/api/v1/shopping/seller/shops/${shopId}/products`, { method: "POST", token, body }),
+      updateProduct: (token, id, body) => request(`/api/v1/shopping/seller/products/${id}`, { method: "PUT", token, body }),
+      patchProduct: (token, id, body) => request(`/api/v1/shopping/seller/products/${id}`, { method: "PATCH", token, body }),
+      deleteProduct: (token, id) => request(`/api/v1/shopping/seller/products/${id}`, { method: "DELETE", token }),
+      orders: (token, shopId, status) => request(`/api/v1/shopping/seller/shops/${shopId}/orders${qs({ status })}`, { token }),
+      accept: (token, shopId, code) => request(`/api/v1/shopping/seller/shops/${shopId}/orders/${code}/accept`, { method: "POST", token }),
+      ship: (token, shopId, code, note = "") => request(`/api/v1/shopping/seller/shops/${shopId}/orders/${code}/ship`, { method: "POST", token, body: { note } }),
+      cancel: (token, shopId, code, reason = "") => request(`/api/v1/shopping/seller/shops/${shopId}/orders/${code}/cancel`, { method: "POST", token, body: { reason } }),
+      stats: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/stats`, { token }),
+      wallet: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/wallet`, { token }),
+      payouts: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/payouts`, { token }),
+      requestPayout: (token, shopId, body) => request(`/api/v1/shopping/seller/shops/${shopId}/payouts`, { method: "POST", token, body }),
+      coupons: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/coupons`, { token }),
+      createCoupon: (token, shopId, body) => request(`/api/v1/shopping/seller/shops/${shopId}/coupons`, { method: "POST", token, body }),
+      deleteCoupon: (token, shopId, id) => request(`/api/v1/shopping/seller/shops/${shopId}/coupons/${id}`, { method: "DELETE", token }),
+      reviews: (token, shopId) => request(`/api/v1/shopping/seller/shops/${shopId}/reviews`, { token }),
+      reply: (token, shopId, reviewId, reply) => request(`/api/v1/shopping/seller/shops/${shopId}/reviews/${reviewId}/reply`, { method: "POST", token, body: { reply } }),
+    },
+
+    agency: {
+      me: (token) => request("/api/v1/shopping/agency/me", { token }),
+      orders: (token) => request("/api/v1/shopping/agency/orders", { token }),
+      setStatus: (token, code, status, note = "") => request(`/api/v1/shopping/agency/orders/${code}/status`, { method: "POST", token, body: { status, note } }),
+    },
+
+    admin: {
+      overview: (token) => request("/api/v1/shopping/admin/overview", { token }),
+      shops: (token, status) => request(`/api/v1/shopping/admin/shops${qs({ status })}`, { token }),
+      updateShop: (token, id, body) => request(`/api/v1/shopping/admin/shops/${id}`, { method: "PATCH", token, body }),
+      moderateProduct: (token, id, body) => request(`/api/v1/shopping/admin/products/${id}`, { method: "PATCH", token, body }),
+      hideReview: (token, id) => request(`/api/v1/shopping/admin/reviews/${id}`, { method: "DELETE", token }),
+      categories: (token) => request("/api/v1/shopping/admin/categories", { token }),
+      createCategory: (token, body) => request("/api/v1/shopping/admin/categories", { method: "POST", token, body }),
+      updateCategory: (token, id, body) => request(`/api/v1/shopping/admin/categories/${id}`, { method: "PUT", token, body }),
+      deleteCategory: (token, id) => request(`/api/v1/shopping/admin/categories/${id}`, { method: "DELETE", token }),
+      partners: (token) => request("/api/v1/shopping/admin/partners", { token }),
+      agencies: (token) => request("/api/v1/shopping/admin/agencies", { token }),
+      createAgency: (token, body) => request("/api/v1/shopping/admin/agencies", { method: "POST", token, body }),
+      updateAgency: (token, id, body) => request(`/api/v1/shopping/admin/agencies/${id}`, { method: "PUT", token, body }),
+      orders: (token, params = {}) => request(`/api/v1/shopping/admin/orders${qs(params)}`, { token }),
+      resolve: (token, code, decision, note = "") => request(`/api/v1/shopping/admin/orders/${code}/resolve`, { method: "POST", token, body: { decision, note } }),
+      payouts: (token, status) => request(`/api/v1/shopping/admin/payouts${qs({ status })}`, { token }),
+      updatePayout: (token, id, status, note) => request(`/api/v1/shopping/admin/payouts/${id}`, { method: "PATCH", token, body: { status, note } }),
+      coupons: (token) => request("/api/v1/shopping/admin/coupons", { token }),
+      createCoupon: (token, body) => request("/api/v1/shopping/admin/coupons", { method: "POST", token, body }),
+      deleteCoupon: (token, id) => request(`/api/v1/shopping/admin/coupons/${id}`, { method: "DELETE", token }),
+      settings: (token) => request("/api/v1/shopping/admin/settings", { token }),
+      saveSettings: (token, body) => request("/api/v1/shopping/admin/settings", { method: "PUT", token, body }),
+    },
   },
 
   // Plateforme e-learning H-learning

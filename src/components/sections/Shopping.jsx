@@ -34,6 +34,9 @@ export default function Shopping() {
             {t("shopping.cta")}
             <ArrowRight size={15} />
           </Link>
+          <Link to="/shopping/vendre" className="ml-3 inline-flex items-center gap-2 rounded-full border border-line text-ink text-sm font-medium px-6 py-3.5 hover:bg-line/50 transition-colors w-fit">
+            {t("shopping.sellCta")}
+          </Link>
         </Reveal>
 
         {/* --- Collage de photos flottantes --- */}
