@@ -1,273 +1,676 @@
 import { Link } from "react-router-dom";
+import {
+  ArrowUpRight,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Moon,
+  Sun,
+  Music2,
+  MessageCircle,
+  ArrowRight,
+} from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
-import { Sun, Moon, Monitor } from "lucide-react";
 import Logo from "../ui/Logo.jsx";
 
-function NetworkGlyph() {
-  return (
-    <svg width="120" height="40" viewBox="0 0 120 40" aria-hidden="true">
-      <circle cx="9" cy="21" r="6" fill="var(--hc-coffee)" stroke="var(--hc-gold)" strokeWidth="1.3" />
-      <path
-        d="M15 21H40M40 21V6H60M40 21V34H60M63 6H90M63 34H90"
-        fill="none"
-        stroke="var(--hc-line-strong)"
-        strokeWidth="1"
-        strokeDasharray="1.4 4"
-        strokeLinecap="round"
-      />
-      <circle cx="60" cy="6" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="60" cy="34" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="90" cy="6" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="90" cy="34" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
 const SOCIALS = [
-  { label: "LinkedIn", initial: "in", href: "https://linkedin.com" },
-  { label: "X", initial: "X", href: "https://x.com" },
-  { label: "Instagram", initial: "IG", href: "https://instagram.com" },
-  { label: "Facebook", initial: "f", href: "https://facebook.com" },
-  // TODO: remplacer par le vrai @ H-Company une fois le compte créé.
-  { label: "TikTok", initial: "TT", href: "https://tiktok.com/@hcompany" },
-  { label: "WhatsApp", initial: "WA", href: "https://wa.me/260770381780" },
+  {
+    label: "LinkedIn",
+    href: "https://linkedin.com",
+    Icon: Linkedin,
+  },
+{
+  label: "Instagram",
+  href: "https://instagram.com",
+  Icon: Instagram,
+},
+{
+  label: "Facebook",
+  href: "https://facebook.com",
+  Icon: Facebook,
+},
+{
+  label: "TikTok",
+  href: "https://tiktok.com/@hcompany",
+  Icon: Music2,
+},
+{
+  label: "WhatsApp",
+  href: "https://wa.me/260770381780",
+  Icon: MessageCircle,
+},
 ];
-
-function SocialMark({ initial }) {
-  return (
-    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-      <circle cx="17" cy="17" r="16" fill="none" stroke="var(--hc-line-strong)" strokeWidth="1.2" />
-      <text x="17" y="21.5" textAnchor="middle" style={{ font: "italic 500 12px 'Instrument Serif', serif", fill: "var(--hc-ink)" }}>
-        {initial}
-      </text>
-    </svg>
-  );
-}
-
-const COLUMNS = [
-  {
-    title: "réseau",
-    links: [
-      { label: "Découvrir", href: "#decouvrir" },
-      { label: "Partenaires", href: "#partenaires" },
-      { label: "Devenir partenaire", href: "#rejoindre" },
-    ],
-  },
-  {
-    title: "apprentissage",
-    links: [
-      { label: "H-learning", href: "#apprentissage" },
-      { label: "Catalogue de cours", href: "#apprentissage" },
-    ],
-  },
-  {
-    title: "contact",
-    links: [
-      { label: "contact@h-company.com", href: "mailto:contact@h-company.com" },
-      { label: "Lusaka, Zambie", href: "#" },
-    ],
-  },
-];
-
-function useColumns(t) {
-  return [
-    {
-      title: t("footer.colNetwork"),
-      links: [
-        { label: t("footer.colDiscover"), href: "#a-propos" },
-        { label: t("footer.colPartners"), href: "#partenaires" },
-        { label: t("footer.colBecomePartner"), href: "#rejoindre" },
-      ],
-    },
-    {
-      title: t("footer.colLearning"),
-      links: [
-        { label: "H-learning", href: "#apprentissage" },
-        { label: t("footer.colCatalog"), href: "#apprentissage" },
-      ],
-    },
-    {
-      title: t("footer.colContact"),
-      links: [
-        { label: "contact@h-company.com", href: "mailto:contact@h-company.com" },
-        { label: t("footer.colLocation"), href: "#" },
-      ],
-    },
-  ];
-}
 
 function LanguageToggle() {
   const { lang, switchLanguage, t } = useLanguage();
+
   return (
-    <div className="hc-lang-toggle" role="group" aria-label={t("footer.language")}>
+    <div
+    className="hc-footer-switch"
+    role="group"
+    aria-label={t("footer.language")}
+    >
+    {["en", "fr"].map((language) => (
       <button
-        type="button"
-        onClick={() => switchLanguage("fr")}
-        aria-pressed={lang === "fr"}
-        className="hc-lang-btn"
-        data-active={lang === "fr"}
+      key={language}
+      type="button"
+      onClick={() => switchLanguage(language)}
+      aria-pressed={lang === language}
+      className="hc-footer-switch-btn"
+      data-active={lang === language}
       >
-        FR
+      {language.toUpperCase()}
       </button>
-      <button
-        type="button"
-        onClick={() => switchLanguage("en")}
-        aria-pressed={lang === "en"}
-        className="hc-lang-btn"
-        data-active={lang === "en"}
-      >
-        EN
-      </button>
+    ))}
     </div>
   );
 }
 
-const THEME_OPTIONS = [
-  { mode: "light", Icon: Sun, label: "Clair" },
-  { mode: "dark", Icon: Moon, label: "Sombre" },
-];
-
 function ThemeToggle() {
   const { mode, setMode } = useTheme();
+
+  const options = [
+    { value: "light", label: "Clair", Icon: Sun },
+    { value: "dark", label: "Sombre", Icon: Moon },
+  ];
+
   return (
-    <div className="hc-lang-toggle" role="group" aria-label="Thème">
-      {THEME_OPTIONS.map(({ mode: m, Icon, label }) => (
-        <button
-          key={m}
-          type="button"
-          onClick={() => setMode(m)}
-          aria-pressed={mode === m}
-          aria-label={label}
-          title={label}
-          className="hc-lang-btn"
-          data-active={mode === m}
+    <div className="hc-footer-switch" role="group" aria-label="Thème">
+    {options.map(({ value, label, Icon }) => (
+      <button
+      key={value}
+      type="button"
+      onClick={() => setMode(value)}
+      aria-label={label}
+      aria-pressed={mode === value}
+      title={label}
+      className="hc-footer-switch-btn hc-footer-theme-btn"
+      data-active={mode === value}
+      >
+      <Icon size={15} strokeWidth={1.8} />
+      </button>
+    ))}
+    </div>
+  );
+}
+
+function FooterColumn({ title, links }) {
+  return (
+    <div className="hc-footer-column">
+    <h3 className="hc-footer-column-title">{title}</h3>
+
+    <ul className="hc-footer-links">
+    {links.map(({ label, href, external }) => (
+      <li key={label}>
+      <a
+      href={href}
+      {...(external
+        ? {
+          target: "_blank",
+          rel: "noopener noreferrer",
+        }
+        : {})}
         >
-          <Icon size={13} />
-        </button>
-      ))}
+        <span>{label}</span>
+        {external && (
+          <ArrowUpRight
+          size={13}
+          className="hc-footer-link-icon"
+          aria-hidden="true"
+          />
+        )}
+        </a>
+        </li>
+    ))}
+    </ul>
     </div>
   );
 }
 
 export default function Footer() {
   const { t } = useLanguage();
-  const COLUMNS = useColumns(t);
+  const { mode } = useTheme();
+
+  const columns = [
+    {
+      title: t("footer.colNetwork"),
+      links: [
+        { label: t("footer.colDiscover"), href: "#a-propos" },
+        { label: t("footer.colPartners"), href: "#partenaires" },
+        {
+          label: t("footer.colBecomePartner"),
+          href: "#rejoindre",
+        },
+      ],
+    },
+    {
+      title: t("footer.colLearning"),
+      links: [
+        { label: "H-learning", href: "#apprentissage" },
+        {
+          label: t("footer.colCatalog"),
+          href: "#apprentissage",
+        },
+      ],
+    },
+    {
+      title: t("footer.colContact"),
+      links: [
+        {
+          label: "contact@h-company.com",
+          href: "mailto:contact@h-company.com",
+        },
+        {
+          label: t("footer.colLocation"),
+          href: "https://www.google.com/maps/search/?api=1&query=Lusaka%2C+Zambia",
+          external: true,
+        },
+      ],
+    },
+  ];
+
   return (
-    <footer className="hc-footer">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
+    <footer
+    className="hc-footer"
+    data-theme={mode}
+    >
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
+      .hc-footer {
+        --f-bg: #f8f7f4;
+        --f-panel: #ffffff;
+        --f-ink: #20231f;
+        --f-muted: #656960;
+        --f-line: #e5e4de;
+        --f-accent: #987342;
+        --f-accent-hover: #76572e;
+        --f-control: #eeede7;
+
+        position: relative;
+        overflow: hidden;
+        padding: 0 24px;
+        background: var(--f-bg);
+        color: var(--f-ink);
+        font-family: 'DM Sans', sans-serif;
+        border-top: 1px solid var(--f-line);
+        transition:
+        background .25s ease,
+        color .25s ease;
+      }
+
+      .hc-footer[data-theme="dark"] {
+        --f-bg: #151714;
+        --f-panel: #1c1f1b;
+        --f-ink: #f2f0e9;
+        --f-muted: #b3b7ac;
+        --f-line: #343830;
+        --f-accent: #d0ad76;
+        --f-accent-hover: #e7c996;
+        --f-control: #292d27;
+      }
+
+      .hc-footer *,
+      .hc-footer *::before,
+      .hc-footer *::after {
+        box-sizing: border-box;
+      }
+
+      .hc-footer a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .hc-footer button {
+        font: inherit;
+      }
+
+      .hc-footer button:focus-visible,
+      .hc-footer a:focus-visible {
+        outline: 2px solid var(--f-accent);
+        outline-offset: 4px;
+        border-radius: 4px;
+      }
+
+      .hc-footer-inner {
+        width: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      /* Brand section */
+
+      .hc-footer-main {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.2fr) 2fr;
+        gap: 76px;
+        padding: 68px 0 54px;
+      }
+
+      .hc-footer-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+      }
+
+      .hc-footer-brandmark {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .hc-footer-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border: 1px solid var(--f-line);
+        border-radius: 13px;
+        background: var(--f-panel);
+      }
+
+      .hc-footer-brand-name {
+        font-family: 'Manrope', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -1.1px;
+      }
+
+      .hc-footer-brand-name span {
+        color: var(--f-accent);
+      }
+
+      .hc-footer-description {
+        max-width: 310px;
+        margin: 22px 0 0;
+        color: var(--f-muted);
+        font-size: 14px;
+        line-height: 1.85;
+      }
+
+      .hc-footer-social-label {
+        margin: 29px 0 13px;
+        color: var(--f-muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+      }
+
+      .hc-footer-socials {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+
+      .hc-footer-social {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 39px;
+        height: 39px;
+        border: 1px solid var(--f-line);
+        border-radius: 11px;
+        background: var(--f-panel);
+        color: var(--f-muted);
+        transition:
+        transform .2s ease,
+        color .2s ease,
+        background .2s ease,
+        border-color .2s ease;
+      }
+
+      .hc-footer-social:hover {
+        transform: translateY(-3px);
+        color: var(--f-accent);
+        border-color: var(--f-accent);
+      }
+
+      /* Navigation columns */
+
+      .hc-footer-columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+        padding-top: 8px;
+      }
+
+      .hc-footer-column-title {
+        margin: 0 0 23px;
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: -.2px;
+      }
+
+      .hc-footer-links {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .hc-footer-links li {
+        min-width: 0;
+      }
+
+      .hc-footer-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 100%;
+        color: var(--f-muted);
+        font-size: 13px;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+        transition: color .18s ease;
+      }
+
+      .hc-footer-links a:hover {
+        color: var(--f-accent);
+      }
+
+      .hc-footer-link-icon {
+        flex-shrink: 0;
+        opacity: 0;
+        transform: translate(-3px, 3px);
+        transition:
+        opacity .18s ease,
+        transform .18s ease;
+      }
+
+      .hc-footer-links a:hover .hc-footer-link-icon {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+
+      /* Bottom bar */
+
+      .hc-footer-bottom {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 22px;
+        min-height: 82px;
+        padding: 19px 0;
+        border-top: 1px solid var(--f-line);
+      }
+
+      .hc-footer-legal {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 9px 16px;
+        color: var(--f-muted);
+        font-size: 11px;
+        line-height: 1.8;
+      }
+
+      .hc-footer-legal a {
+        transition: color .18s ease;
+      }
+
+      .hc-footer-legal a:hover {
+        color: var(--f-accent);
+      }
+
+      .hc-footer-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .hc-footer-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px;
+        border: 1px solid var(--f-line);
+        border-radius: 10px;
+        background: var(--f-panel);
+      }
+
+      .hc-footer-switch-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 29px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--f-muted);
+        cursor: pointer;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        transition:
+        color .18s ease,
+        background .18s ease;
+      }
+
+      .hc-footer-switch-btn[data-active="true"] {
+        background: var(--f-control);
+        color: var(--f-ink);
+      }
+
+      .hc-footer-switch-btn:hover {
+        color: var(--f-accent);
+      }
+
+      .hc-footer-credit {
+        justify-self: end;
+        color: var(--f-muted);
+        font-size: 11px;
+        text-align: right;
+      }
+
+      .hc-footer-credit strong {
+        color: var(--f-ink);
+        font-weight: 700;
+      }
+
+      /* Responsive */
+
+      @media (min-width: 1440px) {
         .hc-footer {
-          --hc-ink: #10140F;
-          --hc-canvas: #F3EEDF;
-          --hc-surface: #FFFFFF;
-          --hc-coffee: #4A3020;
-          --hc-gold: #C89A3D;
-          --hc-clay: #A94B32;
-          --hc-mist: #656B58;
-          --hc-line: #DAD4C2;
-          --hc-line-strong: #B9B29B;
-          background: var(--hc-surface);
-          color: var(--hc-ink);
-          font-family: 'Inter', sans-serif;
-          padding: 4.5rem 1.5rem 2.5rem;
+          padding-right: 36px;
+          padding-left: 36px;
         }
-        .hc-footer-inner { max-width: 68rem; margin: 0 auto; }
-        .hc-footer-top {
-          display: flex; flex-wrap: wrap; justify-content: space-between;
-          gap: 3rem; padding-bottom: 3.5rem;
-        }
-        .hc-footer-brand { display: flex; flex-direction: column; gap: 1.1rem; }
-        .hc-footer-brandmark { display: inline-flex; align-items: center; gap: 0.6rem; }
-        .hc-footer-name { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.35rem; }
-        .hc-footer-tag { font-size: 0.9rem; color: #5C6357; max-width: 22ch; line-height: 1.65; }
+      }
 
-        .hc-footer-cols { display: flex; flex-wrap: wrap; gap: 3.5rem; }
-        .hc-footer-col-title {
-          font-size: 0.8rem; font-weight: 600; color: var(--hc-clay);
-          margin-bottom: 1rem;
+      @media (max-width: 900px) {
+        .hc-footer-main {
+          grid-template-columns: 1fr;
+          gap: 45px;
+          padding-top: 52px;
         }
-        .hc-footer-col a {
-          display: block; font-size: 0.92rem; color: var(--hc-ink);
-          text-decoration: none; margin-bottom: 0.65rem;
-        }
-        .hc-footer-col a:hover { color: var(--hc-clay); }
-        .hc-footer-col a:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
 
-        .hc-footer-socials { display: flex; gap: 0.6rem; margin-top: 0.4rem; }
-        .hc-footer-socials a { display: block; transition: transform 0.15s ease; }
-        .hc-footer-socials a:hover circle { stroke: var(--hc-gold); }
-        .hc-footer-socials a:hover text { fill: var(--hc-clay); }
-        .hc-footer-socials a:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
+        .hc-footer-description {
+          max-width: 430px;
+        }
+
+        .hc-footer-columns {
+          gap: 32px;
+        }
 
         .hc-footer-bottom {
-          display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-          gap: 1rem; padding-top: 1.75rem; border-top: 1px solid var(--hc-line);
-          font-size: 0.82rem; color: var(--hc-mist);
+          grid-template-columns: 1fr auto;
         }
 
-        .hc-lang-toggle {
-          display: inline-flex; border: 1px solid var(--hc-line-strong); border-radius: 100px;
-          padding: 3px; gap: 2px;
+        .hc-footer-controls {
+          justify-content: flex-end;
         }
-        .hc-lang-btn {
-          font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600;
-          padding: 0.3rem 0.7rem; border-radius: 100px; color: var(--hc-mist);
-          transition: background 0.2s ease, color 0.2s ease;
+
+        .hc-footer-credit {
+          grid-column: 1 / -1;
+          justify-self: start;
+          text-align: left;
         }
-        .hc-lang-btn[data-active="true"] { background: var(--hc-ink); color: var(--hc-canvas); }
-        .hc-lang-btn:hover:not([data-active="true"]) { color: var(--hc-ink); }
-        .hc-lang-btn:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
+      }
+
+      @media (max-width: 560px) {
+        .hc-footer {
+          padding: 0 19px;
+        }
+
+        .hc-footer-main {
+          gap: 39px;
+          padding: 42px 0 35px;
+        }
+
+        .hc-footer-brand-name {
+          font-size: 20px;
+        }
+
+        .hc-footer-columns {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 34px 20px;
+        }
+
+        .hc-footer-column:last-child {
+          grid-column: 1 / -1;
+        }
+
+        .hc-footer-column-title {
+          margin-bottom: 17px;
+        }
+
+        .hc-footer-links {
+          gap: 13px;
+        }
+
+        .hc-footer-bottom {
+          grid-template-columns: 1fr;
+          gap: 18px;
+          padding: 23px 0;
+        }
+
+        .hc-footer-legal {
+          gap: 8px 12px;
+        }
+
+        .hc-footer-controls {
+          justify-content: flex-start;
+        }
+
+        .hc-footer-credit {
+          grid-column: auto;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hc-footer *,
+        .hc-footer *::before,
+        .hc-footer *::after {
+          scroll-behavior: auto !important;
+          animation-duration: .01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: .01ms !important;
+        }
+      }
       `}</style>
 
       <div className="hc-footer-inner">
-        <div className="hc-footer-top">
-          <div className="hc-footer-brand">
-            <span className="hc-footer-brandmark">
-              <Logo size={28} />
-              <span className="hc-footer-name">H-Company</span>
-            </span>
-            <p className="hc-footer-tag">
-              {t("footer.tagline")}
-            </p>
-            <NetworkGlyph />
-            <div className="hc-footer-socials">
-              {SOCIALS.map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
-                  <SocialMark initial={s.initial} />
-                </a>
-              ))}
-            </div>
-          </div>
+      <div className="hc-footer-main">
+      <div className="hc-footer-brand">
+      <Link
+      to="/"
+      className="hc-footer-brandmark"
+      aria-label="Hcompany — Accueil"
+      >
+      <span className="hc-footer-logo">
+      <Logo size={29} />
+      </span>
 
-          <div className="hc-footer-cols">
-            {COLUMNS.map((col) => (
-              <div className="hc-footer-col" key={col.title}>
-                <p className="hc-footer-col-title">{col.title}</p>
-                {col.links.map((l) => (
-                  <a key={l.label} href={l.href}>{l.label}</a>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+      <span className="hc-footer-brand-name">
+      H<span>company</span>
+      </span>
+      </Link>
 
-        <div className="hc-footer-bottom">
-          <span>
-            © {new Date().getFullYear()} H-Company. {t("footer.rights")}
-            {" · "}
-            <Link to="/confidentialite" className="hover:text-ink transition-colors">Confidentialité</Link>
-            {" · "}
-            <Link to="/conditions" className="hover:text-ink transition-colors">Conditions</Link>
-          </span>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LanguageToggle />
-          </div>
-          <span>{t("footer.designedAs")}</span>
-        </div>
+      <p className="hc-footer-description">
+      {t("footer.tagline")}
+      </p>
+
+      <p className="hc-footer-social-label">
+      {t("footer.followUs") || "Suivez-nous"}
+      </p>
+
+      <div className="hc-footer-socials">
+      {SOCIALS.map(({ label, href, Icon }) => (
+        <a
+        key={label}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={label}
+        className="hc-footer-social"
+        >
+        <Icon size={17} strokeWidth={1.8} />
+        </a>
+      ))}
       </div>
-    </footer>
+      </div>
+
+      <nav
+      className="hc-footer-columns"
+      aria-label="Navigation de pied de page"
+      >
+      {columns.map((column) => (
+        <FooterColumn
+        key={column.title}
+        title={column.title}
+        links={column.links}
+        />
+      ))}
+      </nav>
+      </div>
+
+      <div className="hc-footer-bottom">
+      <div className="hc-footer-legal">
+      <span>
+      © {new Date().getFullYear()} Hcompany.
+      {" "}
+      {t("footer.rights")}
+      </span>
+
+      <Link to="/confidentialite">
+      Confidentialité
+      </Link>
+
+      <Link to="/conditions">
+      Conditions
+      </Link>
+      </div>
+
+      <div className="hc-footer-controls">
+      <ThemeToggle />
+      <LanguageToggle />
+      </div>
+
+      <div className="hc-footer-credit">
+      {t("footer.designedAs")}
+      {" "}
+      <strong>Hcompany</strong>
+      <ArrowRight
+      size={12}
+      style={{
+        display: "inline",
+        verticalAlign: "middle",
+        marginLeft: 5,
+      }}
+      aria-hidden="true"
+      />
+      </div>
+      </div>
+      </div>
+      </footer>
   );
 }
