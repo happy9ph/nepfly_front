@@ -21,7 +21,7 @@ export function ShopImage({ path, alt = "", className = "", ratio = "aspect-squa
   return (
     <div className={`${ratio} bg-latte-soft overflow-hidden flex items-center justify-center ${className}`}>
       {src && !broken ? (
-        <img src={src} alt={alt} loading="lazy" onError={() => setBroken(true)} className="w-full h-full object-cover" />
+        <img src={src} alt={alt} loading="lazy" onError={() => setBroken(true)} className="w-full h-full object-contain" />
       ) : (
         <ImageIcon className="text-latte" size={28} aria-hidden="true" />
       )}
