@@ -1,271 +1,173 @@
 import { Link } from "react-router-dom";
+import { ArrowUp, ArrowUpRight, Mail, MapPin, MessageCircle, Moon, Sun } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
-import { Sun, Moon, Monitor } from "lucide-react";
 import Logo from "../ui/Logo.jsx";
 
-function NetworkGlyph() {
-  return (
-    <svg width="120" height="40" viewBox="0 0 120 40" aria-hidden="true">
-      <circle cx="9" cy="21" r="6" fill="var(--hc-coffee)" stroke="var(--hc-gold)" strokeWidth="1.3" />
-      <path
-        d="M15 21H40M40 21V6H60M40 21V34H60M63 6H90M63 34H90"
-        fill="none"
-        stroke="var(--hc-line-strong)"
-        strokeWidth="1"
-        strokeDasharray="1.4 4"
-        strokeLinecap="round"
-      />
-      <circle cx="60" cy="6" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="60" cy="34" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="90" cy="6" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-      <circle cx="90" cy="34" r="3" fill="var(--hc-surface)" stroke="var(--hc-gold)" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
 const SOCIALS = [
-  { label: "LinkedIn", initial: "in", href: "https://linkedin.com" },
-  { label: "X", initial: "X", href: "https://x.com" },
-  { label: "Instagram", initial: "IG", href: "https://instagram.com" },
-  { label: "Facebook", initial: "f", href: "https://facebook.com" },
-  // TODO: remplacer par le vrai @ H-Company une fois le compte créé.
-  { label: "TikTok", initial: "TT", href: "https://tiktok.com/@hcompany" },
-  { label: "WhatsApp", initial: "WA", href: "https://wa.me/260770381780" },
+  { label: "LinkedIn", mark: "in", href: "https://linkedin.com" },
+  { label: "X", mark: "X", href: "https://x.com" },
+  { label: "Instagram", mark: "IG", href: "https://instagram.com" },
+  { label: "Facebook", mark: "f", href: "https://facebook.com" },
+  // TODO : remplacer par le vrai @ H-Company une fois le compte créé.
+  { label: "TikTok", mark: "TT", href: "https://tiktok.com/@hcompany" },
+  { label: "WhatsApp", mark: "WA", href: "https://wa.me/260770381780" },
 ];
 
-function SocialMark({ initial }) {
+const COPY = {
+  fr: {
+    tagline: "Le réseau qui relie entreprises, partenaires et talents autour de la technologie.",
+    ctaTitle: "Un seul compte pour voyager, loger, acheter et apprendre.",
+    ctaText: "Rejoignez le réseau H-Company : des services concrets, des partenaires vérifiés, des paiements protégés.",
+    ctaPrimary: "Créer un compte", ctaSecondary: "Devenir partenaire",
+    services: "Services", network: "Réseau", account: "Votre espace", help: "Ressources",
+    svc: { bus: "H-Transport · Bus", parcel: "H-Transport · Colis", lodge: "H-Logement", food: "H-Restaurant", learn: "H-Learning", shop: "H-Shopping", soon: "Bientôt" },
+    net: { about: "À propos", partners: "Partenaires", join: "Devenir partenaire", interp: "Interprétation" },
+    acc: { signin: "Se connecter", signup: "Créer un compte", space: "Mon espace", trips: "Mes séjours", orders: "Mes commandes", host: "Devenir hôte", sell: "Vendre en ligne" },
+    res: { track: "Suivre un colis", courses: "Cours gratuits", privacy: "Confidentialité", terms: "Conditions d'utilisation" },
+    contact: "Nous écrire", location: "Lusaka, Zambie", whatsapp: "WhatsApp",
+    rights: "Tous droits réservés.", madeIn: "Fait à Lusaka, pour tout le réseau.", top: "Haut de page", language: "Langue", theme: "Thème", light: "Clair", dark: "Sombre",
+  },
+  en: {
+    tagline: "The network connecting companies, partners and talent around technology.",
+    ctaTitle: "One account to travel, stay, shop and learn.",
+    ctaText: "Join the H-Company network: real services, verified partners, protected payments.",
+    ctaPrimary: "Create an account", ctaSecondary: "Become a partner",
+    services: "Services", network: "Network", account: "Your space", help: "Resources",
+    svc: { bus: "H-Transport · Bus", parcel: "H-Transport · Parcels", lodge: "H-Lodging", food: "H-Restaurant", learn: "H-Learning", shop: "H-Shopping", soon: "Soon" },
+    net: { about: "About", partners: "Partners", join: "Become a partner", interp: "Interpretation" },
+    acc: { signin: "Sign in", signup: "Create an account", space: "My space", trips: "My trips", orders: "My orders", host: "Become a host", sell: "Sell online" },
+    res: { track: "Track a parcel", courses: "Free courses", privacy: "Privacy", terms: "Terms of service" },
+    contact: "Write to us", location: "Lusaka, Zambia", whatsapp: "WhatsApp",
+    rights: "All rights reserved.", madeIn: "Made in Lusaka, for the whole network.", top: "Back to top", language: "Language", theme: "Theme", light: "Light", dark: "Dark",
+  },
+};
+
+function FootLink({ to, children, external }) {
+  const cls = "group inline-flex items-center gap-1 text-sm text-cream-fixed/70 hover:text-cream-fixed transition-colors py-1.5 focus-visible:outline-2 focus-visible:outline-latte focus-visible:outline-offset-2 rounded";
+  if (external || to.startsWith("mailto:") || to.startsWith("https://")) return <a href={to} className={cls} {...(to.startsWith("https://") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{children}</a>;
+  return <Link to={to} className={cls}>{children}</Link>;
+}
+
+function Column({ title, children }) {
   return (
-    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-      <circle cx="17" cy="17" r="16" fill="none" stroke="var(--hc-line-strong)" strokeWidth="1.2" />
-      <text x="17" y="21.5" textAnchor="middle" style={{ font: "italic 500 12px 'Instrument Serif', serif", fill: "var(--hc-ink)" }}>
-        {initial}
-      </text>
-    </svg>
+    <nav aria-label={title}>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-latte mb-4">{title}</p>
+      <ul className="space-y-0.5">{children}</ul>
+    </nav>
   );
 }
 
-const COLUMNS = [
-  {
-    title: "réseau",
-    links: [
-      { label: "Découvrir", href: "#decouvrir" },
-      { label: "Partenaires", href: "#partenaires" },
-      { label: "Devenir partenaire", href: "#rejoindre" },
-    ],
-  },
-  {
-    title: "apprentissage",
-    links: [
-      { label: "H-learning", href: "#apprentissage" },
-      { label: "Catalogue de cours", href: "#apprentissage" },
-    ],
-  },
-  {
-    title: "contact",
-    links: [
-      { label: "contact@h-company.com", href: "mailto:contact@h-company.com" },
-      { label: "Lusaka, Zambie", href: "#" },
-    ],
-  },
-];
-
-function useColumns(t) {
-  return [
-    {
-      title: t("footer.colNetwork"),
-      links: [
-        { label: t("footer.colDiscover"), href: "#a-propos" },
-        { label: t("footer.colPartners"), href: "#partenaires" },
-        { label: t("footer.colBecomePartner"), href: "#rejoindre" },
-      ],
-    },
-    {
-      title: t("footer.colLearning"),
-      links: [
-        { label: "H-learning", href: "#apprentissage" },
-        { label: t("footer.colCatalog"), href: "#apprentissage" },
-      ],
-    },
-    {
-      title: t("footer.colContact"),
-      links: [
-        { label: "contact@h-company.com", href: "mailto:contact@h-company.com" },
-        { label: t("footer.colLocation"), href: "#" },
-      ],
-    },
-  ];
+function Segmented({ label, children }) {
+  return <div role="group" aria-label={label} className="inline-flex rounded-full border border-cream-fixed/20 p-0.5 gap-0.5">{children}</div>;
 }
 
-function LanguageToggle() {
-  const { lang, switchLanguage, t } = useLanguage();
+function SegBtn({ active, onClick, label, children }) {
   return (
-    <div className="hc-lang-toggle" role="group" aria-label={t("footer.language")}>
-      <button
-        type="button"
-        onClick={() => switchLanguage("fr")}
-        aria-pressed={lang === "fr"}
-        className="hc-lang-btn"
-        data-active={lang === "fr"}
-      >
-        FR
-      </button>
-      <button
-        type="button"
-        onClick={() => switchLanguage("en")}
-        aria-pressed={lang === "en"}
-        className="hc-lang-btn"
-        data-active={lang === "en"}
-      >
-        EN
-      </button>
-    </div>
-  );
-}
-
-const THEME_OPTIONS = [
-  { mode: "light", Icon: Sun, label: "Clair" },
-  { mode: "dark", Icon: Moon, label: "Sombre" },
-];
-
-function ThemeToggle() {
-  const { mode, setMode } = useTheme();
-  return (
-    <div className="hc-lang-toggle" role="group" aria-label="Thème">
-      {THEME_OPTIONS.map(({ mode: m, Icon, label }) => (
-        <button
-          key={m}
-          type="button"
-          onClick={() => setMode(m)}
-          aria-pressed={mode === m}
-          aria-label={label}
-          title={label}
-          className="hc-lang-btn"
-          data-active={mode === m}
-        >
-          <Icon size={13} />
-        </button>
-      ))}
-    </div>
+    <button type="button" onClick={onClick} aria-pressed={active} aria-label={label} title={label}
+      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors inline-flex items-center focus-visible:outline-2 focus-visible:outline-latte ${active ? "bg-cream-fixed text-ink-fixed" : "text-cream-fixed/65 hover:text-cream-fixed"}`}>
+      {children}
+    </button>
   );
 }
 
 export default function Footer() {
-  const { t } = useLanguage();
-  const COLUMNS = useColumns(t);
+  const { lang, switchLanguage } = useLanguage();
+  const { mode, setMode } = useTheme();
+  const c = COPY[lang] || COPY.fr;
   return (
-    <footer className="hc-footer">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
-
-        .hc-footer {
-          --hc-ink: #10140F;
-          --hc-canvas: #F3EEDF;
-          --hc-surface: #FFFFFF;
-          --hc-coffee: #4A3020;
-          --hc-gold: #C89A3D;
-          --hc-clay: #A94B32;
-          --hc-mist: #656B58;
-          --hc-line: #DAD4C2;
-          --hc-line-strong: #B9B29B;
-          background: var(--hc-surface);
-          color: var(--hc-ink);
-          font-family: 'Inter', sans-serif;
-          padding: 4.5rem 1.5rem 2.5rem;
-        }
-        .hc-footer-inner { max-width: 68rem; margin: 0 auto; }
-        .hc-footer-top {
-          display: flex; flex-wrap: wrap; justify-content: space-between;
-          gap: 3rem; padding-bottom: 3.5rem;
-        }
-        .hc-footer-brand { display: flex; flex-direction: column; gap: 1.1rem; }
-        .hc-footer-brandmark { display: inline-flex; align-items: center; gap: 0.6rem; }
-        .hc-footer-name { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.35rem; }
-        .hc-footer-tag { font-size: 0.9rem; color: #5C6357; max-width: 22ch; line-height: 1.65; }
-
-        .hc-footer-cols { display: flex; flex-wrap: wrap; gap: 3.5rem; }
-        .hc-footer-col-title {
-          font-size: 0.8rem; font-weight: 600; color: var(--hc-clay);
-          margin-bottom: 1rem;
-        }
-        .hc-footer-col a {
-          display: block; font-size: 0.92rem; color: var(--hc-ink);
-          text-decoration: none; margin-bottom: 0.65rem;
-        }
-        .hc-footer-col a:hover { color: var(--hc-clay); }
-        .hc-footer-col a:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
-
-        .hc-footer-socials { display: flex; gap: 0.6rem; margin-top: 0.4rem; }
-        .hc-footer-socials a { display: block; transition: transform 0.15s ease; }
-        .hc-footer-socials a:hover circle { stroke: var(--hc-gold); }
-        .hc-footer-socials a:hover text { fill: var(--hc-clay); }
-        .hc-footer-socials a:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
-
-        .hc-footer-bottom {
-          display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-          gap: 1rem; padding-top: 1.75rem; border-top: 1px solid var(--hc-line);
-          font-size: 0.82rem; color: var(--hc-mist);
-        }
-
-        .hc-lang-toggle {
-          display: inline-flex; border: 1px solid var(--hc-line-strong); border-radius: 100px;
-          padding: 3px; gap: 2px;
-        }
-        .hc-lang-btn {
-          font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600;
-          padding: 0.3rem 0.7rem; border-radius: 100px; color: var(--hc-mist);
-          transition: background 0.2s ease, color 0.2s ease;
-        }
-        .hc-lang-btn[data-active="true"] { background: var(--hc-ink); color: var(--hc-canvas); }
-        .hc-lang-btn:hover:not([data-active="true"]) { color: var(--hc-ink); }
-        .hc-lang-btn:focus-visible { outline: 2px solid var(--hc-gold); outline-offset: 2px; }
-      `}</style>
-
-      <div className="hc-footer-inner">
-        <div className="hc-footer-top">
-          <div className="hc-footer-brand">
-            <span className="hc-footer-brandmark">
-              <Logo size={28} />
-              <span className="hc-footer-name">H-Company</span>
-            </span>
-            <p className="hc-footer-tag">
-              {t("footer.tagline")}
-            </p>
-            <NetworkGlyph />
-            <div className="hc-footer-socials">
-              {SOCIALS.map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
-                  <SocialMark initial={s.initial} />
-                </a>
-              ))}
-            </div>
+    <footer className="bg-ink-fixed text-cream-fixed" aria-label="H-Company">
+      <div className="max-w-content mx-auto px-6 pt-16 md:pt-20">
+        {/* Bandeau d'appel */}
+        <div className="rounded-3xl border border-cream-fixed/15 bg-cream-fixed/[0.04] p-8 md:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+          <div className="max-w-xl">
+            <h2 className="font-display italic text-3xl md:text-4xl leading-tight">{c.ctaTitle}</h2>
+            <p className="mt-4 text-cream-fixed/70 leading-relaxed">{c.ctaText}</p>
           </div>
-
-          <div className="hc-footer-cols">
-            {COLUMNS.map((col) => (
-              <div className="hc-footer-col" key={col.title}>
-                <p className="hc-footer-col-title">{col.title}</p>
-                {col.links.map((l) => (
-                  <a key={l.label} href={l.href}>{l.label}</a>
-                ))}
-              </div>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+            <Link to="/creer-un-compte" className="inline-flex items-center justify-center gap-2 rounded-full bg-latte text-ink-fixed text-sm font-semibold px-7 py-3.5 hover:brightness-110 transition">
+              {c.ctaPrimary} <ArrowUpRight size={16} />
+            </Link>
+            <Link to="/#rejoindre" className="inline-flex items-center justify-center rounded-full border border-cream-fixed/30 text-cream-fixed text-sm font-medium px-7 py-3.5 hover:bg-cream-fixed/10 transition">
+              {c.ctaSecondary}
+            </Link>
           </div>
         </div>
 
-        <div className="hc-footer-bottom">
-          <span>
-            © {new Date().getFullYear()} H-Company. {t("footer.rights")}
-            {" · "}
-            <Link to="/confidentialite" className="hover:text-ink transition-colors">Confidentialité</Link>
-            {" · "}
-            <Link to="/conditions" className="hover:text-ink transition-colors">Conditions</Link>
-          </span>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LanguageToggle />
+        {/* Corps */}
+        <div className="grid gap-12 lg:gap-8 py-14 md:py-16 lg:grid-cols-[1.4fr_2.6fr]">
+          <div className="max-w-xs">
+            <Link to="/" className="inline-flex items-center gap-2.5" aria-label="H-Company">
+              <Logo size={30} />
+              <span className="font-display italic text-2xl">H-Company</span>
+            </Link>
+            <p className="mt-4 text-sm leading-relaxed text-cream-fixed/65">{c.tagline}</p>
+            <ul className="mt-6 space-y-2.5 text-sm text-cream-fixed/75">
+              <li><a href="mailto:contact@h-company.com" className="inline-flex items-center gap-2.5 hover:text-cream-fixed transition-colors"><Mail size={15} className="text-latte" /> contact@h-company.com</a></li>
+              <li><a href="https://wa.me/260770381780" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 hover:text-cream-fixed transition-colors"><MessageCircle size={15} className="text-latte" /> {c.whatsapp}</a></li>
+              <li className="inline-flex items-center gap-2.5"><MapPin size={15} className="text-latte" /> {c.location}</li>
+            </ul>
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {SOCIALS.map((s) => (
+                <li key={s.label}>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} title={s.label}
+                    className="w-10 h-10 rounded-full border border-cream-fixed/20 flex items-center justify-center font-display italic text-sm text-cream-fixed/80 hover:border-latte hover:text-latte transition-colors focus-visible:outline-2 focus-visible:outline-latte">
+                    {s.mark}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
-          <span>{t("footer.designedAs")}</span>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+            <Column title={c.services}>
+              <li><FootLink to="/h/transport-bus">{c.svc.bus}</FootLink></li>
+              <li><FootLink to="/h/transport-colis">{c.svc.parcel}</FootLink></li>
+              <li><FootLink to="/logement">{c.svc.lodge}</FootLink></li>
+              <li><FootLink to="/h/restaurant">{c.svc.food}</FootLink></li>
+              <li><FootLink to="/formations">{c.svc.learn}</FootLink></li>
+              <li><FootLink to="/shopping">{c.svc.shop}</FootLink></li>
+            </Column>
+            <Column title={c.network}>
+              <li><FootLink to="/#about">{c.net.about}</FootLink></li>
+              <li><FootLink to="/#explorer">{c.net.partners}</FootLink></li>
+              <li><FootLink to="/#rejoindre">{c.net.join}</FootLink></li>
+              <li><FootLink to="/interpretation">{c.net.interp}</FootLink></li>
+            </Column>
+            <Column title={c.account}>
+              <li><FootLink to="/connexion">{c.acc.signin}</FootLink></li>
+              <li><FootLink to="/creer-un-compte">{c.acc.signup}</FootLink></li>
+              <li><FootLink to="/dashboard">{c.acc.space}</FootLink></li>
+              <li><FootLink to="/logement/mes-sejours">{c.acc.trips}</FootLink></li>
+              <li><FootLink to="/shopping/mes-commandes">{c.acc.orders}</FootLink></li>
+              <li><FootLink to="/logement/hote">{c.acc.host}</FootLink></li>
+              <li><FootLink to="/shopping/vendre">{c.acc.sell}</FootLink></li>
+            </Column>
+            <Column title={c.help}>
+              <li><FootLink to="/shopping/suivi">{c.res.track}</FootLink></li>
+              <li><FootLink to="/formations#catalogue">{c.res.courses}</FootLink></li>
+              <li><FootLink to="/confidentialite">{c.res.privacy}</FootLink></li>
+              <li><FootLink to="/conditions">{c.res.terms}</FootLink></li>
+            </Column>
+          </div>
+        </div>
+
+        {/* Barre basse */}
+        <div className="border-t border-cream-fixed/15 py-7 flex flex-col md:flex-row md:items-center justify-between gap-5 text-xs text-cream-fixed/60">
+          <p>© {new Date().getFullYear()} H-Company. {c.rights} <span className="hidden sm:inline">· {c.madeIn}</span></p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Segmented label={c.theme}>
+              <SegBtn active={mode === "light"} onClick={() => setMode("light")} label={c.light}><Sun size={13} /></SegBtn>
+              <SegBtn active={mode === "dark"} onClick={() => setMode("dark")} label={c.dark}><Moon size={13} /></SegBtn>
+            </Segmented>
+            <Segmented label={c.language}>
+              <SegBtn active={lang === "fr"} onClick={() => switchLanguage("fr")} label="Français">FR</SegBtn>
+              <SegBtn active={lang === "en"} onClick={() => switchLanguage("en")} label="English">EN</SegBtn>
+            </Segmented>
+            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-1.5 rounded-full border border-cream-fixed/20 px-3.5 py-2 font-medium text-cream-fixed/75 hover:text-cream-fixed hover:border-cream-fixed/40 transition-colors">
+              <ArrowUp size={13} /> {c.top}
+            </button>
+          </div>
         </div>
       </div>
     </footer>
