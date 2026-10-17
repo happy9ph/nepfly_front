@@ -4,7 +4,7 @@ import { AlertCircle, BadgeCheck, Banknote, CalendarCheck, CalendarDays, Eye, Ho
 import LodgeLayout from "../../components/lodge/LodgeLayout.jsx";
 import LodgeAuthGate from "../../components/lodge/AuthGate.jsx";
 import { EmptyState, ErrorState, LodgeImage, LodgeStatusPill, Spinner, useLodgeUi } from "../../components/lodge/Shared.jsx";
-import { Card, Field, HostUploader, OPERATORS, inputCls, useHostUi } from "../../components/lodge/HostUi.jsx";
+import { Card, Field, HostUploader, OPERATORS, inputCls, useHostUi, validationMessage } from "../../components/lodge/HostUi.jsx";
 import { errMessage, useLoad, useShopMoney } from "../../data/shop.js";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
@@ -15,10 +15,13 @@ import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 
 const HostTabs = lazy(() => import("./HostTabs.jsx"));
 
+const PROFILE_LABELS = (t) => ({ display_name: t.name, bio: t.bio, phone: t.phone, whatsapp: t.whatsapp, languages: t.languages, mobile_money_phone: t.mmPhone, mobile_money_operator: t.operator });
+
 /* ---------- Création du profil hôte ---------- */
 function HostStart({ onCreated }) {
   const h = useHostUi();
   const t = h.start;
+  const { lang } = useLanguage();
   const { withAuth, user } = useUser();
   const toast = useToast();
   const [f, setF] = useState({ display_name: user?.full_name || user?.name || "", bio: "", phone: "", whatsapp: "", languages: "Français, English", avatar_path: null, mobile_money_operator: "", mobile_money_phone: "" });
@@ -32,7 +35,7 @@ function HostStart({ onCreated }) {
       const me = await withAuth((tk) => api.lodge.hosting.saveMe(tk, f));
       toast?.success?.(t.created);
       onCreated(me);
-    } catch (err) { setError(errMessage(err, h.common.error)); } finally { setBusy(false); }
+    } catch (err) { setError(validationMessage(err, PROFILE_LABELS(t), lang, errMessage(err, h.common.error))); } finally { setBusy(false); }
   }
   return (
     <LodgeLayout width="max-w-6xl">
@@ -203,6 +206,7 @@ function Properties() {
 function Profile({ host, onSaved }) {
   const h = useHostUi();
   const t = h.start;
+  const { lang } = useLanguage();
   const { withAuth } = useUser();
   const toast = useToast();
   const [f, setF] = useState({ display_name: host.display_name, bio: host.bio || "", phone: host.phone || "", whatsapp: host.whatsapp || "", languages: host.languages || "", avatar_path: host.avatar_path || null, mobile_money_operator: host.mobile_money_operator || "", mobile_money_phone: host.mobile_money_phone || "" });
@@ -212,7 +216,7 @@ function Profile({ host, onSaved }) {
   async function submit(e) {
     e.preventDefault();
     setBusy(true); setError("");
-    try { onSaved(await withAuth((tk) => api.lodge.hosting.saveMe(tk, f))); toast?.success?.(h.profile.saved); } catch (err) { setError(errMessage(err, h.common.error)); } finally { setBusy(false); }
+    try { onSaved(await withAuth((tk) => api.lodge.hosting.saveMe(tk, f))); toast?.success?.(h.profile.saved); } catch (err) { setError(validationMessage(err, PROFILE_LABELS(t), lang, errMessage(err, h.common.error))); } finally { setBusy(false); }
   }
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-5">

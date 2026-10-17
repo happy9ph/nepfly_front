@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Check, Circle, Star, Trash2 } from "lucide-react";
 import LodgeLayout from "../../components/lodge/LodgeLayout.jsx";
 import LodgeAuthGate from "../../components/lodge/AuthGate.jsx";
 import { AmenityIcon, ErrorState, LodgeImage, Spinner, useAmenities, useLodgeUi } from "../../components/lodge/Shared.jsx";
-import { Card, Field, HostUploader, inputCls, useHostUi } from "../../components/lodge/HostUi.jsx";
+import { Card, Field, HostUploader, inputCls, useHostUi, validationMessage } from "../../components/lodge/HostUi.jsx";
 import { errMessage } from "../../data/shop.js";
 import { useUser } from "../../context/Usercontext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api } from "../../lib/api.js";
 import { AMENITY_GROUPS } from "../../i18n/lodgeUi.js";
 import { STAY_TYPES } from "../../lib/lodge.js";
@@ -58,6 +59,9 @@ function Content() {
   const toast = useToast();
   const { token, withAuth } = useUser();
   const amen = useAmenities();
+  const { lang } = useLanguage();
+  const formRef = useRef(null);
+  const labels = { title: t.title, summary: t.summary, description: t.description, city: t.city, area: t.area, address: t.address, country: t.country, latitude: t.latitude, longitude: t.longitude, price_per_night: t.price, cleaning_fee: t.cleaning, weekly_discount: t.weekly, monthly_discount: t.monthly, max_guests: t.maxGuests, bedrooms: t.bedrooms, beds: t.beds, bathrooms: t.bathrooms, units: t.units, min_nights: t.minNights, max_nights: t.maxNights, check_in_from: t.checkIn, check_out_until: t.checkOut, house_rules: t.rulesLabel };
   usePageMeta({ title: isNew ? t.newTitle : t.editTitle });
   const [f, setF] = useState(EMPTY);
   const [loaded, setLoaded] = useState(isNew);
@@ -94,6 +98,7 @@ function Content() {
   const ready = checks.every(([, ok]) => ok);
 
   async function save(submit) {
+    if (formRef.current && !formRef.current.reportValidity()) { setError(t.fixErrors); return; }
     setBusy(true); setError("");
     try {
       const body = payload(f);
@@ -105,7 +110,7 @@ function Content() {
       toast?.success?.(submit ? t.submitted : t.saved);
       navigate(submit || isNew ? "/logement/hote?tab=properties" : `/logement/hote/logement/${saved.id}`, { replace: !isNew });
       if (!isNew && !submit) setStatus(saved.status);
-    } catch (e) { setError(errMessage(e, h.common.error)); window.scrollTo({ top: 0, behavior: "smooth" }); } finally { setBusy(false); }
+    } catch (e) { setError(validationMessage(e, labels, lang, errMessage(e, h.common.error))); window.scrollTo({ top: 0, behavior: "smooth" }); } finally { setBusy(false); }
   }
 
   if (loadErr) return <LodgeLayout width="max-w-2xl"><ErrorState message={t.loadError} /></LodgeLayout>;
@@ -116,7 +121,7 @@ function Content() {
       <Link to="/logement/hote?tab=properties" className="inline-flex items-center gap-2 text-sm text-coffee hover:underline"><ArrowLeft size={15} /> {t.back}</Link>
       <h1 className="font-display text-3xl sm:text-4xl text-ink mt-4 mb-8">{isNew ? t.newTitle : t.editTitle}</h1>
       {error && <p role="alert" className="mb-6 rounded-2xl bg-red-500/10 text-red-700 dark:text-red-300 text-sm px-4 py-3 flex gap-2"><AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}</p>}
-      <form onSubmit={(e) => { e.preventDefault(); save(false); }} className="space-y-6">
+      <form ref={formRef} noValidate={false} onSubmit={(e) => { e.preventDefault(); save(false); }} className="space-y-6">
         <Section n={1} title={t.sections.basics}>
           <Field label={t.title} hint={t.titleHint} htmlFor="e-title"><input id="e-title" required minLength={4} maxLength={120} className={inputCls} value={f.title} onChange={set("title")} /></Field>
           <Field label={t.type} htmlFor="e-type"><select id="e-type" className={inputCls} value={f.type} onChange={set("type")}>{STAY_TYPES.map((k) => <option key={k} value={k}>{ui.types[k]}</option>)}</select></Field>

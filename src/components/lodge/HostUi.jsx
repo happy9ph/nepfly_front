@@ -72,3 +72,24 @@ export function HostUploader({ onUploaded, label, multiple = false, busyLabel })
 }
 
 export const OPERATORS = [["zamtel_money", "Zamtel Money"], ["mtn_momo", "MTN MoMo"], ["airtel_money", "Airtel Money"]];
+
+/** Transforme une erreur 422 FastAPI en message lisible : « Titre : au moins 4 caractères ». */
+export function validationMessage(err, labels = {}, lang = "fr", fallback = "") {
+  const list = err?.data?.errors;
+  if (!Array.isArray(list) || !list.length) return err?.data?.detail && err.data.detail !== "Données invalides." ? String(err.data.detail) : fallback || err?.message || "";
+  const fr = lang !== "en";
+  const why = (x) => {
+    const c = x.ctx || {};
+    switch (x.type) {
+      case "string_too_short": return fr ? `au moins ${c.min_length} caractères` : `at least ${c.min_length} characters`;
+      case "string_too_long": return fr ? `${c.max_length} caractères maximum` : `at most ${c.max_length} characters`;
+      case "less_than_equal": return fr ? `maximum ${c.le}` : `maximum ${c.le}`;
+      case "less_than": return fr ? `doit être inférieur à ${c.lt}` : `must be less than ${c.lt}`;
+      case "greater_than_equal": return fr ? `minimum ${c.ge}` : `minimum ${c.ge}`;
+      case "greater_than": return fr ? `doit être supérieur à ${c.gt}` : `must be greater than ${c.gt}`;
+      case "missing": return fr ? "obligatoire" : "required";
+      default: return x.msg || (fr ? "valeur invalide" : "invalid value");
+    }
+  };
+  return list.map((x) => { const k = x.loc?.[x.loc.length - 1]; return `${labels[k] || k} : ${why(x)}`; }).join(" · ");
+}
