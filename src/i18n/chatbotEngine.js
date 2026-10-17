@@ -101,6 +101,9 @@ const L = {
   dashboard: { fr: "Mon espace", en: "My space", to: "/dashboard" },
   team: { fr: "Formation d'équipe", en: "Team training", to: "/formations/bouquets?plan=equipe#equipe" },
   interp: { fr: "Interprétation", en: "Interpretation", to: "/interpretation" },
+  lodge: { fr: "Trouver un logement", en: "Find a stay", to: "/logement" },
+  host: { fr: "Devenir hôte", en: "Become a host", to: "/logement/hote" },
+  trips: { fr: "Mes séjours", en: "My trips", to: "/logement/mes-sejours" },
   shop: { fr: "Ouvrir H-Shopping", en: "Open H-Shopping", to: "/shopping" },
   trackShop: { fr: "Suivre un colis", en: "Track a parcel", to: "/shopping/suivi" },
   seller: { fr: "Devenir vendeur", en: "Become a seller", to: "/shopping/vendre" },
@@ -301,6 +304,13 @@ const KB = [
     fr: "H-Shopping (H-Commerce) est ouvert : une marketplace où acheter auprès de boutiques vérifiées, payer par mobile money (Zamtel, MTN, Airtel) et récupérer son colis en agence ou à domicile. Votre argent est sécurisé jusqu'à la confirmation de réception. Côté vendeurs : créez votre boutique depuis la page « Vendre », elle est validée par notre équipe, puis ajoutez vos produits. Commission uniquement sur les ventes, sans frais fixes. Pour suivre un colis, utilisez « Suivre un colis » avec votre numéro de commande.",
     en: "H-Shopping (H-Commerce) is open: a marketplace to buy from verified shops, pay with mobile money (Zamtel, MTN, Airtel) and collect your parcel at an agency or at home. Your money is held securely until you confirm receipt. For sellers: create your shop from the “Sell” page, our team approves it, then add your products. Commission only on sales, no fixed fees. To track a parcel, use “Track a parcel” with your order number.",
     to: ["shop", "seller", "trackShop"],
+  },
+  {
+    id: "lodging_book",
+    kw: ["logement", "hebergement", "lodge", "appartement", "chambre", "reserver un logement", "louer", "airbnb", "maison d hotes", "accommodation", "lodging", "apartment", "guesthouse", "book a stay", "host my place", "devenir hote", "become a host"],
+    fr: "H-Logement est ouvert : parcourez les lodges, appartements et maisons d'hôtes, filtrez par ville, dates, prix et équipements, puis réservez. Le paiement mobile money est protégé jusqu'à votre arrivée ; l'adresse exacte et le contact de l'hôte apparaissent après confirmation. Chaque logement affiche sa politique d'annulation (flexible, modérée, stricte). Vous avez un logement ? Ouvrez l'espace hôte : annonce, calendrier, prix saisonniers et retraits mobile money, avec une commission uniquement sur les réservations.",
+    en: "H-Lodging is open: browse lodges, apartments and guesthouses, filter by city, dates, price and amenities, then book. Your mobile money payment is protected until you arrive; the exact address and host contact appear once confirmed. Each listing shows its cancellation policy (flexible, moderate, strict). Have a place? Open the host area: listing, calendar, seasonal prices and mobile money payouts, with commission only on bookings.",
+    to: ["lodge", "host", "trips"],
   },
   {
     id: "mobile_apps",

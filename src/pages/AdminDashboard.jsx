@@ -16,6 +16,7 @@ import ServiceCatalogPanel from "../components/admin/ServiceCatalogPanel.jsx";
 import CompanyTrainingPanel from "../components/admin/CompanyTrainingPanel.jsx";
 import LearningAdminPanel from "../components/admin/LearningAdminPanel.jsx";
 import ShoppingAdminPanel from "../components/admin/ShoppingAdminPanel.jsx";
+import LodgeAdminPanel from "../components/admin/LodgeAdminPanel.jsx";
 import AgentsPanel from "../components/admin/AgentsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
@@ -103,6 +104,7 @@ export default function AdminDashboard() {
   const [pendingTrainingCount, setPendingTrainingCount] = useState(0);
   const [pendingRegistrationsCount, setPendingRegistrationsCount] = useState(0);
   const [shoppingCount, setShoppingCount] = useState(0);
+  const [lodgingCount, setLodgingCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -180,6 +182,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isAdmin) return;
     withAuth((t) => api.shop.admin.overview(t)).then((o) => setShoppingCount(o.shops_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
+    withAuth((t) => api.lodge.admin.overview(t)).then((o) => setLodgingCount(o.properties_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
   }, [isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -335,6 +338,7 @@ export default function AdminDashboard() {
     { id: "go-apps", label: "Aller aux candidatures", icon: Users, run: () => { setView("applications"); closeDetail(); } },
     { id: "go-requests", label: "Aller à toutes les demandes", icon: ClipboardList, run: () => { setView("requests"); closeDetail(); } },
     { id: "go-shopping", label: "Aller à H-Shopping", icon: Users, run: () => { setView("shopping"); closeDetail(); } },
+    { id: "go-lodging", label: "Aller à H-Logement", icon: Users, run: () => { setView("lodging"); closeDetail(); } },
     { id: "go-agents", label: "Gérer les agents", icon: Users, run: () => { setView("agents"); closeDetail(); } },
     { id: "f-pending", label: "Filtrer : en attente", icon: Filter, run: () => { setView("applications"); setFilter("pending"); } },
     { id: "f-all", label: "Afficher toutes les candidatures", icon: Filter, run: () => { setView("applications"); setFilter("all"); } },
@@ -444,7 +448,7 @@ export default function AdminDashboard() {
         onSignOut={signOut}
         view={view}
         onViewChange={(v) => { setView(v); closeDetail(); }}
-        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount, shopping: shoppingCount }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount, shopping: shoppingCount, lodging: lodgingCount }}
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
@@ -518,6 +522,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <ShoppingAdminPanel withAuth={withAuth} api={api} onCount={setShoppingCount} />
+            </>
+          ) : view === "lodging" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> H-Logement</p>
+                <Title className="text-3xl">H-Logement</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Annonces à valider, réservations sous séquestre, litiges, hôtes vérifiés, retraits, avis et commissions.
+                </p>
+              </div>
+              <LodgeAdminPanel withAuth={withAuth} api={api} onCount={setLodgingCount} />
             </>
           ) : view === "trainingRequests" ? (
             <>

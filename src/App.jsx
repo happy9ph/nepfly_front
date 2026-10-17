@@ -47,6 +47,16 @@ const SellerStart = lazy(() => import("./pages/shop/SellerStart.jsx"));
 const SellerDashboard = lazy(() => import("./pages/shop/SellerDashboard.jsx"));
 const ProductEditor = lazy(() => import("./pages/shop/ProductEditor.jsx"));
 const AgencyDesk = lazy(() => import("./pages/shop/AgencyDesk.jsx"));
+const LodgeHome = lazy(() => import("./pages/lodge/LodgeHome.jsx"));
+const LodgeSearch = lazy(() => import("./pages/lodge/LodgeSearch.jsx"));
+const PropertyPage = lazy(() => import("./pages/lodge/PropertyPage.jsx"));
+const LodgeBook = lazy(() => import("./pages/lodge/LodgeBook.jsx"));
+const MyTrips = lazy(() => import("./pages/lodge/MyTrips.jsx"));
+const TripDetail = lazy(() => import("./pages/lodge/TripDetail.jsx"));
+const LodgeFavorites = lazy(() => import("./pages/lodge/LodgeFavorites.jsx"));
+const HostPublic = lazy(() => import("./pages/lodge/HostPublic.jsx"));
+const HostApp = lazy(() => import("./pages/lodge/HostApp.jsx"));
+const PropertyEditor = lazy(() => import("./pages/lodge/PropertyEditor.jsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.jsx"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
@@ -159,6 +169,16 @@ export default function App() {
           <Route path="/shopping/vendeur" element={<SellerDashboard />} />
           <Route path="/shopping/vendeur/produit/:id" element={<ProductEditor />} />
           <Route path="/shopping/agence" element={<AgencyDesk />} />
+          <Route path="/logement" element={<LodgeHome />} />
+          <Route path="/logement/recherche" element={<LodgeSearch />} />
+          <Route path="/logement/s/:slug" element={<PropertyPage />} />
+          <Route path="/logement/reserver/:slug" element={<LodgeBook />} />
+          <Route path="/logement/mes-sejours" element={<MyTrips />} />
+          <Route path="/logement/mes-sejours/:code" element={<TripDetail />} />
+          <Route path="/logement/favoris" element={<LodgeFavorites />} />
+          <Route path="/logement/hote-profil/:id" element={<HostPublic />} />
+          <Route path="/logement/hote" element={<HostApp />} />
+          <Route path="/logement/hote/logement/:id" element={<PropertyEditor />} />
           <Route path="/bienvenue" element={<Onboarding />} />
 
           {/* Pages légales */}
