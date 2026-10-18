@@ -8,6 +8,7 @@ import FAQ from "../../components/sections/FAQ.jsx";
 import BackLink from "../../components/ui/BackLink.jsx";
 import CourseCard from "../../components/learning/CourseCard.jsx";
 import CourseCover from "../../components/learning/CourseCover.jsx";
+import CertificateSection from "../../components/sections/CertificateSection.jsx";
 import { HowItWorks, InPersonBand, PlansTeaser, SectionHead, useLearningUi } from "../../components/learning/Shared.jsx";
 import { SkeletonCard } from "../../components/ui/Skeleton.jsx";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
@@ -115,6 +116,8 @@ export default function LearningHub() {
       </section>
 
       <HowItWorks />
+
+      <CertificateSection onGetStarted={() => document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" })} />
 
       <section id="catalogue" className="px-6 pb-20 max-w-content mx-auto scroll-mt-24">
         <SectionHead eyebrow={ui.catalog.eyebrow} title={ui.catalog.title} lead={ui.catalog.lead} />
