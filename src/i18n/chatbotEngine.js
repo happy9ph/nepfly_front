@@ -101,6 +101,9 @@ const L = {
   dashboard: { fr: "Mon espace", en: "My space", to: "/dashboard" },
   team: { fr: "Formation d'équipe", en: "Team training", to: "/formations/bouquets?plan=equipe#equipe" },
   interp: { fr: "Interprétation", en: "Interpretation", to: "/interpretation" },
+  bus: { fr: "Réserver un bus", en: "Book a bus", to: "/transport" },
+  tickets: { fr: "Mes billets", en: "My tickets", to: "/transport/mes-billets" },
+  busOperator: { fr: "Espace agence de bus", en: "Bus operator space", to: "/transport/agence" },
   lodge: { fr: "Trouver un logement", en: "Find a stay", to: "/logement" },
   host: { fr: "Devenir hôte", en: "Become a host", to: "/logement/hote" },
   trips: { fr: "Mes séjours", en: "My trips", to: "/logement/mes-sejours" },
@@ -304,6 +307,13 @@ const KB = [
     fr: "H-Shopping (H-Commerce) est ouvert : une marketplace où acheter auprès de boutiques vérifiées, payer par mobile money (Zamtel, MTN, Airtel) et récupérer son colis en agence ou à domicile. Votre argent est sécurisé jusqu'à la confirmation de réception. Côté vendeurs : créez votre boutique depuis la page « Vendre », elle est validée par notre équipe, puis ajoutez vos produits. Commission uniquement sur les ventes, sans frais fixes. Pour suivre un colis, utilisez « Suivre un colis » avec votre numéro de commande.",
     en: "H-Shopping (H-Commerce) is open: a marketplace to buy from verified shops, pay with mobile money (Zamtel, MTN, Airtel) and collect your parcel at an agency or at home. Your money is held securely until you confirm receipt. For sellers: create your shop from the “Sell” page, our team approves it, then add your products. Commission only on sales, no fixed fees. To track a parcel, use “Track a parcel” with your order number.",
     to: ["shop", "seller", "trackShop"],
+  },
+  {
+    id: "bus_book",
+    kw: ["bus", "billet de bus", "billet", "ticket", "voyage en bus", "reserver un bus", "reserver un billet", "book a bus", "bus ticket", "coach", "agence de bus", "bus operator", "siege", "seat", "h-transport"],
+    fr: "H-Transport (Bus) est ouvert : cherchez un départ par trajet et date, choisissez votre siège et payez en mobile money. Votre paiement est gardé en sécurité jusqu'au départ ; chaque passager reçoit un billet avec QR code, à présenter à l'embarquement. Annulation gratuite jusqu'à 48 h avant le départ. Vous dirigez une agence de bus ? Créez votre espace agence : après validation par H-Company, vous publiez vos départs.",
+    en: "H-Transport (Bus) is open: search a departure by route and date, pick your seat and pay with mobile money. Your payment is held securely until departure; each passenger gets a QR-code ticket to show when boarding. Free cancellation up to 48 hours before departure. Run a bus company? Create your operator space: once H-Company approves it, you publish your departures.",
+    to: ["bus", "tickets", "busOperator"],
   },
   {
     id: "lodging_book",

@@ -17,6 +17,7 @@ import CompanyTrainingPanel from "../components/admin/CompanyTrainingPanel.jsx";
 import LearningAdminPanel from "../components/admin/LearningAdminPanel.jsx";
 import ShoppingAdminPanel from "../components/admin/ShoppingAdminPanel.jsx";
 import LodgeAdminPanel from "../components/admin/LodgeAdminPanel.jsx";
+import TransportAdminPanel from "../components/admin/TransportAdminPanel.jsx";
 import AgentsPanel from "../components/admin/AgentsPanel.jsx";
 import CommandPalette from "../components/admin/CommandPalette.jsx";
 import { SkeletonTable, SkeletonCard } from "../components/ui/Skeleton.jsx";
@@ -105,6 +106,7 @@ export default function AdminDashboard() {
   const [pendingRegistrationsCount, setPendingRegistrationsCount] = useState(0);
   const [shoppingCount, setShoppingCount] = useState(0);
   const [lodgingCount, setLodgingCount] = useState(0);
+  const [transportCount, setTransportCount] = useState(0);
   const [todoOpen, setTodoOpen] = useState(true);
   const [todoHidden, setTodoHidden] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -183,6 +185,7 @@ export default function AdminDashboard() {
     if (!isAdmin) return;
     withAuth((t) => api.shop.admin.overview(t)).then((o) => setShoppingCount(o.shops_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
     withAuth((t) => api.lodge.admin.overview(t)).then((o) => setLodgingCount(o.properties_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
+    withAuth((t) => api.transport.admin.overview(t)).then((o) => setTransportCount(o.operators_pending + o.disputes_open + o.payouts_pending)).catch(() => {});
   }, [isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -338,6 +341,7 @@ export default function AdminDashboard() {
     { id: "go-apps", label: "Aller aux candidatures", icon: Users, run: () => { setView("applications"); closeDetail(); } },
     { id: "go-requests", label: "Aller à toutes les demandes", icon: ClipboardList, run: () => { setView("requests"); closeDetail(); } },
     { id: "go-shopping", label: "Aller à H-Shopping", icon: Users, run: () => { setView("shopping"); closeDetail(); } },
+    { id: "go-transport", label: "Aller à H-Transport", icon: Users, run: () => { setView("transport"); closeDetail(); } },
     { id: "go-lodging", label: "Aller à H-Logement", icon: Users, run: () => { setView("lodging"); closeDetail(); } },
     { id: "go-agents", label: "Gérer les agents", icon: Users, run: () => { setView("agents"); closeDetail(); } },
     { id: "f-pending", label: "Filtrer : en attente", icon: Filter, run: () => { setView("applications"); setFilter("pending"); } },
@@ -448,7 +452,7 @@ export default function AdminDashboard() {
         onSignOut={signOut}
         view={view}
         onViewChange={(v) => { setView(v); closeDetail(); }}
-        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount, shopping: shoppingCount, lodging: lodgingCount }}
+        counts={{ applications: stats.pending, requests: pendingAppsCount, serviceRequests: pendingServiceSubsCount, trainingRequests: pendingTrainingCount, learning: pendingRegistrationsCount, shopping: shoppingCount, lodging: lodgingCount, transport: transportCount }}
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
@@ -533,6 +537,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <LodgeAdminPanel withAuth={withAuth} api={api} onCount={setLodgingCount} />
+            </>
+          ) : view === "transport" ? (
+            <>
+              <div className="mb-8">
+                <p className="text-xs text-ink-faint mb-2">Espace admin <span className="mx-1">/</span> H-Transport</p>
+                <Title className="text-3xl">H-Transport</Title>
+                <p className="text-sm text-ink-soft mt-1">
+                  Agences à valider, départs, réservations sous séquestre, litiges, retraits, avis et commissions.
+                </p>
+              </div>
+              <TransportAdminPanel withAuth={withAuth} api={api} onCount={setTransportCount} />
             </>
           ) : view === "trainingRequests" ? (
             <>

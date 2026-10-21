@@ -47,6 +47,13 @@ const SellerStart = lazy(() => import("./pages/shop/SellerStart.jsx"));
 const SellerDashboard = lazy(() => import("./pages/shop/SellerDashboard.jsx"));
 const ProductEditor = lazy(() => import("./pages/shop/ProductEditor.jsx"));
 const AgencyDesk = lazy(() => import("./pages/shop/AgencyDesk.jsx"));
+const TransportHome = lazy(() => import("./pages/transport/TransportHome.jsx"));
+const TransportSearch = lazy(() => import("./pages/transport/TransportSearch.jsx"));
+const TripPage = lazy(() => import("./pages/transport/TripPage.jsx"));
+const TransportBook = lazy(() => import("./pages/transport/TransportBook.jsx"));
+const MyTickets = lazy(() => import("./pages/transport/MyTickets.jsx"));
+const TicketDetail = lazy(() => import("./pages/transport/TicketDetail.jsx"));
+const OperatorApp = lazy(() => import("./pages/transport/OperatorApp.jsx"));
 const LodgeHome = lazy(() => import("./pages/lodge/LodgeHome.jsx"));
 const LodgeSearch = lazy(() => import("./pages/lodge/LodgeSearch.jsx"));
 const PropertyPage = lazy(() => import("./pages/lodge/PropertyPage.jsx"));
@@ -169,6 +176,13 @@ export default function App() {
           <Route path="/shopping/vendeur" element={<SellerDashboard />} />
           <Route path="/shopping/vendeur/produit/:id" element={<ProductEditor />} />
           <Route path="/shopping/agence" element={<AgencyDesk />} />
+          <Route path="/transport" element={<TransportHome />} />
+          <Route path="/transport/recherche" element={<TransportSearch />} />
+          <Route path="/transport/trajet/:id" element={<TripPage />} />
+          <Route path="/transport/reserver/:id" element={<TransportBook />} />
+          <Route path="/transport/mes-billets" element={<MyTickets />} />
+          <Route path="/transport/mes-billets/:code" element={<TicketDetail />} />
+          <Route path="/transport/agence" element={<OperatorApp />} />
           <Route path="/logement" element={<LodgeHome />} />
           <Route path="/logement/recherche" element={<LodgeSearch />} />
           <Route path="/logement/s/:slug" element={<PropertyPage />} />
