@@ -20,7 +20,7 @@ export default function ServiceDetail() {
   const text = meta ? t(`services.${meta.key}t`) : null;
   usePageMeta(meta ? { title: name, description: text } : null);
 
-  if (!meta) return <Navigate to="/#services" replace />;
+  if (!meta) return <Navigate to="/#marketplace" replace />;
 
   const category = t(`services.categories.${meta.categoryKey}`);
   const unit = UNIT_LABEL[lang][meta.unitKey];
@@ -36,7 +36,7 @@ export default function ServiceDetail() {
       <DetailHero
         art={<TradeArt name={meta.categoryKey} className="w-full h-full" />}
         overlay="linear-gradient(0deg, rgba(30,26,23,0.92) 5%, rgba(30,26,23,0.55) 55%, rgba(30,26,23,0.15) 100%)"
-        backTo="/#services"
+        backTo="/#marketplace"
         backLabel={t("services.heading")}
         icon={Sparkles}
         badge={

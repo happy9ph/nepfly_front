@@ -6,7 +6,6 @@ import About from "../components/sections/About.jsx";
 import Marketplace from "../components/sections/Marketplace.jsx";
 import ExploreServices from "../components/sections/ExploreServices.jsx";
 import ConnectWithUs from "../components/sections/ConnectWithUs.jsx";
-import Services from "../components/sections/Services.jsx";
 import Interpretation from "../components/sections/Interpretation.jsx";
 import Learning from "../components/sections/Learning.jsx";
 import Impact from "../components/sections/Impact.jsx";
@@ -106,9 +105,6 @@ export default function Home() {
         </SectionReveal>
         <SectionReveal variant="center">
           <Marketplace />
-        </SectionReveal>
-        <SectionReveal variant="grid">
-          <Services />
         </SectionReveal>
         <SectionReveal variant="grid">
           <ExploreServices />
