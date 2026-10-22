@@ -87,9 +87,22 @@
 
 html {
   scroll-behavior: smooth;
+  /* Filet de sécurité mobile : aucun élément ne doit élargir la page. `clip`
+     (et non `hidden`) ne crée pas de conteneur de défilement, donc les
+     en-têtes `sticky` continuent de fonctionner. */
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* Un enfant de grille a `min-width: auto` : un contenu large (mot long, liste
+   de chiffres) élargit sa colonne au-delà de l'écran. On l'autorise à rétrécir. */
+[class*="grid-cols-"] > * {
+  min-width: 0;
 }
 
 body {
+  overflow-x: clip;
+  max-width: 100%;
   font-family: var(--font-sans);
   background-color: var(--color-cream);
   color: var(--color-ink);
