@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Reveal from "../ui/Reveal.jsx";
-import ServiceLogo from "../services/ServiceLogo.jsx";
 import ServiceRequestPanel from "../services/ServiceRequestPanel.jsx";
-import { HServiceArt, H_SERVICE_THEME } from "../art/ServiceArt.jsx";
 import { servicePath, SERVICE_PAGES } from "../../data/hServicePages.js";
 import { useServiceCatalog, resolveServices } from "../../hooks/useServiceCatalog.js";
 import { SERVICE_UI } from "../../i18n/servicePageUi.js";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 /**
- * "Explorez nos services" — une carte illustrée par service. Un clic ouvre la
+ * "Explorez nos services" — une grille sobre (sans logos ni illustrations). Un clic ouvre la
  * page dédiée du service (/h/:slug) : plus de pop-up. La liste s'affiche tout
  * de suite (ordre et états par défaut) puis s'ajuste quand le catalogue du
  * backend répond ; un service créé depuis l'admin et inconnu du site ouvre le
@@ -34,77 +32,70 @@ export default function ExploreServices() {
     };
   }
 
+  const copy = lang === "fr"
+    ? { open: "Découvrir", soon: "Bientôt disponible", partnerTitle: "Un seul partenariat, tous les modules.", partnerBody: "Une fois votre partenariat accepté, vous débloquez H-Logement, H-Transport, H-Shopping et H-Learning depuis un seul tableau de bord.", partnerCta: "Devenir partenaire" }
+    : { open: "Discover", soon: "Coming soon", partnerTitle: "One partnership, every module.", partnerBody: "Once your partnership is accepted, unlock H-Lodging, H-Transport, H-Shopping and H-Learning from a single dashboard.", partnerCta: "Become a partner" };
+
   return (
-    <section id="explorer" className="px-6 py-24 bg-cream">
+    <section id="explorer" className="px-5 sm:px-6 py-20 sm:py-28 bg-cream">
       <div className="max-w-content mx-auto">
         <Reveal>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-coffee mb-3">{t("exploreServices.eyebrow")}</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink mb-3">{t("exploreServices.heading")}</h2>
-          <p className="text-ink-soft max-w-xl mb-12 leading-relaxed">{t("exploreServices.lead")}</p>
+          <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-end mb-12 sm:mb-14">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-coffee mb-3">{t("exploreServices.eyebrow")}</p>
+              <h2 className="font-display text-3xl sm:text-5xl text-ink leading-[1.1] mb-4">{t("exploreServices.heading")}</h2>
+              <p className="text-ink-soft max-w-xl leading-relaxed">{t("exploreServices.lead")}</p>
+            </div>
+            <p className="hidden lg:block font-display text-6xl text-line tabular-nums leading-none" aria-hidden="true">
+              {String(list.length).padStart(2, "0")}
+            </p>
+          </div>
         </Reveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <ul className={`grid sm:grid-cols-2 ${list.length % 4 === 0 ? "lg:grid-cols-4" : "lg:grid-cols-3"} border-t border-l border-line rounded-2xl overflow-hidden bg-surface`}>
           {list.map((item, i) => {
             const { label, description } = labelsFor(item);
             const hasPage = Boolean(SERVICE_PAGES[item.key]);
-            const hasArt = Boolean(H_SERVICE_THEME[item.key]);
             const body = (
               <>
-                <div className="relative h-36 overflow-hidden bg-ink-fixed">
-                  {hasArt ? (
-                    <HServiceArt
-                      name={item.key}
-                      className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-cream-fixed/80">
-                      <Sparkles size={34} />
-                    </div>
-                  )}
-                  <span className="absolute top-3 left-3 w-10 h-10 rounded-xl bg-cream/90 backdrop-blur flex items-center justify-center text-coffee-dark overflow-hidden">
-                    <ServiceLogo logoUrl={item.logo_url} serviceKey={item.key} size={19} />
-                  </span>
-                  <span
-                    className={`absolute top-3 right-3 text-[0.62rem] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                      item.disabled ? "bg-ink-fixed/70 text-cream-fixed" : "bg-[#E4B968] text-ink-fixed"
-                    }`}
-                  >
-                    {item.disabled ? ui.soon : ui.available}
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-xs font-semibold tabular-nums tracking-widest text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
+                  <span className={`text-[0.65rem] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${item.disabled ? "bg-latte-soft text-ink-soft" : "bg-coffee/10 text-coffee-dark"}`}>
+                    {item.disabled ? copy.soon : ui.available}
                   </span>
                 </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between gap-3 mb-1.5">
-                    <p className="font-display text-xl text-ink leading-tight">{label}</p>
-                    <ArrowUpRight
-                      size={18}
-                      className="text-ink-faint shrink-0 mt-1 transition-all group-hover:text-coffee-dark group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                    />
-                  </div>
-                  <p className="text-sm text-ink-soft leading-snug">{description}</p>
-                </div>
+                <p className="font-display text-2xl text-ink leading-tight mb-2">{label}</p>
+                <p className="text-sm text-ink-soft leading-relaxed flex-1">{description}</p>
+                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-ink group-hover:text-coffee-dark">
+                  {copy.open}
+                  <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
               </>
             );
-            const cls =
-              "group flex flex-col h-full overflow-hidden rounded-2xl border border-line bg-surface text-left transition-all hover:border-coffee-light hover:-translate-y-1 hover:shadow-lg";
+            const cls = "group flex flex-col h-full min-h-[15rem] p-6 sm:p-7 text-left transition-colors hover:bg-latte-soft/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coffee";
             return (
-              <Reveal key={item.key} delay={Math.min(i, 5) * 0.05}>
-                {hasPage ? (
-                  <Link to={servicePath(item.key)} className={cls} aria-label={label}>
-                    {body}
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setPanel({ key: item.key, name: label, description, soon: item.disabled })}
-                    className={cls}
-                  >
-                    {body}
-                  </button>
-                )}
-              </Reveal>
+              <li key={item.key} className="border-r border-b border-line">
+                <Reveal delay={Math.min(i, 5) * 0.04} className="h-full">
+                  {hasPage ? (
+                    <Link to={servicePath(item.key)} className={cls} aria-label={label}>{body}</Link>
+                  ) : (
+                    <button type="button" onClick={() => setPanel({ key: item.key, name: label, description, soon: item.disabled })} className={`${cls} w-full`}>{body}</button>
+                  )}
+                </Reveal>
+              </li>
             );
           })}
-        </div>
+        </ul>
+
+        <Reveal>
+          <div className="mt-8 rounded-2xl bg-ink-fixed text-cream-fixed p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="max-w-2xl">
+              <p className="font-display text-xl sm:text-2xl mb-1.5">{copy.partnerTitle}</p>
+              <p className="text-sm text-cream-fixed/70 leading-relaxed">{copy.partnerBody}</p>
+            </div>
+            <a href="/#rejoindre" className="shrink-0 text-center rounded-full bg-cream-fixed text-ink-fixed text-sm font-medium px-7 py-3.5 hover:opacity-90">{copy.partnerCta}</a>
+          </div>
+        </Reveal>
       </div>
 
       <ServiceRequestPanel

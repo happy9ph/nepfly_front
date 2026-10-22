@@ -10,7 +10,8 @@ const NAV_ITEMS = [
   { key: "activity", label: "Activité", icon: Activity },
 ];
 
-export default function DashboardSidebar({ active, onSelect, user, onSignOut }) {
+export default function DashboardSidebar({ active, onSelect, user, onSignOut, items }) {
+  const nav = items || NAV_ITEMS;
   const displayName = user?.full_name || user?.email || "";
   const initial = displayName ? displayName[0].toUpperCase() : "";
   const location = useLocation();
@@ -23,8 +24,8 @@ export default function DashboardSidebar({ active, onSelect, user, onSignOut }) 
         <p className="text-xs text-ink-soft mt-1">Espace partenaire</p>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.map(({ key, label, icon: Icon }) =>
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {nav.map(({ key, label, icon: Icon }) =>
           onDashboard ? (
             <button
               key={key}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { LayoutGrid, FileText, Activity, Tag, Boxes, Compass } from "lucide-react";
+import { LayoutGrid, FileText, Activity, Tag, Boxes, Compass, Blocks, QrCode as QrIcon } from "lucide-react";
 import { useUser } from "../context/Usercontext.jsx";
 import { api } from "../lib/api.js";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar.jsx";
@@ -10,6 +10,9 @@ import AppsTab from "../components/dashboard/AppsTab.jsx";
 import MyServicesPanel from "../components/dashboard/MyServicesPanel.jsx";
 import ContractTab from "../components/dashboard/ContractTab.jsx";
 import ActivityTab from "../components/dashboard/ActivityTab.jsx";
+import ShareTab from "../components/dashboard/ShareTab.jsx";
+import { ModulesTab, ModuleWorkspace, useModules } from "../components/dashboard/ModulesTab.jsx";
+import { MODULES, moduleByKey } from "../components/dashboard/modules.js";
 import { Skeleton, SkeletonCard, SkeletonStatRow } from "../components/ui/Skeleton.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -20,13 +23,15 @@ const STATUS_LABELS = {
   rejected: { label: "Non retenu", tone: "rejected" },
 };
 
-const MOBILE_TABS = [
+const BASE_TABS = [
   { key: "overview", label: "Vue d'ensemble", icon: LayoutGrid },
+  { key: "modules", label: "Modules", icon: Blocks },
   { key: "apps", label: "Mes apps", icon: Boxes },
   { key: "services", label: "Mes services", icon: Compass },
   { key: "offers", label: "Offres", icon: Tag },
   { key: "contract", label: "Contrat", icon: FileText },
   { key: "activity", label: "Activité", icon: Activity },
+  { key: "share", label: "Carte QR", icon: QrIcon },
 ];
 
 function StatusBadge({ status }) {
@@ -59,6 +64,7 @@ export default function PartnerDashboard() {
   const [loadError, setLoadError] = useState(null);
   const [pageStatus, setPageStatus] = useState("loading"); // loading | ready | error
   const [activeTab, setActiveTab] = useState("overview");
+  const modules = useModules();
   const toast = useToast();
 
   const load = useCallback(async () => {
@@ -267,9 +273,16 @@ export default function PartnerDashboard() {
     );
   }
 
+  const activeModules = (modules.state?.modules || []).filter((m) => m.active);
+  const MOBILE_TABS = [
+    ...BASE_TABS.slice(0, 2),
+    ...activeModules.map((m) => ({ key: `m:${m.key}`, label: moduleByKey(m.key).fr.short, icon: moduleByKey(m.key).icon })),
+    ...BASE_TABS.slice(2),
+  ];
+
   return (
     <div className="min-h-screen bg-cream md:flex">
-      <DashboardSidebar active={activeTab} onSelect={setActiveTab} user={user} onSignOut={signOut} />
+      <DashboardSidebar active={activeTab} onSelect={setActiveTab} user={user} onSignOut={signOut} items={MOBILE_TABS} />
 
       <div className="flex-1 min-w-0">
         {/* Barre mobile : la sidebar est cachée sous md, on remplace par des onglets horizontaux */}
@@ -308,6 +321,9 @@ export default function PartnerDashboard() {
           {activeTab === "overview" && (
             <OverviewTab application={application} stats={stats} activities={activities} />
           )}
+          {activeTab === "modules" && <ModulesTab state={modules.state} setState={modules.setState} onOpen={(k) => { setActiveTab(`m:${k}`); window.scrollTo({ top: 0 }); }} />}
+          {activeTab.startsWith("m:") && moduleByKey(activeTab.slice(2)) && <ModuleWorkspace moduleKey={activeTab.slice(2)} state={modules.state} />}
+          {activeTab === "share" && <ShareTab application={application} user={user} />}
           {activeTab === "apps" && <AppsTab apps={apps} billing={billing} onRequestApp={handleRequestApp} />}
           {activeTab === "services" && <MyServicesPanel summary={services} catalog={serviceCatalog} />}
           {activeTab === "offers" && <OffersTab offers={offers} onAccept={handleAcceptOffer} />}

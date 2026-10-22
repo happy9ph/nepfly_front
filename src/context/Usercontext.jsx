@@ -67,6 +67,11 @@ export function UserProvider({ children }) {
     return applyAuthResponse(data);
   }
 
+  // Session ouverte par QR : jeton d'accès seul (8 h), pas de jeton de rafraîchissement.
+  function adoptSession(data) {
+    return applyAuthResponse(data);
+  }
+
   async function signOut() {
     try {
       await api.auth.logout();
@@ -104,6 +109,7 @@ export function UserProvider({ children }) {
     signInWithOtp,
     resetPassword,
     completeOAuth,
+    adoptSession,
     signOut,
     withAuth,
   };

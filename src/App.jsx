@@ -64,6 +64,8 @@ const LodgeFavorites = lazy(() => import("./pages/lodge/LodgeFavorites.jsx"));
 const HostPublic = lazy(() => import("./pages/lodge/HostPublic.jsx"));
 const HostApp = lazy(() => import("./pages/lodge/HostApp.jsx"));
 const PropertyEditor = lazy(() => import("./pages/lodge/PropertyEditor.jsx"));
+const QrLogin = lazy(() => import("./pages/qr/QrLogin.jsx"));
+const QrScan = lazy(() => import("./pages/qr/QrScan.jsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.jsx"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
@@ -153,6 +155,9 @@ export default function App() {
 
           {/* Authentification : pages dédiées, plus de modals */}
           <Route path="/connexion" element={<SignIn />} />
+          <Route path="/connexion-qr" element={<QrLogin />} />
+          <Route path="/scanner" element={<QrScan />} />
+          <Route path="/qr/:code" element={<QrScan />} />
           <Route path="/creer-un-compte" element={<Register />} />
           <Route path="/verifier" element={<VerifyOtp />} />
           <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />

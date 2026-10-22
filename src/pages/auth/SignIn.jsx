@@ -12,7 +12,7 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api, ApiError } from "../../lib/api.js";
 
 export default function SignIn() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { signIn } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -157,7 +157,10 @@ export default function SignIn() {
                     className="w-full border border-line rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-coffee-light transition-colors"
                   />
                 </div>
-                <div className="flex justify-end -mt-2">
+                <div className="flex justify-between items-center -mt-2">
+                  <Link to="/connexion-qr" className="text-xs text-coffee-dark hover:text-ink transition-colors underline underline-offset-4">
+                    {lang === "fr" ? "Connexion par QR code" : "Sign in with QR code"}
+                  </Link>
                   <Link to="/mot-de-passe-oublie" className="text-xs text-ink-soft hover:text-ink transition-colors">
                     {t("auth.forgotPassword")}
                   </Link>

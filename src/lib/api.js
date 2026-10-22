@@ -423,6 +423,21 @@ export const api = {
     },
   },
 
+  // Centralisation : modules débloqués depuis le dashboard partenaire
+  partnerModules: {
+    list: (token) => request("/api/v1/partner/modules", { token }),
+    activate: (token, key) => request(`/api/v1/partner/modules/${key}/activate`, { method: "POST", token }),
+    deactivate: (token, key) => request(`/api/v1/partner/modules/${key}/deactivate`, { method: "POST", token }),
+  },
+
+  // Connexion par QR code (façon WhatsApp Web)
+  qr: {
+    start: (deviceLabel) => request("/api/v1/qr/sessions", { method: "POST", body: { device_label: deviceLabel || "" } }),
+    poll: (code, secret) => request(`/api/v1/qr/sessions/${encodeURIComponent(code)}/poll`, { method: "POST", body: { secret } }),
+    info: (token, code) => request(`/api/v1/qr/sessions/${encodeURIComponent(code)}`, { token }),
+    approve: (token, code) => request(`/api/v1/qr/sessions/${encodeURIComponent(code)}/approve`, { method: "POST", token }),
+  },
+
   // Plateforme e-learning H-learning
   learning: {
     courses: () => request("/api/v1/learning/courses"),
