@@ -20,6 +20,9 @@ describe("transport helpers", () => {
   it("dessine le plan du bus", () => {
     expect(seatRows(8)).toEqual([[1, 2, null, 3, 4], [5, 6, null, 7, 8]]);
     expect(seatRows(6)[1]).toEqual([5, 6, null, "gap", "gap"]);
+    expect(seatRows(7, "2+1")).toEqual([[1, 2, null, 3], [4, 5, null, 6], [7, "gap", null, "gap"]]);
+    expect(seatRows(3, "1+1")).toEqual([[1, null, 2], [3, null, "gap"]]);
+    expect(seatRows(4, "inconnu")).toEqual([[1, 2, null, 3, 4]]);
   });
   it("gère la sélection de sièges", () => {
     expect(toggleSeat([2], 5, 2)).toEqual([2, 5]);

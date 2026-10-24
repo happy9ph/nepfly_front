@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, CheckCircle2, Copy, Plus, XCircle } from "lucide-react";
 import { AmenityChip, BusyButton, Card, EmptyState, ErrorState, Field, Modal, Rating, Spinner, StatusPill, inputCls, useTransportMeta, useTransportUi } from "./Shared.jsx";
+import OperatorFleet from "./OperatorFleet.jsx";
+import OperatorCargo from "./OperatorCargo.jsx";
 import { ProfileForm } from "../../pages/transport/OperatorApp.jsx";
 import { validationMessage } from "../lodge/HostUi.jsx";
 import { errMessage, useLoad, useShopMoney } from "../../data/shop.js";
@@ -10,7 +12,7 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api } from "../../lib/api.js";
 import { BUS_TYPES, addDays, fmtDateTime, fmtTime, fmtDay, fromLocalInput, nextDays, toLocalInput, todayISO } from "../../lib/transport.js";
 
-const TABS = ["overview", "trips", "boarding", "bookings", "earnings", "reviews", "profile"];
+const TABS = ["overview", "trips", "fleet", "cargo", "boarding", "bookings", "earnings", "reviews", "profile"];
 
 function useOp() {
   const { withAuth } = useUser();
@@ -55,7 +57,7 @@ function Overview({ goto, openNew }) {
 
 const emptyTrip = () => ({
   origin: "", destination: "", origin_stop: "", destination_stop: "", stops: "", departure_at: toLocalInput(`${addDays(todayISO(), 1)}T07:00`), arrival_at: toLocalInput(`${addDays(todayISO(), 1)}T14:00`),
-  price: "", seats_total: 50, bus_type: "standard", amenities: [], luggage_note: "", notes: "", border_crossing: false,
+  price: "", bus_id: "", seats_total: 50, bus_type: "standard", amenities: [], luggage_note: "", notes: "", border_crossing: false,
 });
 
 function TripEditor({ trip, onClose, onSaved }) {
@@ -64,9 +66,13 @@ function TripEditor({ trip, onClose, onSaved }) {
   const { lang } = useLanguage();
   const { cities, amenities } = useTransportMeta();
   const { run } = useOp();
-  const [f, setF] = useState(() => (trip ? { ...trip, stops: (trip.stops || []).join(", "), departure_at: toLocalInput(trip.departure_at), arrival_at: toLocalInput(trip.arrival_at) } : emptyTrip()));
+  const [f, setF] = useState(() => (trip ? { ...trip, bus_id: trip.bus?.id || "", stops: (trip.stops || []).join(", "), departure_at: toLocalInput(trip.departure_at), arrival_at: toLocalInput(trip.arrival_at) } : emptyTrip()));
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const { withAuth: wa } = useUser();
+  const [buses, setBuses] = useState([]);
+  useEffect(() => { wa((tk) => api.transport.operator.buses(tk)).then((b) => setBuses((b || []).filter((x) => x.is_active))).catch(() => {}); }, [wa]);
+  const bus = buses.find((b) => String(b.id) === String(f.bus_id));
   const locked = trip && trip.booked_seats > 0;
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
   const toggleAm = (k) => setF((s) => ({ ...s, amenities: s.amenities.includes(k) ? s.amenities.filter((x) => x !== k) : [...s.amenities, k] }));
@@ -78,7 +84,7 @@ function TripEditor({ trip, onClose, onSaved }) {
     if (!f.price) return setErr(t.errPrice);
     if (f.arrival_at <= f.departure_at) return setErr(t.errTimes);
     const body = {
-      ...f, price: Number(f.price), seats_total: Number(f.seats_total), departure_at: fromLocalInput(f.departure_at), arrival_at: fromLocalInput(f.arrival_at),
+      ...f, bus_id: f.bus_id ? Number(f.bus_id) : null, price: Number(f.price), seats_total: Number(f.seats_total), departure_at: fromLocalInput(f.departure_at), arrival_at: fromLocalInput(f.arrival_at),
       stops: String(f.stops).split(",").map((s) => s.trim()).filter(Boolean),
     };
     setBusy(true);
@@ -102,8 +108,14 @@ function TripEditor({ trip, onClose, onSaved }) {
           <Field label={t.departure}><input required type="datetime-local" disabled={locked} className={inputCls} value={f.departure_at} onChange={set("departure_at")} /></Field>
           <Field label={t.arrival}><input required type="datetime-local" disabled={locked} className={inputCls} value={f.arrival_at} onChange={set("arrival_at")} /></Field>
           <Field label={t.price}><input required type="number" min="1" step="any" disabled={locked} className={inputCls} value={f.price} onChange={set("price")} /></Field>
-          <Field label={t.seats}><input required type="number" min={trip?.seats_total || 1} max="80" className={inputCls} value={f.seats_total} onChange={set("seats_total")} /></Field>
-          <Field label={t.busType}><select className={inputCls} value={f.bus_type} onChange={set("bus_type")}>{BUS_TYPES.map((b) => <option key={b} value={b}>{ui.bus[b]}</option>)}</select></Field>
+          <Field label={lang === "en" ? "Bus (from your fleet)" : "Bus (de votre flotte)"} hint={bus ? `${bus.layout} · ${bus.seats_total} ${lang === "en" ? "seats" : "sièges"}` : (lang === "en" ? "Pick a bus to use its real seat plan" : "Choisissez un bus pour utiliser son vrai plan de sièges")} className="sm:col-span-2">
+            <select disabled={locked} className={inputCls} value={f.bus_id || ""} onChange={(e) => { const b = buses.find((x) => String(x.id) === e.target.value); setF((s) => ({ ...s, bus_id: e.target.value, ...(b ? { seats_total: b.seats_total, bus_type: b.bus_type, amenities: b.amenities } : {}) })); }}>
+              <option value="">{lang === "en" ? "No bus (manual seats)" : "Sans bus (sièges manuels)"}</option>
+              {buses.map((b) => <option key={b.id} value={b.id}>{b.name} · {b.plate}</option>)}
+            </select>
+          </Field>
+          <Field label={t.seats}><input required disabled={!!bus} type="number" min={trip?.seats_total || 1} max="80" className={inputCls} value={f.seats_total} onChange={set("seats_total")} /></Field>
+          <Field label={t.busType}><select disabled={!!bus} className={inputCls} value={f.bus_type} onChange={set("bus_type")}>{BUS_TYPES.map((b) => <option key={b} value={b}>{ui.bus[b]}</option>)}</select></Field>
           <Field label={t.luggage} hint={t.luggageHint}><input className={inputCls} value={f.luggage_note} maxLength={300} onChange={set("luggage_note")} /></Field>
         </div>
         <fieldset><legend className="text-sm font-medium text-ink mb-2">{t.amenities}</legend>
@@ -413,6 +425,8 @@ export default function OperatorTabs({ operator, reloadOperator }) {
       </div>
       {tab === "overview" && <Overview goto={goto} openNew={() => { setNewTrip(true); setTab("trips"); }} />}
       {tab === "trips" && <Trips editNew={newTrip} clearNew={clearNew} goto={goto} />}
+      {tab === "fleet" && <OperatorFleet />}
+      {tab === "cargo" && <OperatorCargo />}
       {tab === "boarding" && <Boarding key={boardTrip} initialTrip={boardTrip} />}
       {tab === "bookings" && <Bookings />}
       {tab === "earnings" && <Earnings operator={operator} />}

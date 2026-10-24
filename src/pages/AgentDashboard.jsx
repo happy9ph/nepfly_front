@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useUser } from "../context/Usercontext.jsx";
 import { api } from "../lib/api.js";
+import AgentWorkspace, { useHeartbeat } from "../components/agents/AgentWorkspace.jsx";
 
 const GOLD = "var(--color-latte)";
 
@@ -214,7 +215,10 @@ export default function AgentDashboard() {
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
 
+  const [section, setSection] = useState("kyc");
   const isAgent = !isLoading && isAuthenticated && (user?.role === "agent" || user?.role === "admin");
+
+  useHeartbeat(!isLoading && isAuthenticated && (user?.role === "agent" || user?.role === "admin"));
 
   const load = useCallback(async () => {
     try {
@@ -288,6 +292,13 @@ export default function AgentDashboard() {
       </header>
 
       <main className="px-4 sm:px-6 lg:px-12 py-10 max-w-[1100px] mx-auto">
+        <nav className="flex flex-wrap gap-2 mb-8" aria-label="Sections">
+          {[["kyc", "Candidatures"], ["stats", "Mes modules"], ["messages", "Messages"]].map(([k, l]) => (
+            <button key={k} onClick={() => setSection(k)} aria-pressed={section === k} className={`text-sm font-medium rounded-full px-4 py-2 ${section === k ? "bg-coffee text-white" : "border border-line text-ink-soft"}`}>{l}</button>
+          ))}
+        </nav>
+        {section !== "kyc" && <AgentWorkspace section={section} />}
+        <div hidden={section !== "kyc"}>
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 md:gap-4 mb-8 max-w-md">
           <div className="bg-surface border border-line rounded-2xl p-5 flex items-center gap-3">
             <span className="w-10 h-10 rounded-xl bg-latte-soft text-coffee-dark flex items-center justify-center shrink-0"><Clock size={17} /></span>
@@ -327,6 +338,7 @@ export default function AgentDashboard() {
             ))}
           </div>
         )}
+        </div>
       </main>
 
       {selected && (

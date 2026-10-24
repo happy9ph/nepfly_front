@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight, ArrowRight, Armchair, BadgeCheck, Bus, Droplets, Loader2, Lock, Luggage, Plug, Search, Snowflake, Star, Ticket, Toilet, Tv, Wifi, Coffee,
-  Briefcase, MoveRight, Check,
+  Briefcase, MoveRight, Check, Package,
 } from "lucide-react";
 import QRCode from "qrcode";
 import NavBar from "../layout/NavBar.jsx";
@@ -131,6 +131,7 @@ export default function TransportLayout({ children, width = "max-w-content", hid
               <nav className="flex items-center gap-0.5" aria-label="H-Transport">
                 <BarLink to="/transport/recherche" icon={Search} label={ui.search} />
                 <BarLink to="/transport/mes-billets" icon={Ticket} label={ui.tickets} />
+                <BarLink to="/transport/colis" icon={Package} label={ui.cargo || "Colis"} />
                 <BarLink to="/transport/agence" icon={Bus} label={ui.operator} />
               </nav>
             </div>
@@ -251,9 +252,9 @@ export function TripCard({ trip, query = "", money, index = 0 }) {
 
 // --- Plan du bus ---------------------------------------------------------------------
 
-export function SeatMap({ total, taken = [], selected = [], onToggle, readOnly = false }) {
+export function SeatMap({ total, taken = [], selected = [], onToggle, readOnly = false, layout = "2+2" }) {
   const ui = useTransportUi().trip;
-  const rows = useMemo(() => seatRows(total), [total]);
+  const rows = useMemo(() => seatRows(total, layout), [total, layout]);
   const takenSet = new Set(taken);
   return (
     <div>
@@ -266,7 +267,7 @@ export function SeatMap({ total, taken = [], selected = [], onToggle, readOnly =
         <p className="text-center text-[11px] text-ink-faint mb-3 border-b border-dashed border-line pb-2">{ui.front}</p>
         <div className="space-y-2">
           {rows.map((row, i) => (
-            <div key={i} className="grid grid-cols-[1fr_1fr_20px_1fr_1fr] gap-2">
+            <div key={i} className="grid gap-2" style={{ gridTemplateColumns: row.map((c) => (c === null ? "20px" : "1fr")).join(" ") }}>
               {row.map((s, j) => {
                 if (s === null) return <span key={j} />;
                 if (s === "gap") return <span key={j} />;

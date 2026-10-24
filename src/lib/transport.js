@@ -53,12 +53,17 @@ export function fromLocalInput(v) {
   return v ? (v.length === 16 ? `${v}:00` : v) : "";
 }
 
-/** Plan du bus : rangées de 4 sièges (2 + couloir + 2). `null` = couloir. */
-export function seatRows(total) {
+export const BUS_LAYOUTS = { "2+2": [2, 2], "2+1": [2, 1], "1+1": [1, 1] };
+
+/** Plan du bus : une rangée = sièges de gauche, `null` (couloir), sièges de droite.
+ *  Les places absentes de la dernière rangée sont "gap". Disposition par défaut 2+2. */
+export function seatRows(total, layout = "2+2") {
+  const [l, r] = BUS_LAYOUTS[layout] || BUS_LAYOUTS["2+2"];
+  const per = l + r;
   const rows = [];
-  for (let n = 1; n <= total; n += 4) {
-    const r = [n, n + 1 <= total ? n + 1 : undefined, null, n + 2 <= total ? n + 2 : undefined, n + 3 <= total ? n + 3 : undefined];
-    rows.push(r.map((x) => (x === undefined ? "gap" : x)));
+  for (let n = 1; n <= total; n += per) {
+    const cell = (k) => (n + k <= total ? n + k : "gap");
+    rows.push([...Array.from({ length: l }, (_, i) => cell(i)), null, ...Array.from({ length: r }, (_, i) => cell(l + i))]);
   }
   return rows;
 }

@@ -6,6 +6,7 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useUser } from "../../context/Usercontext.jsx";
 import { CHATBOT } from "../../i18n/chatbot.js";
 import { answer } from "../../i18n/chatbotEngine.js";
+import SupportChat from "../support/SupportChat.jsx";
 
 let msgId = 0;
 const nextId = () => ++msgId;
@@ -16,6 +17,7 @@ export default function Chatbot() {
   const dict = CHATBOT[lang] || CHATBOT.fr;
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [view, setView] = useState("bot");
   const [messages, setMessages] = useState(() => [{ id: nextId(), from: "bot", text: dict.greeting }]);
   const [typing, setTyping] = useState(false);
   const [input, setInput] = useState("");
@@ -168,6 +170,12 @@ export default function Chatbot() {
                       </button>
                     ))}
                     <button
+                      onClick={() => { setView("agent"); setMenuOpen(false); }}
+                      className="w-full text-left text-sm text-coffee-dark font-medium px-4 py-2.5 hover:bg-cream transition-colors border-t border-line"
+                    >
+                      {lang === "fr" ? "Parler à un agent" : "Talk to an agent"}
+                    </button>
+                    <button
                       onClick={restart}
                       className="w-full text-left text-sm text-ink-faint px-4 py-2.5 hover:bg-cream transition-colors border-t border-line"
                     >
@@ -178,7 +186,8 @@ export default function Chatbot() {
               </AnimatePresence>
             </div>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-cream/40" aria-live="polite">
+            {view === "agent" && <SupportChat onBack={() => setView("bot")} onNavigate={() => setOpen(false)} />}
+            <div ref={scrollRef} hidden={view === "agent"} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-cream/40" aria-live="polite">
               {isAuthenticated && user && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
@@ -279,7 +288,7 @@ export default function Chatbot() {
               )}
             </div>
 
-            <form onSubmit={handleSend} className="border-t border-line p-3 flex items-center gap-2 shrink-0">
+            <form onSubmit={handleSend} hidden={view === "agent"} className="border-t border-line p-3 flex items-center gap-2 shrink-0">
               <input
                 ref={inputRef}
                 value={input}
@@ -298,7 +307,7 @@ export default function Chatbot() {
                 <Send size={15} />
               </button>
             </form>
-            <p className="flex items-center justify-center gap-1 text-[10px] text-ink-faint pb-2 -mt-1">
+            <p hidden={view === "agent"} className="flex items-center justify-center gap-1 text-[10px] text-ink-faint pb-2 -mt-1">
               <Sparkles size={10} />
               {lang === "fr" ? "Assistante automatique H-Company, sans IA externe." : "Automated H-Company assistant, no external AI."}
             </p>

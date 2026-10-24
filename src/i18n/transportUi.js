@@ -7,7 +7,7 @@ const fr = {
     reviews: (n) => `${n} avis`, newOperator: "Nouvelle agence", verified: "Agence vérifiée", border: "Frontière",
     testMode: "Mode test : aucun argent réel n'est prélevé tant que le paiement mobile money n'est pas activé.", err: "Une erreur est survenue.",
   },
-  bar: { search: "Rechercher", tickets: "Mes billets", operator: "Espace agence" },
+  bar: { cargo: "Colis", search: "Rechercher", tickets: "Mes billets", operator: "Espace agence" },
   bus: { standard: "Standard", vip: "VIP / Luxe", minibus: "Minibus", coaster: "Coaster" },
   status: {
     pending_payment: "Paiement en cours", confirmed: "Billet confirmé", boarded: "Embarqué", completed: "Voyage terminé", expired: "Expirée",
@@ -68,7 +68,7 @@ const fr = {
   },
   op: {
     title: "Espace agence", lead: "Publiez vos départs, scannez les billets, suivez vos ventes et vos paiements.", signInMessage: "Connectez-vous pour ouvrir votre espace agence.",
-    tabs: { overview: "Aperçu", trips: "Départs", boarding: "Embarquement", bookings: "Réservations", earnings: "Revenus", reviews: "Avis", profile: "Profil" },
+    tabs: { overview: "Aperçu", trips: "Départs", fleet: "Flotte", cargo: "Colis", boarding: "Embarquement", bookings: "Réservations", earnings: "Revenus", reviews: "Avis", profile: "Profil" },
     create: { title: "Créez votre agence", lead: "Quelques informations suffisent. H-Company valide chaque agence avant la mise en ligne de ses départs.", name: "Nom de l'agence", city: "Ville de base", description: "Présentation",
       descriptionHint: "Trajets desservis, ancienneté, services à bord…", phone: "Téléphone", whatsapp: "WhatsApp", momo: "Retrait des gains (mobile money)", operator: "Opérateur", number: "Numéro", create: "Créer mon agence", save: "Enregistrer",
       saved: "Profil enregistré." },
@@ -104,7 +104,7 @@ const en = {
     reviews: (n) => `${n} review${n > 1 ? "s" : ""}`, newOperator: "New operator", verified: "Verified operator", border: "Border",
     testMode: "Test mode: no real money is charged until mobile money payment is switched on.", err: "Something went wrong.",
   },
-  bar: { search: "Search", tickets: "My tickets", operator: "Operator space" },
+  bar: { cargo: "Cargo", search: "Search", tickets: "My tickets", operator: "Operator space" },
   bus: { standard: "Standard", vip: "VIP / Luxury", minibus: "Minibus", coaster: "Coaster" },
   status: {
     pending_payment: "Payment in progress", confirmed: "Ticket confirmed", boarded: "Boarded", completed: "Trip completed", expired: "Expired",
@@ -165,7 +165,7 @@ const en = {
   },
   op: {
     title: "Operator space", lead: "Publish departures, scan tickets, follow your sales and payouts.", signInMessage: "Sign in to open your operator space.",
-    tabs: { overview: "Overview", trips: "Departures", boarding: "Boarding", bookings: "Bookings", earnings: "Earnings", reviews: "Reviews", profile: "Profile" },
+    tabs: { overview: "Overview", trips: "Departures", fleet: "Fleet", cargo: "Cargo", boarding: "Boarding", bookings: "Bookings", earnings: "Earnings", reviews: "Reviews", profile: "Profile" },
     create: { title: "Create your agency", lead: "A few details are enough. H-Company approves every agency before its departures go live.", name: "Agency name", city: "Home city", description: "About",
       descriptionHint: "Routes served, years of service, on-board services…", phone: "Phone", whatsapp: "WhatsApp", momo: "Payouts (mobile money)", operator: "Operator", number: "Number", create: "Create my agency", save: "Save",
       saved: "Profile saved." },

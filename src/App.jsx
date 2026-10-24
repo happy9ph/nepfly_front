@@ -53,6 +53,9 @@ const TripPage = lazy(() => import("./pages/transport/TripPage.jsx"));
 const TransportBook = lazy(() => import("./pages/transport/TransportBook.jsx"));
 const MyTickets = lazy(() => import("./pages/transport/MyTickets.jsx"));
 const TicketDetail = lazy(() => import("./pages/transport/TicketDetail.jsx"));
+const CargoHome = lazy(() => import("./pages/transport/CargoHome.jsx"));
+const CargoBook = lazy(() => import("./pages/transport/CargoBook.jsx"));
+const MyCargo = lazy(() => import("./pages/transport/MyCargo.jsx"));
 const OperatorApp = lazy(() => import("./pages/transport/OperatorApp.jsx"));
 const LodgeHome = lazy(() => import("./pages/lodge/LodgeHome.jsx"));
 const LodgeSearch = lazy(() => import("./pages/lodge/LodgeSearch.jsx"));
@@ -188,6 +191,9 @@ export default function App() {
           <Route path="/transport/mes-billets" element={<MyTickets />} />
           <Route path="/transport/mes-billets/:code" element={<TicketDetail />} />
           <Route path="/transport/agence" element={<OperatorApp />} />
+          <Route path="/transport/colis" element={<CargoHome />} />
+          <Route path="/transport/colis/:id" element={<CargoBook />} />
+          <Route path="/transport/mes-colis" element={<MyCargo />} />
           <Route path="/logement" element={<LodgeHome />} />
           <Route path="/logement/recherche" element={<LodgeSearch />} />
           <Route path="/logement/s/:slug" element={<PropertyPage />} />
