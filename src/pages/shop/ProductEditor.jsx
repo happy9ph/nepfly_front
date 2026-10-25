@@ -12,7 +12,13 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api } from "../../lib/api.js";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 
-const EMPTY = { title: "", description: "", category_id: "", price: "", compare_at_price: "", stock: "0", sku: "", brand: "", weight_kg: "", attributes: "", tags: "", status: "draft", images: [], variants: [] };
+const XT = {
+  fr: { cut: "Détourer automatiquement les photos (supprime un fond uni)", cutMiss: "Fond non uni : la photo a été gardée telle quelle.", colors: "Couleurs de l'article", colorsHint: "Le client voit l'article « habillé » de la couleur choisie (photo détourée ou modèle 3D).", addColor: "Ajouter une couleur", colorName: "Nom (ex. Noir)", model3d: "Vue 3D", model3dHint: "Forme 3D que le client peut faire tourner et recolorer.", none: "Aucune" },
+  en: { cut: "Automatically cut out photos (removes a plain background)", cutMiss: "Background isn't plain: the photo was kept as is.", colors: "Item colours", colorsHint: "Customers see the item \"dressed\" in the chosen colour (cut-out photo or 3D model).", addColor: "Add a colour", colorName: "Name (e.g. Black)", model3d: "3D view", model3dHint: "3D shape customers can rotate and recolour.", none: "None" },
+};
+const M3 = { sofa: ["Canapé", "Sofa"], armchair: ["Fauteuil", "Armchair"], chair: ["Chaise", "Chair"], table: ["Table", "Table"], bed: ["Lit", "Bed"], wardrobe: ["Armoire", "Wardrobe"], shelf: ["Étagère", "Shelf"], lamp: ["Lampe", "Lamp"], tshirt: ["T-shirt", "T-shirt"], hoodie: ["Sweat à capuche", "Hoodie"], dress: ["Robe", "Dress"], trousers: ["Pantalon", "Trousers"], shoe: ["Chaussure", "Shoe"], bag: ["Sac", "Bag"] };
+
+const EMPTY = { title: "", description: "", category_id: "", price: "", compare_at_price: "", stock: "0", sku: "", brand: "", weight_kg: "", attributes: "", tags: "", status: "draft", images: [], variants: [], colors: [], model3d: "" };
 
 function Inner() {
   const { id } = useParams();
@@ -28,6 +34,8 @@ function Inner() {
   const toast = useToast();
   usePageMeta({ title: isNew ? e.newTitle : e.editTitle });
   const cats = useCategories();
+  const x = XT[lang] || XT.fr;
+  const [cut, setCut] = useState(true);
   const [f, setF] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -42,7 +50,7 @@ function Inner() {
       title: existing.title, description: existing.description || "", category_id: existing.category_id || "", price: String(existing.price),
       compare_at_price: existing.compare_at_price ? String(existing.compare_at_price) : "", stock: String(existing.stock), sku: existing.sku || "", brand: existing.brand || "",
       weight_kg: existing.weight_kg ? String(existing.weight_kg) : "", attributes: (existing.attributes || []).map((a) => `${a.label}: ${a.value}`).join("\n"),
-      tags: (existing.tags || []).join(", "), status: existing.status, images: existing.images || [],
+      tags: (existing.tags || []).join(", "), status: existing.status, images: existing.images || [], colors: existing.colors || [], model3d: existing.model3d || "",
       variants: (existing.variants || []).map((v) => ({ id: v.id, label: v.label, sku: v.sku || "", price: v.price && v.price !== existing.price ? String(v.price) : "", stock: String(v.stock), is_active: v.is_active })),
     });
     setTargetShop(existing.shop.id);
@@ -60,6 +68,7 @@ function Inner() {
     if (!(Number(f.price) >= 0.5)) er.price = e.errPrice;
     if (f.status === "active" && f.images.length === 0) er.images = e.errImages;
     if (f.variants.some((v) => !v.label.trim())) er.variants = e.errVariant;
+    if (f.colors.some((c) => !c.name.trim())) er.colors = x.colorName;
     setErrors(er);
     return Object.keys(er).length === 0;
   }
@@ -70,7 +79,7 @@ function Inner() {
     const body = {
       title: f.title, description: f.description, category_id: f.category_id ? Number(f.category_id) : null, price: Number(f.price),
       compare_at_price: f.compare_at_price ? Number(f.compare_at_price) : null, stock: Number(f.stock) || 0, sku: f.sku, brand: f.brand,
-      weight_kg: Number(f.weight_kg) || 0, attributes: f.attributes, tags: f.tags, status: f.status, images: f.images,
+      weight_kg: Number(f.weight_kg) || 0, attributes: f.attributes, tags: f.tags, status: f.status, images: f.images, colors: f.colors.map((c) => ({ name: c.name.trim(), hex: c.hex })), model3d: f.model3d,
       variants: f.variants.map((v) => ({ ...(v.id && { id: v.id }), label: v.label, sku: v.sku, price: v.price ? Number(v.price) : null, stock: Number(v.stock) || 0, is_active: v.is_active !== false })),
     };
     try {
@@ -123,7 +132,8 @@ function Inner() {
               ))}
             </ul>
           )}
-          {f.images.length < 10 && <ImagePicker multiple label={e.addImage} onChange={(paths) => setF((x) => ({ ...x, images: [...x.images, ...paths].slice(0, 10) }))} />}
+          <label className="flex items-center gap-2 text-sm text-ink"><input type="checkbox" className="accent-coffee" checked={cut} onChange={(ev) => setCut(ev.target.checked)} />{x.cut}</label>
+          {f.images.length < 10 && <ImagePicker multiple cutout={cut} onCutoutMiss={() => toast.info?.(x.cutMiss)} label={e.addImage} onChange={(paths) => setF((x) => ({ ...x, images: [...x.images, ...paths].slice(0, 10) }))} />}
           {errors.images && <p role="alert" className="text-xs text-red-600">{errors.images}</p>}
         </section>
 
@@ -135,6 +145,22 @@ function Inner() {
             <SField label={e.compare}><input className={fieldClass} type="number" min="0" step="0.01" value={f.compare_at_price} onChange={set("compare_at_price")} /></SField>
             <SField label={e.stock}><input className={fieldClass} type="number" min="0" value={f.stock} onChange={set("stock")} disabled={f.variants.length > 0} /></SField>
           </div>
+        </section>
+
+        <section className={card}>
+          <h2 className="font-display text-xl text-ink">{x.colors}</h2>
+          <p className="text-xs text-ink-faint -mt-3">{x.colorsHint}</p>
+          {f.colors.map((c, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input type="color" aria-label="color" value={c.hex} onChange={(ev) => setF((p) => ({ ...p, colors: p.colors.map((y, j) => (j === i ? { ...y, hex: ev.target.value } : y)) }))} className="w-11 h-11 rounded-xl border border-line bg-surface p-1" />
+              <input aria-label={x.colorName} placeholder={x.colorName} maxLength={30} className={fieldClass} value={c.name} onChange={(ev) => setF((p) => ({ ...p, colors: p.colors.map((y, j) => (j === i ? { ...y, name: ev.target.value } : y)) }))} />
+              <button type="button" aria-label={e.removeImage} onClick={() => setF((p) => ({ ...p, colors: p.colors.filter((_, j) => j !== i) }))} className="h-11 w-9 text-ink-faint hover:text-red-600 flex items-center justify-center"><X size={16} /></button>
+            </div>
+          ))}
+          {f.colors.length < 8 && <button type="button" onClick={() => setF((p) => ({ ...p, colors: [...p.colors, { name: "", hex: "#111111" }] }))} className="inline-flex items-center gap-2 text-sm text-coffee"><Plus size={14} />{x.addColor}</button>}
+          <SField label={x.model3d} hint={x.model3dHint}>
+            <select className={fieldClass} value={f.model3d} onChange={set("model3d")}><option value="">{x.none}</option>{Object.entries(M3).map(([k, v]) => <option key={k} value={k}>{lang === "en" ? v[1] : v[0]}</option>)}</select>
+          </SField>
         </section>
 
         <section className={card}>

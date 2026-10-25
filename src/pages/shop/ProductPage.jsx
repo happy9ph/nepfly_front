@@ -1,3 +1,5 @@
+import { Suspense, lazy } from "react";
+import ProductVisual, { Swatches } from "../../components/shop/ProductVisual.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Check, ChevronRight, Minus, Plus, Share2, ShieldCheck, Store, Truck } from "lucide-react";
@@ -10,6 +12,8 @@ import { useUser } from "../../context/Usercontext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { api } from "../../lib/api.js";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
+
+const Product3D = lazy(() => import("../../components/shop/Product3D.jsx"));
 
 export default function ProductPage() {
   const ui = useShopUi();
@@ -28,6 +32,8 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const [needOption, setNeedOption] = useState(false);
+  const [color, setColor] = useState(null);
+  const [view, setView] = useState("photo");
 
   usePageMeta(product ? { title: `${product.title} — H-Shopping`, description: (product.description || "").slice(0, 150) } : null);
   useEffect(() => {
@@ -35,6 +41,8 @@ export default function ProductPage() {
     setQty(1);
     setImgIdx(0);
     setNeedOption(false);
+    setColor(null);
+    setView("photo");
   }, [id]);
 
   const variant = product?.variants.find((v) => v.id === variantId);
@@ -48,7 +56,7 @@ export default function ProductPage() {
   function line() {
     return {
       product_id: product.id, variant_id: variant?.id || null, quantity: qty, title: product.title,
-      variant_label: variant?.label || "", price, image: product.images[0] || null, max,
+      variant_label: [variant?.label, color].filter(Boolean).join(" · "), color: color || null, price, image: product.images[0] || null, max,
       shop_name: product.shop.name, shop_slug: product.shop.slug,
     };
   }
@@ -89,10 +97,23 @@ export default function ProductPage() {
 
       <div className="grid md:grid-cols-2 gap-8 lg:gap-14">
         <div>
+          {product.model3d && (
+            <div className="inline-flex rounded-full bg-latte-soft p-1 mb-3" role="tablist">
+              {[["photo", lang === "en" ? "Photos" : "Photos"], ["3d", lang === "en" ? "View in 3D" : "Voir en 3D"]].map(([k, l]) => (
+                <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)} className={`px-4 py-1.5 rounded-full text-sm ${view === k ? "bg-ink text-cream" : "text-ink-soft"}`}>{l}</button>
+              ))}
+            </div>
+          )}
+          {view === "3d" && product.model3d ? (
+            <Suspense fallback={<Spinner label={ui.common.loading} />}>
+              <Product3D kind={product.model3d} colors={product.colors || []} color={color} onColor={setColor} />
+            </Suspense>
+          ) : (
           <div className="relative rounded-3xl overflow-hidden border border-line">
-            <ShopImage path={images[imgIdx]} alt={product.title} ratio="aspect-square" />
+            <ProductVisual path={images[imgIdx]} alt={product.title} hex={product.colors?.find((c) => c.name === color)?.hex} ratio="aspect-square" />
             {product.discount_pct > 0 && <span className="absolute top-4 left-4 rounded-full bg-coffee text-on-coffee text-sm font-semibold px-3 py-1">{p.saving(product.discount_pct)}</span>}
           </div>
+          )}
           {images.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
               {images.map((src, i) => (
@@ -115,6 +136,13 @@ export default function ProductPage() {
             <span className="font-display text-4xl text-ink">{money(price)}</span>
             {product.compare_at_price && !hasVariants && <span className="text-ink-faint line-through">{money(product.compare_at_price)}</span>}
           </div>
+
+          {product.colors?.length > 0 && (
+            <div className="mb-6">
+              <p className="text-sm font-medium text-ink mb-3">{lang === "en" ? "Colour" : "Couleur"}{color && <span className="text-ink-soft font-normal"> : {color}</span>}</p>
+              <Swatches colors={product.colors} value={color} onChange={setColor} size="w-9 h-9" className="gap-2.5" />
+            </div>
+          )}
 
           {hasVariants && (
             <fieldset className="mb-6">

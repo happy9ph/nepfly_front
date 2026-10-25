@@ -241,10 +241,10 @@ export const api = {
     removeFavorite: (token, id) => request(`/api/v1/shopping/me/favorites/${id}`, { method: "DELETE", token }),
 
     seller: {
-      upload: (token, file) => {
+      upload: (token, file, cutout = false) => {
         const fd = new FormData();
         fd.append("file", file);
-        return request("/api/v1/shopping/seller/uploads", { method: "POST", token, body: fd });
+        return request(`/api/v1/shopping/seller/uploads${cutout ? "?cutout=true" : ""}`, { method: "POST", token, body: fd });
       },
       shops: (token) => request("/api/v1/shopping/seller/shops", { token }),
       createShop: (token, body) => request("/api/v1/shopping/seller/shops", { method: "POST", token, body }),

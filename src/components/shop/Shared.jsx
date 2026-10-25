@@ -1,3 +1,4 @@
+import ProductVisual, { Swatches } from "./ProductVisual.jsx";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -150,13 +151,14 @@ export function FavoriteButton({ productId, initial = false, className = "" }) {
 
 export function ProductCard({ product, index = 0 }) {
   const ui = useShopUi();
+  const [color, setColor] = useState(null);
   const { money } = useShopMoney();
   const p = product;
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
       <Link to={`/shopping/produit/${p.id}`} className="group block rounded-3xl border border-line bg-surface overflow-hidden hover:border-coffee-light hover:shadow-lg hover:shadow-coffee/5 transition">
         <div className="relative">
-          <ShopImage path={p.image} alt={p.title} ratio="aspect-[4/5]" className="group-hover:scale-[1.02] transition-transform duration-500" />
+          <ProductVisual path={p.image} alt={p.title} hex={p.colors?.find((c) => c.name === color)?.hex} ratio="aspect-[4/5]" className="group-hover:scale-[1.03] transition-transform duration-500" />
           {p.discount_pct > 0 && <span className="absolute top-3 left-3 rounded-full bg-coffee text-on-coffee text-xs font-semibold px-2.5 py-1">{ui.product.saving(p.discount_pct)}</span>}
           {!p.in_stock && <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 text-cream-fixed text-xs px-2.5 py-1">{ui.common.outOfStock}</span>}
           <FavoriteButton productId={p.id} initial={p.is_favorite} className="absolute top-3 right-3" />
@@ -171,6 +173,7 @@ export function ProductCard({ product, index = 0 }) {
             </span>
             {p.compare_at_price && <span className="text-xs text-ink-faint line-through">{money(p.compare_at_price)}</span>}
           </div>
+          {p.colors?.length > 0 && <Swatches colors={p.colors.slice(0, 6)} value={color} onChange={setColor} size="w-5 h-5" className="mt-2" />}
           <div className="mt-2 min-h-[1.25rem]">{p.rating_count > 0 ? <Stars value={p.rating_avg} count={p.rating_count} size={12} /> : null}</div>
         </div>
       </Link>
@@ -245,7 +248,7 @@ export function useSellerUi() {
 }
 
 /** Bouton + aperçu pour téléverser une image (logo, bannière…). */
-export function ImagePicker({ value, onChange, label, hint, ratio = "w-24 h-24", multiple = false }) {
+export function ImagePicker({ value, onChange, label, hint, ratio = "w-24 h-24", multiple = false, cutout = false, onCutoutMiss }) {
   const { withAuth } = useUser();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -257,7 +260,8 @@ export function ImagePicker({ value, onChange, label, hint, ratio = "w-24 h-24",
     try {
       const paths = [];
       for (const f of files) {
-        const r = await withAuth((t) => api.shop.seller.upload(t, f));
+        const r = await withAuth((t) => api.shop.seller.upload(t, f, cutout));
+        if (cutout && !r.cutout) onCutoutMiss?.();
         paths.push(r.path);
       }
       onChange(multiple ? paths : paths[0]);

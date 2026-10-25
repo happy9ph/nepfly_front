@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Plus, Truck } from "lucide-react";
 import { BusyButton, Card, EmptyState, ErrorState, Field, Modal, Spinner, StatusPill, inputCls, useTransportMeta, useTransportUi } from "./Shared.jsx";
 import { useCargoUi } from "../../i18n/cargoUi.js";
@@ -76,6 +76,8 @@ function TripModal({ vehicles, onClose, onSaved }) {
   );
 }
 
+const Vehicle3D = lazy(() => import("./Vehicle3D.jsx"));
+
 function TripPanel({ trip, onChanged }) {
   const c = useCargoUi(); const o = c.op; const { lang } = useLanguage(); const { money } = useShopMoney();
   const call = useCall();
@@ -97,6 +99,7 @@ function TripPanel({ trip, onChanged }) {
       <div className="mt-3 h-2 rounded-full bg-latte-soft overflow-hidden"><div className="h-full bg-coffee" style={{ width: `${Math.min(100, (trip.kg_booked / trip.vehicle.capacity_kg) * 100)}%` }} /></div>
       {open && (
         <div className="mt-4 space-y-4">
+          <Suspense fallback={<Spinner />}><Vehicle3D kind={trip.vehicle.kind} refrigerated={trip.vehicle.refrigerated} booked={trip.kg_booked / trip.vehicle.capacity_kg} height={300} /></Suspense>
           {["loading", "in_transit", "scheduled"].includes(trip.status) && (
             <div className="grid sm:grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
               <Field label={o.location}><input className={inputCls} value={loc} onChange={(e) => setLoc(e.target.value)} /></Field>

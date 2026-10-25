@@ -56,4 +56,10 @@ describe("statuts et prix", () => {
     expect(priceRange([{ price: 120 }, { price: 150 }, { price: 99, is_active: false }], 120)).toEqual({ min: 120, max: 150 });
     expect(priceRange([], 80)).toEqual({ min: 80, max: 80 });
   });
+  it("la couleur distingue les lignes du panier", () => {
+    let items = cartAdd([], { product_id: 1, variant_id: null, price: 10, quantity: 1, color: "Noir" });
+    items = cartAdd(items, { product_id: 1, variant_id: null, price: 10, quantity: 1, color: "Rouge" });
+    items = cartAdd(items, { product_id: 1, variant_id: null, price: 10, quantity: 1, color: "noir" });
+    expect(items.map((i) => [i.key, i.quantity])).toEqual([["1:0:noir", 2], ["1:0:rouge", 1]]);
+  });
 });

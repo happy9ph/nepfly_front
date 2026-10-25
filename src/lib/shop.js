@@ -3,8 +3,8 @@
 
 export const MAX_QTY = 99;
 
-export function cartKey(productId, variantId) {
-  return `${productId}:${variantId || 0}`;
+export function cartKey(productId, variantId, color) {
+  return `${productId}:${variantId || 0}${color ? `:${String(color).toLowerCase()}` : ""}`;
 }
 
 export function clampQty(qty, max = MAX_QTY) {
@@ -14,7 +14,7 @@ export function clampQty(qty, max = MAX_QTY) {
 
 /** Ajoute (ou cumule) une ligne ; renvoie une nouvelle liste. */
 export function cartAdd(items, line) {
-  const key = cartKey(line.product_id, line.variant_id);
+  const key = cartKey(line.product_id, line.variant_id, line.color);
   const found = items.find((i) => i.key === key);
   if (found) {
     return items.map((i) => (i.key === key ? { ...i, ...line, key, quantity: clampQty(i.quantity + (line.quantity || 1), line.max ?? i.max) } : i));
@@ -54,7 +54,7 @@ export function sanitizeCart(raw) {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((i) => i && Number.isInteger(i.product_id) && Number(i.price) >= 0 && Number(i.quantity) >= 1)
-    .map((i) => ({ ...i, key: cartKey(i.product_id, i.variant_id), quantity: clampQty(i.quantity, i.max) }));
+    .map((i) => ({ ...i, key: cartKey(i.product_id, i.variant_id, i.color), quantity: clampQty(i.quantity, i.max) }));
 }
 
 // Étapes de la frise de suivi, dans l'ordre.

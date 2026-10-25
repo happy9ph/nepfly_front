@@ -70,7 +70,7 @@ export default function ShopCheckout() {
     if (!items.length || !agencyId || phase === "done") return;
     let alive = true;
     api.shop
-      .quote({ items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, quantity: i.quantity })), delivery_mode: mode, agency_id: agencyId, coupon_code: coupon || undefined })
+      .quote({ items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, color: i.color || null, quantity: i.quantity })), delivery_mode: mode, agency_id: agencyId, coupon_code: coupon || undefined })
       .then((q) => { if (alive) { setQuote(q); setQuoteError(""); if (coupon) setCouponMsg(c.couponApplied(coupon)); } })
       .catch((e) => {
         if (!alive) return;
@@ -106,7 +106,7 @@ export default function ShopCheckout() {
     try {
       const data = await withAuth((t) =>
         api.shop.checkout(t, {
-          items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, quantity: i.quantity })),
+          items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, color: i.color || null, quantity: i.quantity })),
           delivery_mode: mode, agency_id: agencyId, coupon_code: coupon || undefined,
           recipient_name: form.name, recipient_phone: form.phone, address: form.address, city: form.city, note: form.note,
           method: operator, phone: buildPhone(prefix, digits), currency: currency?.code || pivot,

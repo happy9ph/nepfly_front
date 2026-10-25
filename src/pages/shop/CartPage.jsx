@@ -25,7 +25,7 @@ export default function CartPage() {
     let alive = true;
     api.shop.agencies().then((ags) => {
       if (!ags.length) return null;
-      return api.shop.quote({ items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, quantity: i.quantity })), agency_id: ags[0].id, delivery_mode: "agency_pickup" });
+      return api.shop.quote({ items: items.map((i) => ({ product_id: i.product_id, variant_id: i.variant_id, color: i.color || null, quantity: i.quantity })), agency_id: ags[0].id, delivery_mode: "agency_pickup" });
     }).then((q) => {
       if (!alive || !q) return;
       setProblem("");
