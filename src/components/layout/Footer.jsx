@@ -99,7 +99,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
             <Column title={c.services}>
               <li><FootLink to="/h/transport-bus">{c.svc.bus}</FootLink></li>
@@ -131,7 +130,6 @@ export default function Footer() {
               <li><FootLink to="/conditions">{c.res.terms}</FootLink></li>
             </Column>
           </div>
-        </div>
 
         {/* Barre basse */}
         <div className="border-t border-cream-fixed/15 py-7 flex flex-col md:flex-row md:items-center justify-between gap-5 text-xs text-cream-fixed/60">
