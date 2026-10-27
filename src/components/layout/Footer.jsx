@@ -131,6 +131,7 @@ export default function Footer() {
             </Column>
           </div>
 
+
         {/* Barre basse */}
         <div className="border-t border-cream-fixed/15 py-7 flex flex-col md:flex-row md:items-center justify-between gap-5 text-xs text-cream-fixed/60">
           <p>© {new Date().getFullYear()} H-Company. {c.rights} <span className="hidden sm:inline">· {c.madeIn}</span></p>
@@ -148,7 +149,6 @@ export default function Footer() {
             </button>
           </div>
         </div>
-      </div>
     </footer>
   );
 }
