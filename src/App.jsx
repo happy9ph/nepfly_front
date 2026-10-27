@@ -1,8 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Routes, Route, Navigate, useParams, useLocation, useNavigationType } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import Chatbot from "./components/chatbot/Chatbot.jsx";
 import ScrollToTop from "./components/ui/ScrollToTop.jsx";
-import BrandLoader from "./components/ui/BrandLoader.jsx";
 import { HeadManager } from "./components/ui/HeadManager.jsx";
 
 // Découpage du code par page : chaque page n'est téléchargée que lorsque
@@ -74,44 +73,16 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.jsx"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
 
+// Pendant le chargement du code d'une page : une fine barre en haut (après 150 ms seulement, pour ne rien
+// afficher quand la page est déjà en cache). Rien de bloquant, aucun écran plein écran.
 function RouteFallback() {
-  // Écran neutre pendant le chargement du code de la page — très bref
-  // (quelques dizaines de Ko), mais évite un flash de page blanche. Le
-  // véritable écran de marque (BrandLoader) est géré séparément, à chaque
-  // changement de route, pour rester visible assez longtemps pour être vu.
-  return <div className="min-h-screen bg-cream" />;
-}
-
-// Rejoue le petit "ta-dum" de marque (lettre H animée, façon écran de
-// chargement Netflix) à chaque redirection vers une nouvelle page — pas
-// seulement quand le code doit vraiment être téléchargé. On force un temps
-// d'affichage minimum (900ms) pour que l'animation se joue vraiment, plutôt
-// que de dépendre du temps de chargement réel (souvent quasi instantané une
-// fois les fichiers en cache). Le tout premier chargement de la home gère
-// son propre écran (voir Home.jsx), donc on l'ignore ici.
-function RouteTransitionLoader() {
-  const location = useLocation();
-  const navType = useNavigationType();
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    // Ignore le tout premier montage (chargement initial de la home, qui a
-    // son propre écran de marque) — seuls les changements de route suivants
-    // rejouent cette animation.
-    if (!window.__hcRouteSeen) {
-      window.__hcRouteSeen = true;
-      return;
-    }
-    // Retour / avance dans l'historique : pas d'animation. La personne veut
-    // retrouver sa page tout de suite, exactement là où elle l'a laissée.
-    if (navType === "POP") return;
-    setShow(true);
-    const timer = setTimeout(() => setShow(false), 700);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
-
-  return <BrandLoader visible={show} />;
+  const [on, setOn] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setOn(true), 150); return () => clearTimeout(t); }, []);
+  return (
+    <div className="min-h-[60vh] bg-cream">
+      {on && <div className="fixed top-0 left-0 right-0 h-0.5 z-[400] overflow-hidden bg-latte/20" role="progressbar" aria-label="Chargement"><div className="h-full w-1/3 bg-coffee route-bar" /></div>}
+    </div>
+  );
 }
 
 // Anciens liens /cours/:id (e-mails, favoris) → nouvelle fiche cours.
@@ -123,7 +94,6 @@ function OldCourseRedirect() {
 export default function App() {
   return (
     <HeadManager>
-      <RouteTransitionLoader />
       <ScrollToTop />
       <a
         href="#main-content"

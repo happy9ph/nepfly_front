@@ -21,8 +21,8 @@ export default function ProductVisual({ path, alt = "", hex = null, className = 
       {cut && <span aria-hidden="true" className="absolute left-1/2 -translate-x-1/2 bottom-[9%] w-3/5 h-4 rounded-[50%] bg-ink/15 blur-md" />}
       {shown && !broken ? (
         <img src={shown} alt={alt} loading="lazy" onError={() => setBroken(true)}
-          className={cut ? `relative w-full h-full object-contain ${padded ? "p-[9%]" : ""} transition-[filter] duration-300` : "w-full h-full object-cover"}
-          style={cut ? { filter: "drop-shadow(0 12px 14px rgba(0,0,0,.18))" } : undefined} />
+          decoding="async"
+          className={cut ? `relative w-full h-full object-contain ${padded ? "p-[9%]" : ""}` : "w-full h-full object-cover"} />
       ) : <ImageIcon className="text-latte" size={28} aria-hidden="true" />}
     </div>
   );

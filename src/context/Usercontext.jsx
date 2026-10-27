@@ -1,3 +1,4 @@
+import { clearLoadCache } from "../lib/loadCache.js";
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { api, ApiError } from "../lib/api.js";
 
@@ -73,6 +74,7 @@ export function UserProvider({ children }) {
   }
 
   async function signOut() {
+    clearLoadCache();
     try {
       await api.auth.logout();
     } catch {

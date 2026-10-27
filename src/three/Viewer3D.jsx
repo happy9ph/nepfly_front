@@ -66,12 +66,20 @@ export default function Viewer3D({ build, tint = null, deps = [], className = ""
     dom.addEventListener("pointerdown", down); dom.addEventListener("pointermove", move); dom.addEventListener("pointerup", up); dom.addEventListener("pointercancel", up);
     dom.addEventListener("wheel", wheel, { passive: false });
 
+
+    // Pas de rendu quand le canvas est hors écran ou l'onglet masqué : économise batterie et défilement.
+    const vis = { on: true };
+    const io = new IntersectionObserver(([e]) => { vis.on = e.isIntersecting; }, { threshold: 0 });
+    io.observe(el);
+    const vc = () => { vis.on = vis.on && !document.hidden; };
+    document.addEventListener("visibilitychange", vc);
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const clock = new THREE.Clock();
     let raf;
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(clock.getDelta(), 0.05), now = performance.now();
+      if (!vis.on || document.hidden) return;
       if (!st.ptrs.size) {
         st.yaw += st.vy; st.vy *= 0.92;
         if (live.current.spin && !reduce && now - st.last > 1800) st.yaw += dt * 0.6;
@@ -84,7 +92,7 @@ export default function Viewer3D({ build, tint = null, deps = [], className = ""
     loop();
     onReady?.({ root: obj, live });
     return () => {
-      cancelAnimationFrame(raf); ro.disconnect();
+      cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", vc);
       dom.removeEventListener("pointerdown", down); dom.removeEventListener("pointermove", move); dom.removeEventListener("pointerup", up); dom.removeEventListener("pointercancel", up); dom.removeEventListener("wheel", wheel);
       disposeTree(scene); renderer.dispose(); renderer.forceContextLoss?.(); dom.remove();
     };

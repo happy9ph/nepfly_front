@@ -1,3 +1,4 @@
+import { cacheGet, cacheKey, cacheSet } from "../lib/loadCache.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/api.js";
 import { FALLBACK_PLANS, loadCurrency, saveCurrency } from "./plans.js";
@@ -6,16 +7,21 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 
 /** Charge une ressource ; `reload()` relance. deps = quand relancer. */
 export function useLoad(fn, deps = []) {
-  const [state, setState] = useState({ data: null, error: null, loading: true });
+  const [state, setState] = useState(() => {
+    const c = cacheGet(cacheKey(fn, deps));
+    return c ? { data: c.data, error: null, loading: false } : { data: null, error: null, loading: true };
+  });
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const run = useCallback(() => {
     let cancelled = false;
-    setState((s) => ({ ...s, loading: true, error: null }));
+    const k = cacheKey(fnRef.current, deps), c = cacheGet(k);
+    if (c) setState({ data: c.data, error: null, loading: false });
+    else setState((s) => ({ ...s, loading: true, error: null }));
     Promise.resolve()
       .then(() => fnRef.current())
-      .then((data) => !cancelled && setState({ data, error: null, loading: false }))
-      .catch((error) => !cancelled && setState({ data: null, error, loading: false }));
+      .then((data) => { cacheSet(k, data); if (!cancelled) setState({ data, error: null, loading: false }); })
+      .catch((error) => { if (!cancelled) setState((s) => (s.data && c ? { ...s, error: null, loading: false } : { data: null, error, loading: false })); });
     return () => {
       cancelled = true;
     };

@@ -54,7 +54,7 @@ export default function Home() {
     if (!firstVisit) return;
     // Temps minimum pour laisser l'animation du H se jouer entièrement,
     // même si les polices sont prêtes quasi instantanément.
-    const timer = setTimeout(() => setMinTimeElapsed(true), 1100);
+    const timer = setTimeout(() => setMinTimeElapsed(true), 500);
     return () => clearTimeout(timer);
   }, [firstVisit]);
 

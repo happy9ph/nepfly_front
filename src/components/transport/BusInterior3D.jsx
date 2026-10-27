@@ -134,11 +134,19 @@ export default function BusInterior3D({ total, layout = "2+2", color = "#c89a3d"
     dom.addEventListener("keydown", kd); dom.addEventListener("keyup", ku); dom.addEventListener("blur", () => st.keys.clear());
     live.current.st = st;
 
+
+    // Pas de rendu quand le canvas est hors écran ou l'onglet masqué : économise batterie et défilement.
+    const vis = { on: true };
+    const io = new IntersectionObserver(([e]) => { vis.on = e.isIntersecting; }, { threshold: 0 });
+    io.observe(el);
+    const vc = () => { vis.on = vis.on && !document.hidden; };
+    document.addEventListener("visibilitychange", vc);
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const clock = new THREE.Clock(); let raf;
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(clock.getDelta(), 0.05), k = st.keys, ex = live.current.extra || {};
+      if (!vis.on || document.hidden) return;
       const fwd = (k.has("w") || k.has("z") || k.has("arrowup") || ex.f ? 1 : 0) - (k.has("s") || k.has("arrowdown") || ex.b ? 1 : 0);
       const str = (k.has("d") || ex.r ? 1 : 0) - (k.has("a") || k.has("q") || ex.l ? 1 : 0);
       st.yaw += ((k.has("arrowleft") ? 1 : 0) - (k.has("arrowright") ? 1 : 0)) * 1.6 * dt;
@@ -160,7 +168,7 @@ export default function BusInterior3D({ total, layout = "2+2", color = "#c89a3d"
     };
     loop();
     return () => {
-      cancelAnimationFrame(raf); ro.disconnect();
+      cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", vc);
       dom.removeEventListener("pointerdown", down); dom.removeEventListener("pointermove", move); dom.removeEventListener("pointerup", up); dom.removeEventListener("pointercancel", up);
       dom.removeEventListener("keydown", kd); dom.removeEventListener("keyup", ku);
       scene.traverse((o) => { o.geometry?.dispose?.(); const m = o.material; (Array.isArray(m) ? m : m ? [m] : []).forEach((x) => { x.map?.dispose?.(); x.dispose?.(); }); });
