@@ -77,7 +77,6 @@ export default function Footer() {
   const c = COPY[lang] || COPY.fr;
   return (
     <footer className="bg-ink-fixed text-cream-fixed" aria-label="H-Company">
-
           <div className="max-w-xs">
             <Link to="/" className="inline-flex items-center gap-2.5" aria-label="H-Company">
               <Logo size={30} />
