@@ -13,10 +13,10 @@ const fr = {
     sold: (n) => `${n} séjour${n > 1 ? "s" : ""}`,
   },
   types: {
-    lodge: "Lodge", hotel_room: "Chambre d'hôtel", apartment: "Appartement", house: "Maison", villa: "Villa", guesthouse: "Maison d'hôtes", studio: "Studio",
+    lodge: "Lodge", hotel_room: "Chambre d'hôtel", apartment: "Appartement", house: "Maison", villa: "Villa", guesthouse: "Maison d'hôtes", studio: "Studio", room: "Chambre simple",
   },
   typesPlural: {
-    lodge: "Lodges", hotel_room: "Chambres d'hôtel", apartment: "Appartements", house: "Maisons", villa: "Villas", guesthouse: "Maisons d'hôtes", studio: "Studios",
+    lodge: "Lodges", hotel_room: "Chambres d'hôtel", apartment: "Appartements", house: "Maisons", villa: "Villas", guesthouse: "Maisons d'hôtes", studio: "Studios", room: "Chambres simples",
   },
   amenityGroups: { essentials: "L'essentiel", comfort: "Confort", services: "Services", family: "Pour tous" },
   policy: {
@@ -54,6 +54,18 @@ const fr = {
     rating: "Note minimale", ratingAny: "Toutes les notes", ratingFrom: (n) => `${n}+ `, totalFor: (n, total) => `${total} pour ${n} nuit${n > 1 ? "s" : ""}`,
     datesHint: "Ajoutez vos dates pour voir les logements réellement disponibles et le prix total.", prev: "Précédent", next: "Suivant", page: (p, n) => `Page ${p} sur ${n}`,
     city: "Ville", allCities: "Toutes les villes",
+  },
+  tour: {
+    title: "Visite en 3D", lead: "Marchez dans le logement comme si vous y étiez : au clavier (ZQSD / flèches), à la souris ou au doigt.",
+    start: "Commencer la visite", hide: "Fermer la visite", note: "Plan indicatif construit d'après l'annonce (chambres, lits, équipements). L'aménagement réel peut différer.",
+    unsupported: "Votre appareil ne peut pas afficher la 3D.", help: "Glissez pour regarder · ZQSD / flèches pour marcher · survolez un objet",
+    kinds: { room: "Chambre simple : entrée, chambre et salle d'eau", hotel_room: "Hôtel : réception, couloir puis votre chambre", lodge: "Lodge : réception, couloir puis votre chambre", guesthouse: "Maison d'hôtes : accueil, couloir puis votre chambre", studio: "Studio : une grande pièce avec coin cuisine", apartment: "Appartement : salon, cuisine, chambres et balcon", house: "Maison : salon, cuisine, chambres et jardin", villa: "Villa : grandes pièces, jardin et piscine" },
+  },
+  walk: {
+    title: "Se promener dans le quartier", lead: "Marchez dans la rue, repérez une maison qui vous plaît, cliquez-la pour voir son prix puis entrez-y en 3D.",
+    city: "Quartier / ville", all: "Toutes les villes", help: "Glissez pour regarder · ZQSD / flèches pour marcher · cliquez une maison ou un panneau",
+    empty: "Aucun logement à afficher ici pour le moment.", visit: "Visiter l'intérieur en 3D", listing: "Voir l'annonce", close: "Fermer", loaded: (n) => `${n} logement${n > 1 ? "s" : ""} dans la rue`,
+    link: "Se promener dans le quartier en 3D", linkLead: "Marchez dans la rue et trouvez votre maison.",
   },
   property: {
     photos: (n) => `Voir les ${n} photos`, noPhoto: "Pas de photo", share: "Partager", copied: "Lien copié",
@@ -125,10 +137,10 @@ const en = {
     sold: (n) => `${n} stay${n > 1 ? "s" : ""}`,
   },
   types: {
-    lodge: "Lodge", hotel_room: "Hotel room", apartment: "Apartment", house: "House", villa: "Villa", guesthouse: "Guesthouse", studio: "Studio",
+    lodge: "Lodge", hotel_room: "Hotel room", apartment: "Apartment", house: "House", villa: "Villa", guesthouse: "Guesthouse", studio: "Studio", room: "Single room",
   },
   typesPlural: {
-    lodge: "Lodges", hotel_room: "Hotel rooms", apartment: "Apartments", house: "Houses", villa: "Villas", guesthouse: "Guesthouses", studio: "Studios",
+    lodge: "Lodges", hotel_room: "Hotel rooms", apartment: "Apartments", house: "Houses", villa: "Villas", guesthouse: "Guesthouses", studio: "Studios", room: "Single rooms",
   },
   amenityGroups: { essentials: "Essentials", comfort: "Comfort", services: "Services", family: "For everyone" },
   policy: {
@@ -166,6 +178,18 @@ const en = {
     rating: "Minimum rating", ratingAny: "Any rating", ratingFrom: (n) => `${n}+ `, totalFor: (n, total) => `${total} for ${n} night${n > 1 ? "s" : ""}`,
     datesHint: "Add your dates to see what is actually available and the total price.", prev: "Previous", next: "Next", page: (p, n) => `Page ${p} of ${n}`,
     city: "City", allCities: "All cities",
+  },
+  tour: {
+    title: "3D tour", lead: "Walk through the place as if you were there: keyboard (WASD / arrows), mouse or touch.",
+    start: "Start the tour", hide: "Close the tour", note: "Indicative plan built from the listing (bedrooms, beds, amenities). The real layout may differ.",
+    unsupported: "Your device cannot display 3D.", help: "Drag to look around · WASD / arrows to walk · hover an object",
+    kinds: { room: "Single room: entrance, bedroom and bathroom", hotel_room: "Hotel: reception, corridor, then your room", lodge: "Lodge: reception, corridor, then your room", guesthouse: "Guesthouse: welcome desk, corridor, then your room", studio: "Studio: one large room with kitchenette", apartment: "Apartment: living room, kitchen, bedrooms and balcony", house: "House: living room, kitchen, bedrooms and garden", villa: "Villa: large rooms, garden and pool" },
+  },
+  walk: {
+    title: "Walk around the neighbourhood", lead: "Walk down the street, spot a house you like, click it to see its price, then step inside in 3D.",
+    city: "Area / city", all: "All cities", help: "Drag to look around · WASD / arrows to walk · click a house or a sign",
+    empty: "No listings to show here yet.", visit: "Visit the inside in 3D", listing: "View listing", close: "Close", loaded: (n) => `${n} listing${n > 1 ? "s" : ""} on the street`,
+    link: "Walk the neighbourhood in 3D", linkLead: "Stroll down the street and find your house.",
   },
   property: {
     photos: (n) => `Show all ${n} photos`, noPhoto: "No photo", share: "Share", copied: "Link copied",

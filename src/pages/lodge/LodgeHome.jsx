@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BadgeCheck, Banknote, Building2, CalendarCheck, Home, Hotel, ShieldCheck, Tent, BedDouble, Castle, Key } from "lucide-react";
+import { ArrowRight, BadgeCheck, Banknote, Building2, CalendarCheck, Home, Hotel, ShieldCheck, Tent, BedDouble, Castle, Key, DoorOpen, Footprints } from "lucide-react";
 import LodgeLayout from "../../components/lodge/LodgeLayout.jsx";
 import SearchForm from "../../components/lodge/SearchForm.jsx";
 import { EmptyState, ErrorState, LodgeImage, PropertyGrid, SectionTitle, Spinner, useLodgeUi } from "../../components/lodge/Shared.jsx";
@@ -9,7 +9,7 @@ import { api } from "../../lib/api.js";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 
 const TRUST_ICONS = [ShieldCheck, Banknote, CalendarCheck, BadgeCheck];
-const TYPE_ICONS = { lodge: Hotel, hotel_room: BedDouble, apartment: Building2, house: Home, villa: Castle, guesthouse: Key, studio: Tent };
+const TYPE_ICONS = { lodge: Hotel, hotel_room: BedDouble, apartment: Building2, house: Home, villa: Castle, guesthouse: Key, studio: Tent, room: DoorOpen };
 
 export default function LodgeHome() {
   const ui = useLodgeUi();
@@ -41,6 +41,11 @@ export default function LodgeHome() {
           {data && !empty && <p className="mt-5 text-xs text-cream-fixed/60">{h.stats(data.totals.properties, data.totals.hosts).join(" · ")}</p>}
         </div>
       </section>
+
+      <Link to="/logement/quartier" className="group mb-10 flex items-center justify-between gap-4 rounded-3xl border border-line bg-gradient-to-r from-latte-soft to-cream p-6 hover:border-coffee-light transition">
+        <span className="flex items-center gap-4"><span className="w-12 h-12 rounded-2xl bg-coffee text-cream-fixed flex items-center justify-center"><Footprints size={22} /></span><span><span className="block font-display text-xl text-ink">{ui.walk.link}</span><span className="block text-sm text-ink-soft">{ui.walk.linkLead}</span></span></span>
+        <ArrowRight className="text-coffee group-hover:translate-x-1 transition" size={20} />
+      </Link>
 
       <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16" aria-label="H-Logement">
         {h.trust.map((t, i) => {

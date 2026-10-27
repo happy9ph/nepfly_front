@@ -58,6 +58,7 @@ const CargoBook = lazy(() => import("./pages/transport/CargoBook.jsx"));
 const MyCargo = lazy(() => import("./pages/transport/MyCargo.jsx"));
 const OperatorApp = lazy(() => import("./pages/transport/OperatorApp.jsx"));
 const LodgeHome = lazy(() => import("./pages/lodge/LodgeHome.jsx"));
+const LodgeWalk = lazy(() => import("./pages/lodge/LodgeWalk.jsx"));
 const LodgeSearch = lazy(() => import("./pages/lodge/LodgeSearch.jsx"));
 const PropertyPage = lazy(() => import("./pages/lodge/PropertyPage.jsx"));
 const LodgeBook = lazy(() => import("./pages/lodge/LodgeBook.jsx"));
@@ -196,6 +197,7 @@ export default function App() {
           <Route path="/transport/mes-colis" element={<MyCargo />} />
           <Route path="/logement" element={<LodgeHome />} />
           <Route path="/logement/recherche" element={<LodgeSearch />} />
+          <Route path="/logement/quartier" element={<LodgeWalk />} />
           <Route path="/logement/s/:slug" element={<PropertyPage />} />
           <Route path="/logement/reserver/:slug" element={<LodgeBook />} />
           <Route path="/logement/mes-sejours" element={<MyTrips />} />

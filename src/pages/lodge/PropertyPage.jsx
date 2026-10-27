@@ -12,6 +12,7 @@ import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { api } from "../../lib/api.js";
 import { addDays, formatDay, formatRating, nightsBetween, osmEmbedUrl, osmLink, pickDate, searchQuery, todayISO } from "../../lib/lodge.js";
+import PropertyTour from "../../components/lodge/PropertyTour.jsx";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 
 function Gallery({ images, title }) {
@@ -248,6 +249,8 @@ export default function PropertyPage() {
               <div className="rounded-2xl border border-line bg-surface p-4 flex gap-3"><ShieldCheck className="text-coffee shrink-0" size={20} /><div><p className="text-sm font-medium text-ink">{ui.home.trust[0].t}</p><p className="text-xs text-ink-soft mt-0.5">{ui.home.trust[0].d}</p></div></div>
             </div>
           </section>
+
+          <PropertyTour p={p} autoStart={params.get("visite") === "1"} />
 
           <section>
             <h2 className="font-display text-2xl text-ink mb-4">{pr.about}</h2>
