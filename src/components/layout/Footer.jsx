@@ -77,25 +77,7 @@ export default function Footer() {
   const c = COPY[lang] || COPY.fr;
   return (
     <footer className="bg-ink-fixed text-cream-fixed" aria-label="H-Company">
-      <div className="max-w-content mx-auto px-6 pt-16 md:pt-20">
-        {/* Bandeau d'appel */}
-        <div className="rounded-3xl border border-cream-fixed/15 bg-cream-fixed/[0.04] p-8 md:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-          <div className="max-w-xl">
-            <h2 className="font-display italic text-3xl md:text-4xl leading-tight">{c.ctaTitle}</h2>
-            <p className="mt-4 text-cream-fixed/70 leading-relaxed">{c.ctaText}</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link to="/creer-un-compte" className="inline-flex items-center justify-center gap-2 rounded-full bg-latte text-ink-fixed text-sm font-semibold px-7 py-3.5 hover:brightness-110 transition">
-              {c.ctaPrimary} <ArrowUpRight size={16} />
-            </Link>
-            <Link to="/#rejoindre" className="inline-flex items-center justify-center rounded-full border border-cream-fixed/30 text-cream-fixed text-sm font-medium px-7 py-3.5 hover:bg-cream-fixed/10 transition">
-              {c.ctaSecondary}
-            </Link>
-          </div>
-        </div>
 
-        {/* Corps */}
-        <div className="grid gap-12 lg:gap-8 py-14 md:py-16 lg:grid-cols-[1.4fr_2.6fr]">
           <div className="max-w-xs">
             <Link to="/" className="inline-flex items-center gap-2.5" aria-label="H-Company">
               <Logo size={30} />
