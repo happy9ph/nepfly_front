@@ -35,6 +35,7 @@ export function UserProvider({ children }) {
   }, []);
 
   async function applyAuthResponse(data) {
+    clearLoadCache(); // jamais de données en cache d'un autre compte
     setToken(data.access_token);
     setUser(data.user);
     setError(null);
