@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Loader2, Plus, Star, Trash2, X } from "lucide-react";
+import { ChevronLeft, Loader2, Plus, Sparkles, Star, Trash2, X } from "lucide-react";
 import ShopLayout from "../../components/shop/ShopLayout.jsx";
 import AuthGate from "../../components/shop/AuthGate.jsx";
 import { ErrorState, ImagePicker, ShopImage, Spinner, useShopUi, useSellerUi } from "../../components/shop/Shared.jsx";
@@ -9,12 +9,13 @@ import { errMessage, useCategories, useLoad, useShopMoney } from "../../data/sho
 import { useUser } from "../../context/Usercontext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
-import { api } from "../../lib/api.js";
+import { api, uploadUrl } from "../../lib/api.js";
+import { isCutout } from "../../lib/colorize.js";
 import { usePageMeta } from "../../components/ui/HeadManager.jsx";
 
 const XT = {
-  fr: { cut: "Détourer automatiquement les photos (IA, sur votre appareil — 1re fois un peu plus long)", cutMiss: "Détourage impossible pour au moins une photo : elle a été gardée telle quelle.", colors: "Couleurs de l'article", colorsHint: "Le client voit l'article « habillé » de la couleur choisie (photo détourée ou modèle 3D).", addColor: "Ajouter une couleur", colorName: "Nom (ex. Noir)", model3d: "Vue 3D", model3dHint: "Forme 3D que le client peut faire tourner et recolorer.", none: "Aucune" },
-  en: { cut: "Automatically cut out photos (AI, on your device — first use takes longer)", cutMiss: "Cut-out failed for at least one photo: it was kept as is.", colors: "Item colours", colorsHint: "Customers see the item \"dressed\" in the chosen colour (cut-out photo or 3D model).", addColor: "Add a colour", colorName: "Name (e.g. Black)", model3d: "3D view", model3dHint: "3D shape customers can rotate and recolour.", none: "None" },
+  fr: { reCut: "Détourer cette photo", reCutAll: (n) => `Détourer les ${n} photo${n > 1 ? "s" : ""} non détourée${n > 1 ? "s" : ""}`, reCutting: "Détourage en cours…", reCutDone: (n) => `${n} photo${n > 1 ? "s détourées" : " détourée"}. Enregistrez l'article pour conserver le changement.`, cut: "Détourer automatiquement les photos (IA, sur votre appareil — 1re fois un peu plus long)", cutMiss: "Détourage impossible pour au moins une photo : elle a été gardée telle quelle.", colors: "Couleurs de l'article", colorsHint: "Le client voit l'article « habillé » de la couleur choisie (photo détourée ou modèle 3D).", addColor: "Ajouter une couleur", colorName: "Nom (ex. Noir)", model3d: "Vue 3D", model3dHint: "Forme 3D que le client peut faire tourner et recolorer.", none: "Aucune" },
+  en: { reCut: "Cut out this photo", reCutAll: (n) => `Cut out the ${n} remaining photo${n > 1 ? "s" : ""}`, reCutting: "Cutting out…", reCutDone: (n) => `${n} photo${n > 1 ? "s" : ""} cut out. Save the item to keep the change.`, cut: "Automatically cut out photos (AI, on your device — first use takes longer)", cutMiss: "Cut-out failed for at least one photo: it was kept as is.", colors: "Item colours", colorsHint: "Customers see the item \"dressed\" in the chosen colour (cut-out photo or 3D model).", addColor: "Add a colour", colorName: "Name (e.g. Black)", model3d: "3D view", model3dHint: "3D shape customers can rotate and recolour.", none: "None" },
 };
 const M3 = { sofa: ["Canapé", "Sofa"], armchair: ["Fauteuil", "Armchair"], chair: ["Chaise", "Chair"], table: ["Table", "Table"], bed: ["Lit", "Bed"], wardrobe: ["Armoire", "Wardrobe"], shelf: ["Étagère", "Shelf"], lamp: ["Lampe", "Lamp"], tshirt: ["T-shirt", "T-shirt"], hoodie: ["Sweat à capuche", "Hoodie"], dress: ["Robe", "Dress"], trousers: ["Pantalon", "Trousers"], shoe: ["Chaussure", "Shoe"], bag: ["Sac", "Bag"] };
 
@@ -36,6 +37,32 @@ function Inner() {
   const cats = useCategories();
   const x = XT[lang] || XT.fr;
   const [cut, setCut] = useState(true);
+  const [recutting, setRecutting] = useState(null); // null | chemin | "all"
+  // Re-détoure des photos DÉJÀ envoyées (anciennes photos au fond raté ou non détourées), dans le navigateur.
+  // Rien n'est écrit sur l'article tant que le vendeur n'a pas cliqué sur « Enregistrer ».
+  async function recut(paths) {
+    if (!paths.length || recutting) return;
+    setRecutting(paths.length > 1 ? "all" : paths[0]);
+    const replaced = {};
+    let ok = 0, miss = 0;
+    try {
+      const { cutoutInBrowser } = await import("../../lib/removeBg.js");
+      for (const p of paths) {
+        try {
+          const res = await fetch(uploadUrl(p));
+          if (!res.ok) throw new Error("fetch");
+          const blob = await res.blob();
+          const out = await cutoutInBrowser(new File([blob], "photo", { type: blob.type || "image/jpeg" }));
+          const r = await withAuth((t) => api.shop.seller.upload(t, out, false, true));
+          if (!r.cutout) throw new Error("not-cut");
+          replaced[p] = r.path; ok++;
+        } catch { miss++; }   // l'ancienne photo est conservée
+      }
+      if (ok) setF((s) => ({ ...s, images: s.images.map((y) => replaced[y] || y) }));
+    } finally { setRecutting(null); }
+    if (ok) toast.success?.(x.reCutDone(ok));
+    if (miss) toast.info?.(x.cutMiss);
+  }
   const [f, setF] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -124,6 +151,12 @@ function Inner() {
       {f.images.map((p, i) => (
         <li key={p} className="relative group">
         <ShopImage path={p} ratio="aspect-square" className={`rounded-2xl ${i === 0 ? "ring-2 ring-coffee" : ""}`} />
+        {!isCutout(p) && (
+          <button type="button" onClick={() => recut([p])} disabled={!!recutting} aria-label={x.reCut} title={x.reCut}
+          className="absolute top-1 left-1 w-7 h-7 rounded-full bg-cream-fixed/90 text-ink-fixed flex items-center justify-center disabled:opacity-60">
+          {recutting === p || recutting === "all" ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+          </button>
+        )}
         <div className="absolute inset-x-1 bottom-1 flex justify-between">
         {i !== 0 ? <button type="button" onClick={() => setF((x) => ({ ...x, images: [p, ...x.images.filter((y) => y !== p)] }))} aria-label={e.makeMain} title={e.makeMain} className="w-7 h-7 rounded-full bg-cream-fixed/90 text-ink-fixed flex items-center justify-center"><Star size={13} /></button> : <span />}
         <button type="button" onClick={() => setF((x) => ({ ...x, images: x.images.filter((y) => y !== p) }))} aria-label={e.removeImage} className="w-7 h-7 rounded-full bg-cream-fixed/90 text-ink-fixed flex items-center justify-center"><X size={13} /></button>
@@ -131,6 +164,13 @@ function Inner() {
         </li>
       ))}
       </ul>
+    )}
+    {f.images.some((p) => !isCutout(p)) && (
+      <button type="button" onClick={() => recut(f.images.filter((p) => !isCutout(p)))} disabled={!!recutting}
+      className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2.5 text-sm text-ink hover:border-coffee-light disabled:opacity-60">
+      {recutting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+      {recutting ? x.reCutting : x.reCutAll(f.images.filter((p) => !isCutout(p)).length)}
+      </button>
     )}
     <label className="flex items-center gap-2 text-sm text-ink"><input type="checkbox" className="accent-coffee" checked={cut} onChange={(ev) => setCut(ev.target.checked)} />{x.cut}</label>
     {f.images.length < 10 && <ImagePicker multiple cutout={cut} onCutoutMiss={() => toast.info?.(x.cutMiss)} label={e.addImage} onChange={(paths) => setF((x) => ({ ...x, images: [...x.images, ...paths].slice(0, 10) }))} />}
