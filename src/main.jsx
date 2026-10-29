@@ -11,6 +11,10 @@ import { CartProvider } from "./context/CartContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import ErrorBoundary from "./components/ui/ErrorBoundary.jsx";
 import NetworkStatusBanner from "./components/ui/NetworkStatusBanner.jsx";
+import { reloadOnce } from "./lib/chunkReload.js";
+
+// Nouveau déploiement pendant qu'un onglet est ouvert : rechargement automatique (une fois).
+window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); reloadOnce(); });
 
 // Supervision des erreurs — importée dynamiquement, uniquement si
 // VITE_SENTRY_DSN est renseigné. Un simple `import * as Sentry` statique

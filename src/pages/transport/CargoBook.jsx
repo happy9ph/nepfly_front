@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from "react";
+import BackLink from "../../components/ui/BackLink.jsx";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import TransportLayout, { BusyButton, Card, ErrorState, Field, PayBox, Spinner, TransportAuthGate, inputCls, usePayBox, useTransportUi } from "../../components/transport/Shared.jsx";
 import { useCargoUi } from "../../i18n/cargoUi.js";
@@ -54,7 +55,7 @@ function Form() {
   }
   return (
     <TransportLayout hideBar width="max-w-3xl">
-      <Link to="/transport/colis" className="text-sm text-ink-soft">← {c.title}</Link>
+      <BackLink to="/transport/colis" className="text-sm text-ink-soft">← {c.title}</BackLink>
       <h1 className="font-display text-3xl text-ink mt-3">{trip.origin} → {trip.destination}</h1>
       <p className="text-sm text-ink-soft mb-6 capitalize">{c.kinds[trip.vehicle.kind]} · {fmtDateTime(trip.departure_at, lang)} · {trip.operator_name}</p>
       <div className="mb-6">

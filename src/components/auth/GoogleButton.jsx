@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api, ApiError } from "../../lib/api.js";
+import { rememberRedirect } from "../../lib/redirect.js";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 function GoogleIcon() {
@@ -13,7 +14,7 @@ function GoogleIcon() {
   );
 }
 
-export default function GoogleButton() {
+export default function GoogleButton({ redirectTo = "/" }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,6 +23,7 @@ export default function GoogleButton() {
     setError(null);
     setLoading(true);
     try {
+      rememberRedirect(redirectTo); // le site est rechargé au retour de Google
       const { url } = await api.auth.googleLoginUrl();
       window.location.href = url;
     } catch (err) {

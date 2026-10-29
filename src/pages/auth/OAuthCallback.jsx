@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUser } from "../../context/Usercontext.jsx";
+import { takeRedirect } from "../../lib/redirect.js";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
 /**
@@ -34,7 +35,8 @@ export default function OAuthCallback() {
 
     completeOAuth(accessToken, refreshToken)
       .then(() => {
-        navigate(isNewAccount ? "/bienvenue" : "/", { replace: true });
+        const dest = takeRedirect();
+        navigate(isNewAccount ? "/bienvenue" : dest, { replace: true, state: { redirectTo: dest } });
       })
       .catch(() => setError("Impossible de finaliser la connexion Google."));
   }, [completeOAuth, navigate]);

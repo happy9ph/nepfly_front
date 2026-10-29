@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { safeRedirect } from "../../lib/redirect.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
@@ -13,10 +14,10 @@ import { api, ApiError } from "../../lib/api.js";
 
 export default function SignIn() {
   const { t, lang } = useLanguage();
-  const { signIn } = useUser();
+  const { signIn, isAuthenticated, isLoading } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.redirectTo || "/";
+  const redirectTo = safeRedirect(location.state?.redirectTo);
 
   const [mode, setMode] = useState("otp"); // "otp" | "password"
   const [email, setEmail] = useState("");
@@ -46,7 +47,7 @@ export default function SignIn() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate(redirectTo);
+      navigate(redirectTo, { replace: true }); // « Retour » ne ramène pas au formulaire de connexion
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) setLocked(true);
       else setError(err?.data?.detail || "E-mail ou mot de passe incorrect.");
@@ -54,6 +55,9 @@ export default function SignIn() {
       setLoading(false);
     }
   }
+
+  // Déjà connecté (ex. retour sur /connexion avec le bouton Précédent) : inutile de rester ici.
+  if (isAuthenticated && !isLoading) return <Navigate to={redirectTo} replace />;
 
   return (
     <AuthLayout
@@ -75,12 +79,12 @@ export default function SignIn() {
         <>
           <h1 className="font-display text-2xl text-ink mb-2">{t("auth.signinTitle")}</h1>
           <p className="text-sm text-stone mb-8">{t("auth.noAccount")}{" "}
-            <Link to="/creer-un-compte" className="text-coffee-dark font-medium hover:underline">
+            <Link to="/creer-un-compte" state={{ redirectTo }} className="text-coffee-dark font-medium hover:underline">
               {t("auth.joinNetwork")}
             </Link>
           </p>
 
-          <GoogleButton />
+          <GoogleButton redirectTo={redirectTo} />
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-line" />
             <span className="text-xs text-ink-faint">{t("auth.orDivider")}</span>
