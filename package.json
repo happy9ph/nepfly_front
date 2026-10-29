@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
     "@sentry/react": "^10.74.0",
     "@tailwindcss/vite": "^4.3.3",
     "framer-motion": "^13.2.0",
