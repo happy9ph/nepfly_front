@@ -341,6 +341,7 @@ const SERVICE_ALIASES = {
   h_transport_colis: ["colis", "colis", "parcel", "package", "envoyer un colis", "suivi", "tracking", "expedier", "ship"],
   h_logement: ["logement", "book a room", "reserver une chambre", "book accommodation", "hebergement", "hotel", "chambre", "lodge", "sejour", "lodging", "accommodation", "room", "stay", "dormir"],
   h_restaurant: ["restaurant", "manger", "repas", "table", "commander", "food", "meal", "dine", "order food", "reserver une table"],
+  h_tourisme: ["h-tourisme", "tourisme", "tourism", "excursion", "excursions", "safari", "victoria", "chutes", "tour", "tours", "visite", "croisiere"],
   h_learning: ["h-learning", "learning", "formation", "formations", "cours", "apprendre", "course", "courses", "training", "learn", "etudier"],
   h_money: ["h-money", "argent", "transfert d argent", "envoyer de l argent", "money", "transfer money", "send money", "mobile money", "remittance"],
   h_translate: ["h-translate", "translate", "traduction", "interpretation", "interprete", "langues", "languages"],

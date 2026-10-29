@@ -206,6 +206,7 @@ export const H_SERVICE_THEME = {
   h_transport_colis: { from: "#8A5A36", to: "#33221A", accent: "#F0C98A" },
   h_logement: { from: "#3E6B52", to: "#16261E", accent: "#A8D5B5" },
   h_restaurant: { from: "#B2573C", to: "#3A1B13", accent: "#F2A58E" },
+  h_tourisme: { from: "#3F7A78", to: "#12292A", accent: "#9EE0D8" },
   h_learning: { from: "#3D5F94", to: "#14223A", accent: "#9DB9E6" },
   h_money: { from: "#2F7A5C", to: "#10281E", accent: "#8EE0BC" },
   h_translate: { from: "#6B4FA3", to: "#241741", accent: "#C7B3F0" },
@@ -449,11 +450,25 @@ function Shopping({ id }) {
   );
 }
 
+function Tourism() {
+  return (
+    <>
+      <circle cx="446" cy="120" r="38" fill="#F6D58E" fillOpacity="0.9" />
+      <path d="M40 360 L190 150 L270 260 L340 190 L560 360 Z" fill="#1B4A48" />
+      <path d="M190 150 L222 196 L200 188 L186 210 L166 186 L152 198 Z" fill={CREAM} fillOpacity="0.9" />
+      <path d="M0 360 L130 270 L240 360 Z" fill="#256563" fillOpacity="0.85" />
+      <rect x="0" y="336" width="600" height="84" fill="#0E2425" fillOpacity="0.55" />
+      <path d="M96 392 C200 350 300 410 420 372 S540 390 600 380" fill="none" stroke={CREAM} strokeOpacity="0.5" strokeWidth="5" strokeDasharray="2 12" strokeLinecap="round" />
+    </>
+  );
+}
+
 const H_SCENES = {
   h_transport_bus: Bus,
   h_transport_colis: Parcel,
   h_logement: Lodging,
   h_restaurant: Restaurant,
+  h_tourisme: Tourism,
   h_learning: Learning,
   h_money: Money,
   h_translate: Translate,
