@@ -32,11 +32,11 @@ export const translations = {
     marketplace: {
       eyebrow: "La marketplace",
       heading: "Un seul parcours, du besoin à la livraison.",
-      lead: "Chaque demande suit le même chemin clair : que ce soit pour un service H-Company, une formation H-learning ou un partenaire comme Lukondo.",
-      step1Title: "Rechercher", step1Text: "Le client explore la marketplace et trouve un service, un partenaire ou une formation par catégorie ou mot-clé.",
-      step2Title: "Mettre en relation", step2Text: "H-Company connecte automatiquement la demande au bon partenaire du réseau, avec toutes les infos utiles transmises.",
-      step3Title: "Contractualiser", step3Text: "Offre, durée, mode de paiement : tout est formalisé et visible dans l'espace du client, avant toute signature.",
-      step4Title: "Livrer & suivre", step4Text: "Le partenaire exécute, le client suit l'avancement en temps réel depuis son propre tableau de bord.",
+      lead: "Bus et colis, logement en 3D, table de restaurant, excursion, boutique ou formation : chaque demande suit le même chemin clair, quel que soit le service.",
+      step1Title: "Rechercher", step1Text: "Le client explore la marketplace et trouve un trajet, un logement, une table, une excursion, un produit ou une formation, par catégorie ou mot-clé.",
+      step2Title: "Mettre en relation", step2Text: "H-Company transmet la demande au bon partenaire vérifié du réseau (agence, hôte, restaurant, opérateur, boutique), avec toutes les infos utiles.",
+      step3Title: "Contractualiser", step3Text: "Dates, places, montant et mode de paiement : tout est récapitulé et visible dans l'espace du client avant de confirmer.",
+      step4Title: "Livrer & suivre", step4Text: "Le partenaire confirme et exécute ; le client suit l'avancement, reçoit des notifications et laisse un avis.",
     },
     services: {
       eyebrow: "La marketplace H-Company",
@@ -561,11 +561,11 @@ export const translations = {
     marketplace: {
       eyebrow: "The marketplace",
       heading: "One journey, from need to delivery.",
-      lead: "Every request follows the same clear path : whether it's an H-Company service, an H-learning course, or a partner like Lukondo.",
-      step1Title: "Search", step1Text: "The client browses the marketplace and finds a service, partner or course by category or keyword.",
-      step2Title: "Get matched", step2Text: "H-Company automatically connects the request to the right partner in the network, with all the useful info passed along.",
-      step3Title: "Formalize", step3Text: "Offer, duration, payment terms : everything is formalized and visible in the client's space before any signature.",
-      step4Title: "Deliver & track", step4Text: "The partner delivers, the client tracks progress in real time from their own dashboard.",
+      lead: "Bus and parcels, 3D lodging, a restaurant table, a tour, a shop or a course: every request follows the same clear path, whatever the service.",
+      step1Title: "Search", step1Text: "The client browses the marketplace and finds a trip, a stay, a table, a tour, a product or a course by category or keyword.",
+      step2Title: "Get matched", step2Text: "H-Company passes the request to the right verified partner in the network (agency, host, restaurant, operator, shop) with all the useful details.",
+      step3Title: "Formalize", step3Text: "Dates, seats, amount and payment method: everything is summarised and visible in the client's space before confirming.",
+      step4Title: "Deliver & track", step4Text: "The partner confirms and delivers; the client follows progress, gets notifications and leaves a review.",
     },
     services: {
       eyebrow: "The H-Company marketplace",
