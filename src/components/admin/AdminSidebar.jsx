@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers, GraduationCap, ShieldCheck, PlayCircle, ShoppingBag, BedDouble, Bus } from "lucide-react";
+import { Users, ClipboardList, LogOut, ExternalLink, Search, Compass, Layers, GraduationCap, ShieldCheck, PlayCircle, ShoppingBag, BedDouble, Bus, UtensilsCrossed } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "applications", label: "Candidatures", icon: Users },
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { key: "shopping", label: "H-Shopping", icon: ShoppingBag },
   { key: "lodging", label: "H-Logement", icon: BedDouble },
   { key: "transport", label: "H-Transport", icon: Bus },
+  { key: "restaurant", label: "H-Restaurant", icon: UtensilsCrossed },
   { key: "trainingRequests", label: "Formations d'équipe", icon: GraduationCap },
   { key: "agents", label: "Agents", icon: ShieldCheck },
 ];

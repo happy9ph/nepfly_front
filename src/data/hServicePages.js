@@ -349,6 +349,9 @@ export const SERVICE_PAGES = {
   /* ───────────────────────── H-Restaurant ───────────────────────── */
   h_restaurant: {
     showcase: "dining",
+    live: true,
+    ctaTo: "/restaurant",
+    secondaryTo: "/restaurant/pro",
     partner: "confismila",
     fr: {
       name: "H-Restaurant",

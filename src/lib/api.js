@@ -375,6 +375,42 @@ export const api = {
   },
 
   // H-Logement : hébergements (recherche, réservation, hôtes, admin)
+  resto: {
+    home: () => request("/api/v1/restaurant/home"),
+    search: (params = {}) => request(`/api/v1/restaurant/search${qs(params)}`),
+    detail: (slug) => request(`/api/v1/restaurant/restaurants/${slug}`),
+    tables: (id, params = {}) => request(`/api/v1/restaurant/restaurants/${id}/tables${qs(params)}`),
+    slots: (id, params = {}) => request(`/api/v1/restaurant/restaurants/${id}/slots${qs(params)}`),
+    reviews: (id) => request(`/api/v1/restaurant/restaurants/${id}/reviews`),
+    reserve: (token, body) => request("/api/v1/restaurant/reservations", { method: "POST", token, body }),
+    mine: (token) => request("/api/v1/restaurant/me/reservations", { token }),
+    cancel: (token, code) => request(`/api/v1/restaurant/me/reservations/${code}/cancel`, { method: "POST", token }),
+    review: (token, code, body) => request(`/api/v1/restaurant/me/reservations/${code}/review`, { method: "POST", token, body }),
+    owner: {
+      upload: (token, file) => { const fd = new FormData(); fd.append("file", file); return request("/api/v1/restaurant/owner/uploads", { method: "POST", token, body: fd }); },
+      list: (token) => request("/api/v1/restaurant/owner/restaurants", { token }),
+      create: (token, body) => request("/api/v1/restaurant/owner/restaurants", { method: "POST", token, body }),
+      get: (token, id) => request(`/api/v1/restaurant/owner/restaurants/${id}`, { token }),
+      update: (token, id, body) => request(`/api/v1/restaurant/owner/restaurants/${id}`, { method: "PUT", token, body }),
+      act: (token, id, what) => request(`/api/v1/restaurant/owner/restaurants/${id}/${what}`, { method: "POST", token }),
+      addCategory: (token, id, body) => request(`/api/v1/restaurant/owner/restaurants/${id}/categories`, { method: "POST", token, body }),
+      updateCategory: (token, id, cid, body) => request(`/api/v1/restaurant/owner/restaurants/${id}/categories/${cid}`, { method: "PUT", token, body }),
+      deleteCategory: (token, id, cid) => request(`/api/v1/restaurant/owner/restaurants/${id}/categories/${cid}`, { method: "DELETE", token }),
+      addItem: (token, id, body) => request(`/api/v1/restaurant/owner/restaurants/${id}/items`, { method: "POST", token, body }),
+      updateItem: (token, id, iid, body) => request(`/api/v1/restaurant/owner/restaurants/${id}/items/${iid}`, { method: "PUT", token, body }),
+      deleteItem: (token, id, iid) => request(`/api/v1/restaurant/owner/restaurants/${id}/items/${iid}`, { method: "DELETE", token }),
+      saveTables: (token, id, tables) => request(`/api/v1/restaurant/owner/restaurants/${id}/tables`, { method: "PUT", token, body: tables }),
+      reservations: (token, id, params = {}) => request(`/api/v1/restaurant/owner/restaurants/${id}/reservations${qs(params)}`, { token }),
+      action: (token, code, body) => request(`/api/v1/restaurant/owner/reservations/${code}/action`, { method: "POST", token, body }),
+      stats: (token, id, days = 30) => request(`/api/v1/restaurant/owner/restaurants/${id}/stats${qs({ days })}`, { token }),
+    },
+    admin: {
+      overview: (token) => request("/api/v1/restaurant/admin/overview", { token }),
+      list: (token, params = {}) => request(`/api/v1/restaurant/admin/restaurants${qs(params)}`, { token }),
+      decide: (token, id, what, reason = "") => request(`/api/v1/restaurant/admin/restaurants/${id}/${what}`, { method: "POST", token, body: ["reject", "suspend"].includes(what) ? { reason } : undefined }),
+    },
+  },
+
   lodge: {
     home: (token) => request("/api/v1/lodging/home", { token }),
     amenities: () => request("/api/v1/lodging/amenities"),

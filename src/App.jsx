@@ -56,6 +56,11 @@ const CargoHome = lazy(() => import("./pages/transport/CargoHome.jsx"));
 const CargoBook = lazy(() => import("./pages/transport/CargoBook.jsx"));
 const MyCargo = lazy(() => import("./pages/transport/MyCargo.jsx"));
 const OperatorApp = lazy(() => import("./pages/transport/OperatorApp.jsx"));
+const RestoHome = lazy(() => import("./pages/resto/RestoHome.jsx"));
+const RestoSearch = lazy(() => import("./pages/resto/RestoSearch.jsx"));
+const RestoPage = lazy(() => import("./pages/resto/RestoPage.jsx"));
+const MyReservations = lazy(() => import("./pages/resto/MyReservations.jsx"));
+const RestoPro = lazy(() => import("./pages/resto/RestoPro.jsx"));
 const LodgeHome = lazy(() => import("./pages/lodge/LodgeHome.jsx"));
 const LodgeWalk = lazy(() => import("./pages/lodge/LodgeWalk.jsx"));
 const LodgeSearch = lazy(() => import("./pages/lodge/LodgeSearch.jsx"));
@@ -165,6 +170,11 @@ export default function App() {
           <Route path="/transport/colis" element={<CargoHome />} />
           <Route path="/transport/colis/:id" element={<CargoBook />} />
           <Route path="/transport/mes-colis" element={<MyCargo />} />
+          <Route path="/restaurant" element={<RestoHome />} />
+          <Route path="/restaurant/recherche" element={<RestoSearch />} />
+          <Route path="/restaurant/r/:slug" element={<RestoPage />} />
+          <Route path="/restaurant/mes-reservations" element={<MyReservations />} />
+          <Route path="/restaurant/pro" element={<RestoPro />} />
           <Route path="/logement" element={<LodgeHome />} />
           <Route path="/logement/recherche" element={<LodgeSearch />} />
           <Route path="/logement/quartier" element={<LodgeWalk />} />

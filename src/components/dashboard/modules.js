@@ -1,4 +1,4 @@
-import { Bus, GraduationCap, Home, ShoppingBag } from "lucide-react";
+import { Bus, GraduationCap, Home, ShoppingBag, UtensilsCrossed } from "lucide-react";
 
 /** Modules que le partenaire débloque depuis son dashboard. */
 export const MODULES = [
@@ -16,6 +16,11 @@ export const MODULES = [
     key: "shopping", icon: ShoppingBag, route: "/shopping/vendeur",
     fr: { name: "H-Shopping", short: "Boutique", desc: "Ouvrez votre boutique : produits, commandes, promotions et portefeuille.", links: [["Tableau de bord vendeur", "/shopping/vendeur"], ["Commandes", "/shopping/vendeur?onglet=orders"], ["Produits", "/shopping/vendeur?onglet=products"], ["Portefeuille", "/shopping/vendeur?onglet=wallet"]] },
     en: { name: "H-Shopping", short: "Shop", desc: "Open your shop: products, orders, promotions and wallet.", links: [["Seller dashboard", "/shopping/vendeur"], ["Orders", "/shopping/vendeur?onglet=orders"], ["Products", "/shopping/vendeur?onglet=products"], ["Wallet", "/shopping/vendeur?onglet=wallet"]] },
+  },
+  {
+    key: "restaurant", icon: UtensilsCrossed, route: "/restaurant/pro",
+    fr: { name: "H-Restaurant", short: "Restaurant", desc: "Dessinez votre salle en 3D, publiez votre menu et recevez les réservations.", links: [["Espace restaurant", "/restaurant/pro"], ["Réservations", "/restaurant/pro?tab=reservations"], ["Menu", "/restaurant/pro?tab=menu"], ["Plan de salle", "/restaurant/pro?tab=room"]] },
+    en: { name: "H-Restaurant", short: "Restaurant", desc: "Draw your dining room in 3D, publish your menu and receive bookings.", links: [["Restaurant space", "/restaurant/pro"], ["Bookings", "/restaurant/pro?tab=reservations"], ["Menu", "/restaurant/pro?tab=menu"], ["Floor plan", "/restaurant/pro?tab=room"]] },
   },
   {
     key: "learning", icon: GraduationCap, route: "/formations/mon-bouquet",
